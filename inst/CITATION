@@ -1,0 +1,16 @@
+citHeader("To cite the ropls package in publications use:")
+
+citEntry(entry="article",  
+   author=c(
+   person(c("E.", "A."), "Thevenot"), person("A.", "Roux"), person("Y.", "Xu"),
+   person("E.", "Ezan"), person("C.", "Junot")),
+   title="Analysis of the human adult urinary metabolome variations with age, body mass index and gender by implementing a comprehensive workflow for univariate and OPLS statistical analyses",
+   journal="Journal of Proteome Research",
+   year="2015",
+   volume="",
+   pages="--",
+   url="",
+   textVersion = paste("Thevenot, E.A., Roux, A., Xu, Y., Ezan, E., Junot, C.",
+                       "2015.",
+                       "Analysis of the human adult urinary metabolome variations with age, body mass index and gender by implementing a comprehensive workflow for univariate and OPLS statistical analyses.",
+                       "Journal of Proteome Research"))

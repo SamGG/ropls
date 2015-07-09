@@ -1,0 +1,44 @@
+CHANGES IN VERSION 0.99.4
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o rename:
+        'sacuri' data set -> 'sacurine'
+
+CHANGES IN VERSION 0.99.2
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o rename:
+        ropF -> roplsF
+        ropStrF -> strF
+
+    o depreacated roplsF arguments:
+        parObsColLabVcn: now available through the parLabVc and parAsColVcn arguments
+        parObsLegVc: not useful
+	
+    o rename roplsF arguments:
+        ncpN -> predN
+        ncoN -> orthoN
+        ploVc -> plotVc
+        algC -> algoC
+        savImg.pdfC -> fileFig.pdfC
+        savLog.txtC -> fileInfo.txtC
+        logL -> log10L
+        perN -> permN
+        scaC -> scaleC
+        tesVi -> testVi
+        vrbC -> verboseC
+        parObsColVc -> parAsColVcn
+        parPcsVn -> parCompVn
+        parMahL -> parEllipsesL
+        parObsLabVc -> parLabVc
+        parMaiL -> parTitleL
+        parNexN -> parTopLoadN		
+
+USED INTERNALLY (NOT EXPORTED)
+
+    ropColF -> now split between .colorF and .legendF
+    ropMahF -> now .ellipseF

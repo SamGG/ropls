@@ -1,0 +1,317 @@
+%\VignetteIndexEntry{PCA, PLS and OPLS with \emph{ropls}}
+%\VignetteKeywords{ropls} \\
+%\VignettePackage{ropls} \\
+
+\documentclass[a4paper,11pt]{article}
+\usepackage[table]{xcolor}
+\setlength{\parindent}{0cm}
+
+<<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
+BiocStyle::latex()
+@
+
+\begin{document}
+\title{\emph{ropls}: PCA, PLS(-DA) and OPLS(-DA) for multivariate analysis and feature selection of omics data}
+\author{Etienne A. Th\'evenot}
+\maketitle
+
+\setkeys{Gin}{width=0.6\textwidth} 
+
+
+\section{The \emph{ropls} package}
+
+
+The \emph{ropls} R package implements the PCA, PLS(-DA) and OPLS(-DA) approaches with the original, NIPALS-based, versions of the algorithms \cite{Wold2001}\cite{Trygg2002}. It includes the R2 and Q2 quality metrics \cite{Eriksson2001}\cite{Tenenhaus1998}, the permutation diagnostics \cite{Szymanska2012}, the computation of the VIP values \cite{Mevik2007}, the score and orthogonal distances to detect outliers \cite{Hubert2005}, as well as many graphics (scores, loadings, predictions, diagnostics, outliers, etc).
+
+\vspace{1\baselineskip}
+
+The functionalities from \emph{ropls} can also be accessed via a graphical user interface in the \emph{Multivariate} module from the \emph{Workflow4Metabolomics.org} online resource for computational metabolomics (\url{http://workflow4metabolomics.org/}) which provides a user-friendly, web-based environment for data pre-processing, statistical analysis, and annotation \cite{Giacomoni2015}.
+
+
+\section{Context}
+
+
+\subsection{Orthogonal Partial Least-Squares}
+
+Partial least-squares, which is a latent variable regression method based on covariance between the predictors and the response, has been shown to efficiently handle datasets with multi-collinear predictors, as in the case of spectrometry measurements \cite{Wold2001}. More recently, Trygg and Wold introduced the orthogonal projection to latent structures (OPLS) algorithm to model separately the variations of the predictors correlated and orthogonal to the response \cite{Trygg2002}.
+
+\vspace{1\baselineskip}
+
+OPLS has a similar predictive capacity compared to PLS and improves the interpretation of the predictive components and of the systematic variation \cite{Pinto2012a}. In particular, OPLS modeling of single responses only requires one predictive component.
+
+\vspace{1\baselineskip}
+
+Diagnostics such as the Q2Y metrics and permutation testing are of high importance to avoid overfitting and assess the statistical significance of the model. The variable importance in projection (VIP), which reflects both the loading weights for each component and the variability of the response explained by this component \cite{Pinto2012a}\cite{Mehmood2012} is often used for feature selection \cite{Trygg2002}\cite{Pinto2012a}.
+
+
+\subsection{OPLS software}
+
+OPLS is available in the SIMCA-P commercial software (Umetrics, Ume\r{a}, Sweden; \cite{Eriksson2001}). In addition, the kernel-based version of OPLS \cite{Bylesjo2008a} is available in the open-source R statistical environment \cite{RDCT2008}, and a single implementation of the linear algorithm in R has been described recently \cite{Gaude2013}.
+
+
+\section{The 'sacurine' metabolomics dataset}
+
+
+\subsection{Study objective}
+
+The objective was to study the influence of age, body mass index and gender on metabolite concentrations in urine, by analysing 183 samples from a cohort of adults with liquid chromatography coupled to high-resolution mass spectrometry (\cite{Thevenot2015}).
+
+
+\subsection{Pre-processing and annotation}
+
+Urine samples were analyzed by using an LTQ Orbitrap in the negative ionization mode. A total of 109 metabolites were identified or annotated at the MSI level 1 or 2. After retention time alignment with XCMS, peaks were integrated with Quan Browser. Signal drift and batch effect were corrected, and each urine profile was normalized to the osmolality of the sample. Finally, the data were log10 transformed.
+
+
+\subsection{Covariates}
+
+The volunteers' age, body mass index, and gender were recorded.
+
+
+\section{Hands-on}
+
+
+\subsection{Loading}
+
+We first load the \emph{ropls} package:
+
+<<>>=
+library(ropls)
+@
+
+We then load the \emph{sacurine} dataset which contains:
+
+\begin{enumerate}
+\item The \emph{profileMN} \textbf{M}atrix of \textbf{N}umeric type containing the intensity profiles (log10 transformed)
+\item The \emph{sampleDF} \textbf{D}ata \textbf{F}rame containg sample metadata
+\item The \emph{variableDF} dataframe containg variable metadata
+\end{enumerate}
+
+<<>>=
+data(sacurine)
+names(sacurine)
+@
+
+We attach \emph{sacurine} to the search path and display a summary of the content of the \emph{profileMN}, \emph{sampleDF} and \emph{variableDF} with the \emph{strF} \textbf{F}unction of the \emph{ropls} package (see also \emph{str})
+
+<<>>=
+attach(sacurine)
+strF(profileMN)
+strF(sampleDF)
+strF(variableDF)
+@
+
+
+\subsection{Principal Component Analysis (PCA)}
+
+We perform a PCA on the \emph{profileMN} matrix (samples as rows, variables as columns). Scores are visualized on Figure \ref{fig:pca}.
+
+<<eval=FALSE,results=hide>>=
+sacPcaLs <- roplsF(profileMN, plotVc = "x-score")
+@
+
+Note:
+\begin{enumerate}
+\item The \texttt{plotVc = 'x-score'} (score plot only) is used in all examples of this document for compatibility with the Sweave software used to generate this pdf; However, the default \texttt{'summary'} argument can be useful to visualize a 4-plot graphics with additional information about inertia, outliers and x-loadings,
+\item Since \emph{profileMN} does not contain missing value, the singular value decomposition was used by default; NIPALS can be selected with the \texttt{algoC} argument specifying the \textbf{algo}rithm (\textbf{C}haracter),
+\item The \texttt{predN = NA} default number of \textbf{pred}ictive components (\textbf{N}umeric) means that only components with a variance superior to the mean variance of all components are kept (note that this rule requires all components to be computed and can be quite time-consuming for large datasets with the NIPALS algorithm; in such cases, one may specify a limited number of components with the \texttt{predN} parameter).
+\end{enumerate}
+
+\begin{figure}
+\begin{center}
+<<label=figPca,fig=TRUE,echo=FALSE,results=hide>>=
+sacPcaLs <- roplsF(profileMN, parDevNewL = FALSE, plotVc = "x-score")
+@
+\end{center}
+\caption{PCA score plot. The displayed components can be specified with \texttt{parCompVn} (plotting \textbf{par}ameter specifying the \textbf{comp}onents: \textbf{V}ector of \textbf{n}umeric type)}
+\label{fig:pca}
+\end{figure}
+
+Let us see if we notice any partition according to gender, by labeling/coloring the samples according to the gender and drawing the Mahalanobis ellipses for the male and female subgroups (Figure \ref{fig:pcaMah}).
+
+<<eval=FALSE,results=hide>>=
+sacPcaMahLs <- roplsF(profileMN, plotVc = "x-score",
+parAsColVcn = sampleDF[, "genderVc"], parEllipsesL = TRUE)
+@
+
+\begin{figure}
+\begin{center}
+<<label=figPcaMah,fig=TRUE,echo=FALSE,results=hide>>=
+sacPcaMahLs <- roplsF(profileMN, parAsColVcn = sampleDF[, "genderVc"],
+parEllipsesL = TRUE, parDevNewL = FALSE, plotVc = "x-score")
+@
+\end{center}
+\caption{PCA score plot colored according to gender.}
+\label{fig:pcaMah}
+\end{figure}
+
+Note that the plotting \textbf{par}ameter to be used \textbf{as} \textbf{col}ors (\textbf{V}ector of either \textbf{c}haracter or \textbf{n}umeric type) has a length equal to the number of rows of the profileMN matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColVcn = sampleDF[, "ageVn"]}.
+
+
+\subsection{Partial least-squares: PLS and PLS-DA}
+
+For PLS (and OPLS), the Y matrix of responses must be provided. Y must be either a numerical matrix with one or several columns (PLS model of quantitative responses, see the \emph{lowarp} dataset) or a character matrix of a single column (PLS-DA model of a single qualitative response) as in the following example (Figure \ref{fig:pls}).
+
+<<eval=FALSE,results=hide>>=
+sacPlsLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+plotVc = "x-score")
+@
+
+\begin{figure}
+\begin{center}
+<<label=figPls,fig=TRUE,echo=FALSE,results=hide>>=
+sacPlsLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+parDevNewL = FALSE, plotVc = "x-score")
+@
+\end{center}
+\caption{PLS-DA model of the 'gender' response (score plot). The number of components and the cumulative R2X, R2Y and Q2Y are indicated below the plot.}
+\label{fig:pls}
+\end{figure}
+
+Note:
+\begin{enumerate}
+\item The NIPALS algorithm is used for PLS (and OPLS); \emph{profileMN} matrices with (a moderate amount of) missing values can thus be analysed,
+\item As for PCA, the default \texttt{predN} value is NA: components are computed until either R2Y of the component is < 0.01 or Q2Y is < 0 (for more than 100 observations) or 0.05 otherwise.
+\end{enumerate}
+
+Let us look at the parameters of the model:
+
+<<label=tab1>>=
+print(sacPlsLs[["summaryDF"]])
+@
+
+We see that 3 predictive components were computed (pre) and that R2Y and Q2Y are quite high. Let us assess the significance of these values by comparing to models generated after random permutation of the labels (Figure \ref{fig:plsPer}).
+
+<<eval=FALSE,results=hide>>=
+sacPlsPerLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+permN = 100, plotVc = "permutation")
+@
+
+\begin{figure}
+\begin{center}
+<<label=figPlsPer,fig=TRUE,echo=FALSE,results=hide>>=
+sacPlsLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+permN = 100, parDevNewL = FALSE, plotVc = "permutation")
+@
+\end{center}
+\caption{Significance of R2Y and Q2Y evaluated by permutation testing.}
+\label{fig:plsPer}
+\end{figure}
+ 
+
+\subsection{Orthogonal partial least squares: OPLS and OPLS-DA}
+
+To perform OPLS(-DA), we set \texttt{orthoN} (number of components which are \textbf{ortho}gonal; \textbf{N}umeric) to either a specific number of orthogonal components, or to NA. Let us build an OPLS-DA model of the 'gender' response (Figure \ref{fig:plsPer}). Note that for OPLS modeling of a single response, the number of predictive component is 1.
+
+<<eval=FALSE,results=hide>>=
+sacOplLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+predN = 1, orthoN = NA, plotVc = "x-score")
+@
+
+\begin{figure}
+\begin{center}
+<<label=figOpl,fig=TRUE,echo=FALSE,results=hide>>=
+sacOplLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+predN = 1, orthoN = NA, parDevNewL = FALSE, plotVc = "x-score")
+@
+\end{center}
+\caption{OPLS-DA model of the 'gender' response (score plot). The predictive component is displayed as abscissa and the orthogonal component as ordinate.}
+\label{fig:opl}
+\end{figure}
+
+Before closing this example session, we detach \emph{sacurine} from the search path: 
+
+<<>>=
+detach(sacurine)
+@
+
+
+\subsection{Session information}
+
+<<eval=FALSE,results=hide>>=
+sessionInfo()
+@
+
+<<echo=FALSE,results=tex>>=
+toLatex(sessionInfo())
+@
+
+\section{Pre-processing and annotation of mass spectrometry data}
+
+
+To illustrate how profileMN, sampleDF and variableDF can be obtained from raw mass spectra file, we use the LC-MS data from the \emph{faahKO} package \cite{Saghatelian2004}, which will pre-process with the \emph{xcms} package \cite{Smith2006} and annotate isotopes and adducts with the \emph{CAMERA} package \cite{Kuhl2012}, as described in the corresponding vignettes (all these packages are from \emph{bioconductor}).
+
+Let us start by getting the paths to the 12 raw files (6 KO and 6 WT mice) in the ".cdf" open format. The files are grouped in two sub-directories ("KO" and "WT") since \emph{xcms} can use sample class information when grouping the peaks and correcting retention times.
+
+<<eval=FALSE,results=hide>>=
+library(faahKO)
+cdfpath <- system.file("cdf", package = "faahKO")
+cdffiles <- list.files(cdfpath, recursive = TRUE, full.names = TRUE)
+basename(cdffiles)
+@
+
+Next, \emph{xcms} is used to pre-process the individual raw files, as described in the vignette. 
+
+<<eval=FALSE,fig=FALSE,results=hide>>=
+library(xcms)
+xset <- xcmsSet(cdffiles)
+xset
+xset <- group(xset)
+xset2 <- retcor(xset, family = "symmetric", plottype = "mdevden")
+xset2 <- group(xset2, bw = 10)
+xset3 <- fillPeaks(xset2)
+@
+
+Finally, the \emph{annotateDiffreport} from \emph{CAMERA} annotates isotopes and adducts and builds a peak table containing the peak intensities and the variable metadata.
+
+<<eval=FALSE,results=hide>>=
+library(CAMERA)
+diffreport <- annotateDiffreport(xset3, quick=TRUE)
+diffreport[1:4, ]
+@
+
+We then build the profileMN, sampleDF and variableDF matrix and dataframes as follows:
+
+<<eval=FALSE,results=hide>>=
+sampleVc <- grep("^ko|^wt", colnames(diffreport), value = TRUE)
+profileMN <- t(as.matrix(diffreport[, sampleVc]))
+dimnames(profileMN) <- list(sampleVc, diffreport[, "name"])
+sampleDF <- data.frame(row.names = sampleVc,
+genotypeVc = substr(sampleVc, 1, 2), stringsAsFactors = FALSE)
+variableDF <- diffreport[, !(colnames(diffreport) %in% c("name", sampleVc))]
+rownames(variableDF) <- diffreport[, "name"]
+@
+
+The data can now be analysed with the \emph{ropls} package as described in the previous section (i.e. by performing a PCA and a PLS-DA):
+
+<<eval=FALSE,fig=FALSE,results=hide>>=
+library(ropls)
+roplsF(profileMN)
+roplsF(profileMN, matrix(sampleDF[, "genotypeVc"], ncol = 1))
+@
+
+<<eval=FALSE,echo=FALSE>>=
+rm(list = ls())
+@
+
+
+\section{Other datasets}
+
+In addition to the \emph{sacurine} dataset presented above, the package contains the following datasets to illustrate the functionalities of PCA, PLS and OPLS (see the examples in the documentation of the roplsF function):
+
+\paragraph{aminoacids} Amino-Acids Dataset. Quantitative structure property relationship (QSPR; \cite{Wold2001}).
+
+\paragraph{cellulose} NIR-Viscosity example data set to illustrate multivariate calibration using PLS, spectral filtering and OPLS (Multivariate calibration using spectral data. Simca tutorial. Umetrics, Sweden).
+
+\paragraph{cornell} Octane of various blends of gasoline: Twelve mixture component proportions of the blend are analysed \cite{Tenenhaus1998}.
+
+\paragraph{foods} Food consumption patterns accross European countries (FOODS). The relative consumption of 20 food items was compiled for 16 countries. The values range between 0 and 100 percent and a high value corresponds to a high consumption. The dataset contains 3 missing data \cite{Eriksson2001}.
+
+\paragraph{linnerud} Three physiological and three exercise variables are measured on twenty middle-aged men in a fitness club \cite{Tenenhaus1998}.
+
+\paragraph{lowarp} A multi response optimization data set (LOWARP) \cite{Eriksson2001}.
+
+\paragraph{mark} Marks obtained by french students in mathematics, physics, french and english. Toy example to illustrate the potentialities of PCA \cite{Baccini2010}.
+
+\bibliography{ropls}
+
+\end{document}
