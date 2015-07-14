@@ -41,7 +41,7 @@ Etienne Thevenot (CEA)
 
 \examples{
 data(sacurine)
-strF(sacurine[['profileMN']])
-strF(sacurine[['sampleDF']])
+strF(sacurine[['dataMatrix']])
+strF(sacurine[['sampleMetadata']])
 }
 

@@ -1,3 +1,13 @@
+CHANGES IN VERSION 0.99.7
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o rename ('sacurine' data set) for compatibility with 'Workflow4Metabolomics.org':
+        'profileMN'  -> dataMatrix
+        'sampleDF'   -> sampleMetadata
+        'variableDF' -> variableMetadata
+        
 CHANGES IN VERSION 0.99.6
 ------------------------------
 

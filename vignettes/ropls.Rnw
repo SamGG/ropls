@@ -15,7 +15,7 @@ BiocStyle::latex()
 \author{Etienne A. Th\'evenot}
 \maketitle
 
-\setkeys{Gin}{width=0.6\textwidth} 
+\setkeys{Gin}{width=0.6\textwidth}
 
 
 \section{The \emph{ropls} package}
@@ -81,9 +81,9 @@ library(ropls)
 We then load the \emph{sacurine} dataset which contains:
 
 \begin{enumerate}
-\item The \emph{profileMN} \textbf{M}atrix of \textbf{N}umeric type containing the intensity profiles (log10 transformed)
-\item The \emph{sampleDF} \textbf{D}ata \textbf{F}rame containg sample metadata
-\item The \emph{variableDF} dataframe containg variable metadata
+\item The \emph{dataMatrix} matrix of numeric type containing the intensity profiles (log10 transformed)
+\item The \emph{sampleMetadata} data frame containg sample metadata
+\item The \emph{variableMetadata} data frame containg variable metadata
 \end{enumerate}
 
 <<>>=
@@ -91,35 +91,35 @@ data(sacurine)
 names(sacurine)
 @
 
-We attach \emph{sacurine} to the search path and display a summary of the content of the \emph{profileMN}, \emph{sampleDF} and \emph{variableDF} with the \emph{strF} \textbf{F}unction of the \emph{ropls} package (see also \emph{str})
+We attach \emph{sacurine} to the search path and display a summary of the content of the \emph{dataMatrix}, \emph{sampleMetadata} and \emph{variableMetadata} with the \emph{strF} \textbf{F}unction of the \emph{ropls} package (see also \emph{str})
 
 <<>>=
 attach(sacurine)
-strF(profileMN)
-strF(sampleDF)
-strF(variableDF)
+strF(dataMatrix)
+strF(sampleMetadata)
+strF(variableMetadata)
 @
 
 
 \subsection{Principal Component Analysis (PCA)}
 
-We perform a PCA on the \emph{profileMN} matrix (samples as rows, variables as columns). Scores are visualized on Figure \ref{fig:pca}.
+We perform a PCA on the \emph{dataMatrix} matrix (samples as rows, variables as columns). Scores are visualized on Figure \ref{fig:pca}.
 
 <<eval=FALSE,results=hide>>=
-sacPcaLs <- roplsF(profileMN, plotVc = "x-score")
+sacPcaLs <- roplsF(dataMatrix, plotVc = "x-score")
 @
 
 Note:
 \begin{enumerate}
 \item The \texttt{plotVc = 'x-score'} (score plot only) is used in all examples of this document for compatibility with the Sweave software used to generate this pdf; However, the default \texttt{'summary'} argument can be useful to visualize a 4-plot graphics with additional information about inertia, outliers and x-loadings,
-\item Since \emph{profileMN} does not contain missing value, the singular value decomposition was used by default; NIPALS can be selected with the \texttt{algoC} argument specifying the \textbf{algo}rithm (\textbf{C}haracter),
+\item Since \emph{dataMatrix} does not contain missing value, the singular value decomposition was used by default; NIPALS can be selected with the \texttt{algoC} argument specifying the \textbf{algo}rithm (\textbf{C}haracter),
 \item The \texttt{predN = NA} default number of \textbf{pred}ictive components (\textbf{N}umeric) means that only components with a variance superior to the mean variance of all components are kept (note that this rule requires all components to be computed and can be quite time-consuming for large datasets with the NIPALS algorithm; in such cases, one may specify a limited number of components with the \texttt{predN} parameter).
 \end{enumerate}
 
 \begin{figure}
 \begin{center}
 <<label=figPca,fig=TRUE,echo=FALSE,results=hide>>=
-sacPcaLs <- roplsF(profileMN, parDevNewL = FALSE, plotVc = "x-score")
+sacPcaLs <- roplsF(dataMatrix, parDevNewL = FALSE, plotVc = "x-score")
 @
 \end{center}
 \caption{PCA score plot. The displayed components can be specified with \texttt{parCompVn} (plotting \textbf{par}ameter specifying the \textbf{comp}onents: \textbf{V}ector of \textbf{n}umeric type)}
@@ -129,14 +129,14 @@ sacPcaLs <- roplsF(profileMN, parDevNewL = FALSE, plotVc = "x-score")
 Let us see if we notice any partition according to gender, by labeling/coloring the samples according to the gender and drawing the Mahalanobis ellipses for the male and female subgroups (Figure \ref{fig:pcaMah}).
 
 <<eval=FALSE,results=hide>>=
-sacPcaMahLs <- roplsF(profileMN, plotVc = "x-score",
-parAsColVcn = sampleDF[, "genderVc"], parEllipsesL = TRUE)
+sacPcaMahLs <- roplsF(dataMatrix, plotVc = "x-score",
+parAsColVcn = sampleMetadata[, "genderVc"], parEllipsesL = TRUE)
 @
 
 \begin{figure}
 \begin{center}
 <<label=figPcaMah,fig=TRUE,echo=FALSE,results=hide>>=
-sacPcaMahLs <- roplsF(profileMN, parAsColVcn = sampleDF[, "genderVc"],
+sacPcaMahLs <- roplsF(dataMatrix, parAsColVcn = sampleMetadata[, "genderVc"],
 parEllipsesL = TRUE, parDevNewL = FALSE, plotVc = "x-score")
 @
 \end{center}
@@ -144,7 +144,7 @@ parEllipsesL = TRUE, parDevNewL = FALSE, plotVc = "x-score")
 \label{fig:pcaMah}
 \end{figure}
 
-Note that the plotting \textbf{par}ameter to be used \textbf{as} \textbf{col}ors (\textbf{V}ector of either \textbf{c}haracter or \textbf{n}umeric type) has a length equal to the number of rows of the profileMN matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColVcn = sampleDF[, "ageVn"]}.
+Note that the plotting \textbf{par}ameter to be used \textbf{as} \textbf{col}ors (\textbf{V}ector of either \textbf{c}haracter or \textbf{n}umeric type) has a length equal to the number of rows of the dataMatrix matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColVcn = sampleMetadata[, "ageVn"]}.
 
 
 \subsection{Partial least-squares: PLS and PLS-DA}
@@ -152,14 +152,14 @@ Note that the plotting \textbf{par}ameter to be used \textbf{as} \textbf{col}ors
 For PLS (and OPLS), the Y matrix of responses must be provided. Y must be either a numerical matrix with one or several columns (PLS model of quantitative responses, see the \emph{lowarp} dataset) or a character matrix of a single column (PLS-DA model of a single qualitative response) as in the following example (Figure \ref{fig:pls}).
 
 <<eval=FALSE,results=hide>>=
-sacPlsLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
 plotVc = "x-score")
 @
 
 \begin{figure}
 \begin{center}
 <<label=figPls,fig=TRUE,echo=FALSE,results=hide>>=
-sacPlsLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
 parDevNewL = FALSE, plotVc = "x-score")
 @
 \end{center}
@@ -169,7 +169,7 @@ parDevNewL = FALSE, plotVc = "x-score")
 
 Note:
 \begin{enumerate}
-\item The NIPALS algorithm is used for PLS (and OPLS); \emph{profileMN} matrices with (a moderate amount of) missing values can thus be analysed,
+\item The NIPALS algorithm is used for PLS (and OPLS); \emph{dataMatrix} matrices with (a moderate amount of) missing values can thus be analysed,
 \item As for PCA, the default \texttt{predN} value is NA: components are computed until either R2Y of the component is < 0.01 or Q2Y is < 0 (for more than 100 observations) or 0.05 otherwise.
 \end{enumerate}
 
@@ -182,35 +182,35 @@ print(sacPlsLs[["summaryDF"]])
 We see that 3 predictive components were computed (pre) and that R2Y and Q2Y are quite high. Let us assess the significance of these values by comparing to models generated after random permutation of the labels (Figure \ref{fig:plsPer}).
 
 <<eval=FALSE,results=hide>>=
-sacPlsPerLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+sacPlsPerLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
 permN = 100, plotVc = "permutation")
 @
 
 \begin{figure}
 \begin{center}
 <<label=figPlsPer,fig=TRUE,echo=FALSE,results=hide>>=
-sacPlsLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
 permN = 100, parDevNewL = FALSE, plotVc = "permutation")
 @
 \end{center}
 \caption{Significance of R2Y and Q2Y evaluated by permutation testing.}
 \label{fig:plsPer}
 \end{figure}
- 
+
 
 \subsection{Orthogonal partial least squares: OPLS and OPLS-DA}
 
 To perform OPLS(-DA), we set \texttt{orthoN} (number of components which are \textbf{ortho}gonal; \textbf{N}umeric) to either a specific number of orthogonal components, or to NA. Let us build an OPLS-DA model of the 'gender' response (Figure \ref{fig:plsPer}). Note that for OPLS modeling of a single response, the number of predictive component is 1.
 
 <<eval=FALSE,results=hide>>=
-sacOplLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+sacOplLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
 predN = 1, orthoN = NA, plotVc = "x-score")
 @
 
 \begin{figure}
 \begin{center}
 <<label=figOpl,fig=TRUE,echo=FALSE,results=hide>>=
-sacOplLs <- roplsF(profileMN, matrix(sampleDF[, "genderVc"], ncol = 1),
+sacOplLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
 predN = 1, orthoN = NA, parDevNewL = FALSE, plotVc = "x-score")
 @
 \end{center}
@@ -218,7 +218,7 @@ predN = 1, orthoN = NA, parDevNewL = FALSE, plotVc = "x-score")
 \label{fig:opl}
 \end{figure}
 
-Before closing this example session, we detach \emph{sacurine} from the search path: 
+Before closing this example session, we detach \emph{sacurine} from the search path:
 
 <<>>=
 detach(sacurine)
@@ -238,7 +238,7 @@ toLatex(sessionInfo())
 \section{Pre-processing and annotation of mass spectrometry data}
 
 
-To illustrate how profileMN, sampleDF and variableDF can be obtained from raw mass spectra file, we use the LC-MS data from the \emph{faahKO} package \cite{Saghatelian2004}, which will pre-process with the \emph{xcms} package \cite{Smith2006} and annotate isotopes and adducts with the \emph{CAMERA} package \cite{Kuhl2012}, as described in the corresponding vignettes (all these packages are from \emph{bioconductor}).
+To illustrate how \emph{dataMatrix}, \emph{sampleMetadata} and \emph{variableMetadata} can be obtained from raw mass spectra file, we use the LC-MS data from the \emph{faahKO} package \cite{Saghatelian2004}, which will pre-process with the \emph{xcms} package \cite{Smith2006} and annotate isotopes and adducts with the \emph{CAMERA} package \cite{Kuhl2012}, as described in the corresponding vignettes (all these packages are from \emph{bioconductor}).
 
 Let us start by getting the paths to the 12 raw files (6 KO and 6 WT mice) in the ".cdf" open format. The files are grouped in two sub-directories ("KO" and "WT") since \emph{xcms} can use sample class information when grouping the peaks and correcting retention times.
 
@@ -249,7 +249,7 @@ cdffiles <- list.files(cdfpath, recursive = TRUE, full.names = TRUE)
 basename(cdffiles)
 @
 
-Next, \emph{xcms} is used to pre-process the individual raw files, as described in the vignette. 
+Next, \emph{xcms} is used to pre-process the individual raw files, as described in the vignette.
 
 <<eval=FALSE,fig=FALSE,results=hide>>=
 library(xcms)
@@ -269,24 +269,24 @@ diffreport <- annotateDiffreport(xset3, quick=TRUE)
 diffreport[1:4, ]
 @
 
-We then build the profileMN, sampleDF and variableDF matrix and dataframes as follows:
+We then build the dataMatrix, sampleMetadata and variableMetadata matrix and dataframes as follows:
 
 <<eval=FALSE,results=hide>>=
 sampleVc <- grep("^ko|^wt", colnames(diffreport), value = TRUE)
-profileMN <- t(as.matrix(diffreport[, sampleVc]))
-dimnames(profileMN) <- list(sampleVc, diffreport[, "name"])
-sampleDF <- data.frame(row.names = sampleVc,
+dataMatrix <- t(as.matrix(diffreport[, sampleVc]))
+dimnames(dataMatrix) <- list(sampleVc, diffreport[, "name"])
+sampleMetadata <- data.frame(row.names = sampleVc,
 genotypeVc = substr(sampleVc, 1, 2), stringsAsFactors = FALSE)
-variableDF <- diffreport[, !(colnames(diffreport) %in% c("name", sampleVc))]
-rownames(variableDF) <- diffreport[, "name"]
+variableMetadata <- diffreport[, !(colnames(diffreport) %in% c("name", sampleVc))]
+rownames(variableMetadata) <- diffreport[, "name"]
 @
 
 The data can now be analysed with the \emph{ropls} package as described in the previous section (i.e. by performing a PCA and a PLS-DA):
 
 <<eval=FALSE,fig=FALSE,results=hide>>=
 library(ropls)
-roplsF(profileMN)
-roplsF(profileMN, matrix(sampleDF[, "genotypeVc"], ncol = 1))
+roplsF(dataMatrix)
+roplsF(dataMatrix, matrix(sampleMetadata[, "genotypeVc"], ncol = 1))
 @
 
 <<eval=FALSE,echo=FALSE>>=

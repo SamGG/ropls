@@ -52,12 +52,12 @@ test_sacurine_PCA <- function() {
 
     data(sacurine)
 
-    sacPcaNipLs <- roplsF(sacurine[["profileMN"]],
+    sacPcaNipLs <- roplsF(sacurine[["dataMatrix"]],
                           plotVc = "none", verboseC = "none")
     checkEqualsNumeric(sacPcaNipLs[["summaryDF"]]["h8", "R2X(cum)"],
                        0.501,
                        tolerance = 1e-3)
-    sacPcaSvdLs <- roplsF(sacurine[["profileMN"]],
+    sacPcaSvdLs <- roplsF(sacurine[["dataMatrix"]],
                           algoC = "svd",
                           plotVc = "none", verboseC = "none")
     checkEqualsNumeric(sacPcaSvdLs[["tMN"]][1, 1],
@@ -70,8 +70,8 @@ test_sacurine_PLSDA <- function() {
 
     data(sacurine)
 
-    sacPlsLs <- roplsF(sacurine[["profileMN"]],
-                       matrix(sacurine[["sampleDF"]][, "genderVc"], ncol = 1),
+    sacPlsLs <- roplsF(sacurine[["dataMatrix"]],
+                       matrix(sacurine[["sampleMetadata"]][, "genderVc"], ncol = 1),
                        plotVc = "none", verboseC = "none")
     checkEqualsNumeric(sacPlsLs[["summaryDF"]]["h3", "Q2(cum)"],
                        0.5835585,
@@ -82,8 +82,8 @@ test_sacurine_PLSDA <- function() {
 
     ## splitting the dataset between a reference and a test subsets
 
-    sacPlsCrvLs <- roplsF(sacurine[["profileMN"]],
-                          matrix(sacurine[["sampleDF"]][, "genderVc"],
+    sacPlsCrvLs <- roplsF(sacurine[["dataMatrix"]],
+                          matrix(sacurine[["sampleMetadata"]][, "genderVc"],
                                  ncol = 1),
                           plotVc = "none", testVi = 1:10, verboseC = "none")
     checkEqualsNumeric(sacPlsCrvLs[["summaryDF"]]["h3", "RMSEP"],
@@ -96,8 +96,8 @@ test_sacurine_OPLSDA <- function() {
 
     data(sacurine)
 
-    sacOplLs <- roplsF(sacurine[["profileMN"]],
-                       matrix(sacurine[["sampleDF"]][, "genderVc"],
+    sacOplLs <- roplsF(sacurine[["dataMatrix"]],
+                       matrix(sacurine[["sampleMetadata"]][, "genderVc"],
                               ncol = 1),
                        orthoN = 1,
                        plotVc = "none", verboseC = "none")
@@ -107,8 +107,8 @@ test_sacurine_OPLSDA <- function() {
 
     ## permutation testing
 
-    sacOplPerLs <- roplsF(sacurine[["profileMN"]],
-                          matrix(sacurine[["sampleDF"]][, "genderVc"],
+    sacOplPerLs <- roplsF(sacurine[["dataMatrix"]],
+                          matrix(sacurine[["sampleMetadata"]][, "genderVc"],
                                  ncol = 1),
                           predN = 1,
                           orthoN = 1,
@@ -125,8 +125,8 @@ test_sacurine_PLSDA_pareto <- function() {
 
     data(sacurine)
 
-    sacPlsScaLs <- roplsF(sacurine[["profileMN"]],
-                       matrix(sacurine[["sampleDF"]][, "genderVc"], ncol = 1),
+    sacPlsScaLs <- roplsF(sacurine[["dataMatrix"]],
+                       matrix(sacurine[["sampleMetadata"]][, "genderVc"], ncol = 1),
                        plotVc = "none", scaleC = "pareto", verboseC = "none")
     checkEqualsNumeric(sacPlsScaLs[["summaryDF"]]["h2", "Q2(cum)"],
                        0.5210747,
