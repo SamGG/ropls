@@ -206,7 +206,6 @@ roplsF <- function(xMN,
                            which(drop(yMCN) == claC)[seq(2, sum(drop(yMCN) == claC), by = 2)])
             testVi <- sort(testVi)
         }
-
     }
 
 
@@ -270,27 +269,27 @@ roplsF <- function(xMN,
 
     ## RMSER
 
-    if(!is.null(yMCN) && ncol(yMCN) == 1 && !is.null(ropLs[["testVi"]])) {
+    ## if(!is.null(yMCN) && ncol(yMCN) == 1 && !is.null(ropLs[["testVi"]])) {
 
-        refVi <- setdiff(1:nrow(xMN), ropLs[["testVi"]])
-        ynrMCN <- yMCN
+    ##     refVi <- setdiff(1:nrow(xMN), ropLs[["testVi"]])
+    ##     ynrMCN <- yMCN
 
-        ynrMCN[refVi, ] <- sample(ynrMCN[refVi, ])
+    ##     ynrMCN[refVi, ] <- sample(ynrMCN[refVi, ])
 
-        rndLs <- .coreF(xMN = xMN,
-                        yMCN = ynrMCN,
-                        orthoN = ropLs[["orthoN"]],
-                        predN = ropLs[["predN"]],
-                        scaleC = scaleC,
-                        algoC = algoC,
-                        crossvalN = crossvalN,
-                        testVi = ropLs[["testVi"]],
-                        c2nLs = c2nLs,
-                        xZeroVarVi = ropLs[["xZeroVarVi"]])
+    ##     rndLs <- .coreF(xMN = xMN,
+    ##                     yMCN = ynrMCN,
+    ##                     orthoN = ropLs[["orthoN"]],
+    ##                     predN = ropLs[["predN"]],
+    ##                     scaleC = scaleC,
+    ##                     algoC = algoC,
+    ##                     crossvalN = crossvalN,
+    ##                     testVi = ropLs[["testVi"]],
+    ##                     c2nLs = c2nLs,
+    ##                     xZeroVarVi = ropLs[["xZeroVarVi"]])
 
-        ropLs[["summaryDF"]][, "RMSER"] <- rndLs[["summaryDF"]][, "RMSEP"]
+    ##     ropLs[["summaryDF"]][, "RMSER"] <- rndLs[["summaryDF"]][, "RMSEP"]
 
-    }
+    ## }
 
     ## Permutation testing (Szymanska et al, 2012)
 
@@ -351,8 +350,8 @@ roplsF <- function(xMN,
 
         permMN <- cbind(permMN, sim = perSimVn)
 
-        perPvaVn <- c(pR2Y = (1 + length(which(ropLs[["permMN"]][-1, "R2Y(cum)"] >= ropLs[["permMN"]][1, "R2Y(cum)"]))) / (nrow(ropLs[["permMN"]]) - 1),
-                      pQ2 = (1 + length(which(ropLs[["permMN"]][-1, "Q2(cum)"] >= ropLs[["permMN"]][1, "Q2(cum)"]))) / (nrow(ropLs[["permMN"]]) - 1))
+        perPvaVn <- c(pR2Y = (1 + length(which(permMN[-1, "R2Y(cum)"] >= permMN[1, "R2Y(cum)"]))) / (nrow(permMN) - 1),
+                      pQ2 = (1 + length(which(permMN[-1, "Q2(cum)"] >= permMN[1, "Q2(cum)"]))) / (nrow(permMN) - 1))
         ropLs[["summaryDF"]][, "pR2Y"] <- perPvaVn["pR2Y"]
         ropLs[["summaryDF"]][, "pQ2"] <- perPvaVn["pQ2"]
 
@@ -502,7 +501,13 @@ roplsF <- function(xMN,
 
     if(ropLs[["predN"]] + ropLs[["orthoN"]] < 2) {
 
-        warning("A single component model has been selected by cross-validation;\nCorrelations between variables and components will not be computed;\ntCompMN, pCompMN and topLoadMN are set to NULL", call. = FALSE)
+        if(length(plotVc) > 1 || plotVc != "none") {
+            warning("A single component model has been selected by cross-validation: Only the 'overview' plot is available", call. = FALSE)
+            plotVc <- "overview"
+        }
+
+        ropLs[["tCompMN"]] <- ropLs[["tMN"]]
+        ropLs[["pCompMN"]] <- ropLs[["pMN"]]
 
     } else {
 
@@ -519,48 +524,54 @@ roplsF <- function(xMN,
             ropLs[["pCompMN"]] <- ropLs[["pMN"]][, parCompVn, drop = FALSE]
         }
 
-        cxtCompMN <- cor(ropLs[["xModelMN"]], ropLs[["tCompMN"]], use = "pairwise.complete.obs")
+    }
 
-        if(!is.null(ropLs[["yModelMN"]]))
-            cytCompMN <- cor(ropLs[["yModelMN"]], ropLs[["tCompMN"]], use = "pairwise.complete.obs")
+    cxtCompMN <- cor(ropLs[["xModelMN"]], ropLs[["tCompMN"]],
+                     use = "pairwise.complete.obs")
 
-
-        if(parTopLoadN * 4 < ncol(ropLs[["xModelMN"]])) {
-
-            pexVin <- integer(parTopLoadN * 4) ## 'ex'treme values
-
-            for(k in 1:2) {
-
-                pkVn <-  ropLs[["pCompMN"]][, k]
-
-                pexVin[1:(2 * parTopLoadN) + 2 * parTopLoadN * (k - 1)] <- c(order(pkVn)[1:parTopLoadN],
-                                                                     rev(order(pkVn, decreasing = TRUE)[1:parTopLoadN]))
-
-            }
-
-        } else
-            pexVin <- 1:ncol(ropLs[["xModelMN"]])
+    if(!is.null(ropLs[["yModelMN"]]))
+        cytCompMN <- cor(ropLs[["yModelMN"]], ropLs[["tCompMN"]], use = "pairwise.complete.obs")
 
 
-        pxtCompMN <- cbind(ropLs[["pCompMN"]],
-                           cxtCompMN)
-        colnames(pxtCompMN)[3:4] <- paste("cor_", colnames(pxtCompMN)[3:4], sep = "")
+    if(parTopLoadN * 4 < ncol(ropLs[["xModelMN"]])) {
 
-        ropLs[["topLoadMN"]] <- pxtCompMN
+        pexVin <- integer(parTopLoadN * ncol(ropLs[["pCompMN"]]) * 2) ## 'ex'treme values
 
-        ropLs[["topLoadMN"]] <- ropLs[["topLoadMN"]][pexVin, ]
+        for(k in 1:ncol(ropLs[["pCompMN"]])) {
 
-        if(parTopLoadN * 4 < ncol(ropLs[["xModelMN"]])) {
+            pkVn <-  ropLs[["pCompMN"]][, k]
 
-            ropLs[["topLoadMN"]][(2 * parTopLoadN + 1):(4 * parTopLoadN), c(1, 3)] <- NA
-            ropLs[["topLoadMN"]][1:(2 * parTopLoadN), c(2, 4)] <- NA
+            pexVin[1:(2 * parTopLoadN) + 2 * parTopLoadN * (k - 1)] <- c(order(pkVn)[1:parTopLoadN],
+                                                                         rev(order(pkVn, decreasing = TRUE)[1:parTopLoadN]))
 
         }
 
-        if(verboseC == "all")
-            print(signif(ropLs[["topLoadMN"]], 2))
+    } else
+        pexVin <- 1:ncol(ropLs[["xModelMN"]])
+
+
+    pxtCompMN <- cbind(ropLs[["pCompMN"]],
+                       cxtCompMN)
+
+    if(ncol(ropLs[["pCompMN"]]) == 1) {
+       colnames(pxtCompMN)[2] <- paste0("cor_", colnames(pxtCompMN)[2])
+    } else
+        colnames(pxtCompMN)[3:4] <- paste0("cor_", colnames(pxtCompMN)[3:4])
+
+    ropLs[["topLoadMN"]] <- pxtCompMN
+
+    ropLs[["topLoadMN"]] <- ropLs[["topLoadMN"]][pexVin, , drop = FALSE]
+
+    if(parTopLoadN * 4 < ncol(ropLs[["xModelMN"]]) &&
+       ncol(ropLs[["pCompMN"]]) > 1) {
+
+        ropLs[["topLoadMN"]][(2 * parTopLoadN + 1):(4 * parTopLoadN), c(1, 3)] <- NA
+        ropLs[["topLoadMN"]][1:(2 * parTopLoadN), c(2, 4)] <- NA
 
     }
+
+    if(verboseC == "all")
+        print(signif(ropLs[["topLoadMN"]], 2))
 
     if(verboseC %in% c("all", "overview")) {
 
@@ -711,9 +722,9 @@ roplsF <- function(xMN,
         ## Par
         ##----
 
-        if(layL)
+        if(layL) {
             marVn <- c(4.6, 4.1, 2.6, 1.6)
-        else
+        } else
             marVn <- c(5.1, 4.1, 4.1, 2.1)
 
         par(font=2, font.axis=2, font.lab=2, lwd=2,

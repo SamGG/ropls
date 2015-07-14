@@ -1,3 +1,11 @@
+CHANGES IN VERSION 0.99.6
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o roplsF:
+        handling of PLS models with single predictive component only
+
 CHANGES IN VERSION 0.99.4
 ------------------------------
 
