@@ -1,7 +1,7 @@
 roplsF <- function(xMN,
                    yMCN = NULL,
-                   predN = NA,
-                   orthoN = 0,
+                   predI = NA,
+                   orthoI = 0,
                    plotVc = c("correlation",
                        "none",
                        "outlier",
@@ -17,11 +17,11 @@ roplsF <- function(xMN,
                        "xy-weight")[8],
 
                    algoC = c("default", "nipals", "svd")[1],
-                   crossvalN = 7,
+                   crossvalI = 7,
                    fileFig.pdfC = NULL,
                    fileInfo.txtC = NULL,
                    log10L = FALSE,
-                   permN = 0,
+                   permI = 0,
                    scaleC = c("center",
                        "pareto",
                        "standard")[3],
@@ -33,12 +33,12 @@ roplsF <- function(xMN,
 
                    parAsColVcn = NA,
                    parCexN = 1,
-                   parCompVn = c(1, 2),
+                   parCompVi = c(1, 2),
                    parDevNewL = TRUE,
                    parEllipsesL = NA,
                    parLabVc = NA,
                    parTitleL = TRUE,
-                   parTopLoadN = 3) {
+                   parTopLoadI = 3) {
 
 
     ## Option
@@ -88,13 +88,13 @@ roplsF <- function(xMN,
     if(!is.logical(log10L))
         stop("'log10L' must be a logical", call. = FALSE)
 
-    if(permN < 0 || (permN - floor(permN)) > 1e-10)
-        stop("'permN' must be an integer", call. = FALSE)
+    if(permI < 0 || (permI - floor(permI)) > 1e-10)
+        stop("'permI' must be an integer", call. = FALSE)
 
-    if(permN > 0 && (is.null(yMCN) || ncol(yMCN) > 1))
+    if(permI > 0 && (is.null(yMCN) || ncol(yMCN) > 1))
         stop("Permutation testing available only when 'yMCN' has one column only", call. = FALSE)
 
-    if(permN > 0 && !is.null(testVi))
+    if(permI > 0 && !is.null(testVi))
         stop("Permutation testing and external validation cannot be performed simultaneously", call. = FALSE)
     ## compatibility between permutation testing and external cross-validation to be verified
 
@@ -116,7 +116,7 @@ roplsF <- function(xMN,
     if(!is.null(yMCN) && algoC != "nipals")
         stop("'nipals' algorithm must be used for (O)PLS(-DA)", call. = FALSE)
 
-    if((is.na(orthoN) || orthoN > 0) && ncol(yMCN) > 1)
+    if((is.na(orthoI) || orthoI > 0) && ncol(yMCN) > 1)
         stop("OPLS(-DA) only available for 'yMCN' with single column only", call. = FALSE)
 
     if(!(length(scaleC) == 1 && scaleC %in% c('none', 'center', 'pareto', 'standard')))
@@ -131,26 +131,26 @@ roplsF <- function(xMN,
         stop("'testVi' must be either set to 'odd' or an integer vector of 'xMN' row numbers", call. = FALSE)
 
     if(!is.null(yMCN) &&
-       (is.na(orthoN) || orthoN > 0) &&
+       (is.na(orthoI) || orthoI > 0) &&
        any(is.na(yMCN)))
         stop("'yMCN' must not contain missing values for OPLS(-DA)", call. = FALSE)
 
     if(length(verboseC) != 1 || !(verboseC %in% c('all', 'none', 'overview', 'summary')))
         stop("'verboseC' must be either 'all', 'none', 'overview', or 'summary'", call. = FALSE)
 
-    if(crossvalN > nrow(xMN))
-        stop("'crossvalN' must be less than the row number of 'xMN'", call. = FALSE)
+    if(crossvalI > nrow(xMN))
+        stop("'crossvalI' must be less than the row number of 'xMN'", call. = FALSE)
 
-    if(is.na(orthoN) || orthoN > 0)
-        if(is.na(predN) || predN > 1) {
-            predN <- 1
-            warning("OPLS: number of predictive components ('predN' argument) set to 1", call. = FALSE)
+    if(is.na(orthoI) || orthoI > 0)
+        if(is.na(predI) || predI > 1) {
+            predI <- 1
+            warning("OPLS: number of predictive components ('predI' argument) set to 1", call. = FALSE)
         }
 
-    if(!is.na(predN))
-        if(predN > min(nrow(xMN), ncol(xMN))) {
-            predN <- min(nrow(xMN), ncol(xMN))
-            warning("'predN' set to the minimum of the 'xMN' matrix dimensions: ", predN, call. = FALSE)
+    if(!is.na(predI))
+        if(predI > min(nrow(xMN), ncol(xMN))) {
+            predI <- min(nrow(xMN), ncol(xMN))
+            warning("'predI' set to the minimum of the 'xMN' matrix dimensions: ", predI, call. = FALSE)
         }
 
 
@@ -159,10 +159,10 @@ roplsF <- function(xMN,
     ##   Computations
     ##------------------------------------
 
-    cvaVc <- paste("cv", 1:crossvalN, sep = "")
+    cvaVc <- paste("cv", 1:crossvalI, sep = "")
     cvaLs <- vector(length = length(cvaVc), mode = "list")
     names(cvaLs) <- cvaVc
-    cvaOutLs <- split(1:nrow(xMN), rep(1:crossvalN, length = nrow(xMN)))
+    cvaOutLs <- split(1:nrow(xMN), rep(1:crossvalI, length = nrow(xMN)))
 
     ## rownames and colnames
 
@@ -217,8 +217,8 @@ roplsF <- function(xMN,
 
     if(!is.null(testVi)) {
         xVarIndLs[[1]] <- setdiff(1:nrow(xMN), testVi)
-    } else if(!is.null(yMCN) && ncol(yMCN) == 1 && nrow(xMN) >= 2 * crossvalN)
-        for(cvkN in 1:crossvalN)
+    } else if(!is.null(yMCN) && ncol(yMCN) == 1 && nrow(xMN) >= 2 * crossvalI)
+        for(cvkN in 1:crossvalI)
             xVarIndLs <- c(xVarIndLs, list(setdiff(1:nrow(xMN), cvaOutLs[[cvkN]])))
 
     xVarVarLs <- lapply(xVarIndLs,
@@ -250,11 +250,11 @@ roplsF <- function(xMN,
 
     ropLs <- .coreF(xMN = xMN,
                     yMCN = yMCN,
-                    orthoN = orthoN,
-                    predN = predN,
+                    orthoI = orthoI,
+                    predI = predI,
                     scaleC = scaleC,
                     algoC = algoC,
-                    crossvalN = crossvalN,
+                    crossvalI = crossvalI,
                     testVi = testVi,
                     c2nLs = c2nLs,
                     xZeroVarVi = xZeroVarVi)
@@ -278,11 +278,11 @@ roplsF <- function(xMN,
 
     ##     rndLs <- .coreF(xMN = xMN,
     ##                     yMCN = ynrMCN,
-    ##                     orthoN = ropLs[["orthoN"]],
-    ##                     predN = ropLs[["predN"]],
+    ##                     orthoI = ropLs[["orthoI"]],
+    ##                     predI = ropLs[["predI"]],
     ##                     scaleC = scaleC,
     ##                     algoC = algoC,
-    ##                     crossvalN = crossvalN,
+    ##                     crossvalI = crossvalI,
     ##                     testVi = ropLs[["testVi"]],
     ##                     c2nLs = c2nLs,
     ##                     xZeroVarVi = ropLs[["xZeroVarVi"]])
@@ -293,26 +293,26 @@ roplsF <- function(xMN,
 
     ## Permutation testing (Szymanska et al, 2012)
 
-    if(permN > 0) {
+    if(permI > 0) {
 
         modSumVc <- colnames(ropLs[["summaryDF"]])
 
         permMN <- matrix(0,
-                        nrow = 1 + permN,
+                        nrow = 1 + permI,
                         ncol = length(modSumVc),
                         dimnames = list(NULL, modSumVc))
 
-        perSimVn <- numeric(1 + permN)
+        perSimVn <- numeric(1 + permI)
         perSimVn[1] <- 1
 
 
         permMN[1, ] <- as.matrix(ropLs[["summaryDF"]])
 
         if(is.null(fileInfo.txtC))
-            bar <- txtProgressBar(1, permN, style = 3)
+            bar <- txtProgressBar(1, permI, style = 3)
 
 
-        for(k in 1:permN) {
+        for(k in 1:permI) {
 
             if(is.null(fileInfo.txtC))
                 setTxtProgressBar(bar, k)
@@ -330,11 +330,11 @@ roplsF <- function(xMN,
 
             perLs <- .coreF(xMN = xMN,
                             yMCN = yPerMCN,
-                            orthoN = ropLs[["orthoN"]],
-                            predN = ropLs[["predN"]],
+                            orthoI = ropLs[["orthoI"]],
+                            predI = ropLs[["predI"]],
                             scaleC = scaleC,
                             algoC = algoC,
-                            crossvalN = crossvalN,
+                            crossvalI = crossvalI,
                             testVi = ropLs[["testVi"]],
                             c2nLs = c2nLs,
                             xZeroVarVi = ropLs[["xZeroVarVi"]])
@@ -365,7 +365,7 @@ roplsF <- function(xMN,
         else
             ropTypC <- "PLS-DA"
     }
-    if(ropLs[["orthoN"]] > 0)
+    if(ropLs[["orthoI"]] > 0)
         ropTypC <- paste("O", ropTypC, sep = "")
 
 
@@ -408,15 +408,15 @@ roplsF <- function(xMN,
         ## Raw summary
         ##------------
 
-        message("Summary of the ", parTopLoadN, " increasing variance spaced raw variables:")
+        message("Summary of the ", parTopLoadI, " increasing variance spaced raw variables:")
 
     }
 
-    if(ncol(xMN) > parTopLoadN) {
+    if(ncol(xMN) > parTopLoadI) {
         xVarVn <- apply(xMN, 2, var)
         names(xVarVn) <- 1:length(xVarVn)
         xVarVn <- sort(xVarVn)
-        xVarSorVin <- as.numeric(names(xVarVn[seq(1, length(xVarVn), length = parTopLoadN)]))
+        xVarSorVin <- as.numeric(names(xVarVn[seq(1, length(xVarVn), length = parTopLoadI)]))
         xRawMN <- xMN[, xVarSorVin]
     } else
         xRawMN <- xMN
@@ -433,9 +433,9 @@ roplsF <- function(xMN,
         xCorMN <- cor(xMN, use = "pairwise.complete.obs")
         xCorMN[lower.tri(xCorMN, diag = TRUE)] <- 0
 
-        if(ncol(xMN) > parTopLoadN) {
+        if(ncol(xMN) > parTopLoadI) {
 
-            xCorNexDF <- which(abs(xCorMN) > sort(abs(xCorMN), decreasing = TRUE)[parTopLoadN + 1],
+            xCorNexDF <- which(abs(xCorMN) > sort(abs(xCorMN), decreasing = TRUE)[parTopLoadI + 1],
                                arr.ind = TRUE)
 
             xCorDisMN <- matrix(0,
@@ -468,7 +468,7 @@ roplsF <- function(xMN,
         if(is.null(yMCN)) {
 
             message(ropLs[["typC"]], " ('", algoC, "' algorithm)")
-            message("Number of components: ", ropLs[["predN"]])
+            message("Number of components: ", ropLs[["predI"]])
 
         } else {
 
@@ -478,13 +478,13 @@ roplsF <- function(xMN,
                            pareto = " and pareto scaling",
                            standard = " and unit-variance scaling"))
 
-            if(ropLs[["orthoN"]] > 0) {
+            if(ropLs[["orthoI"]] > 0) {
                 message(ropLs[["typC"]], " ('nipals' algorithm)")
-                message("Number of orthogonal components: ", ropLs[["orthoN"]])
+                message("Number of orthogonal components: ", ropLs[["orthoI"]])
             } else
                 message("PLS ('nipals' algorithm)")
 
-            message("Number of predictive components: ", ropLs[["predN"]])
+            message("Number of predictive components: ", ropLs[["predI"]])
 
         }
 
@@ -499,7 +499,7 @@ roplsF <- function(xMN,
 
     }
 
-    if(ropLs[["predN"]] + ropLs[["orthoN"]] < 2) {
+    if(ropLs[["predI"]] + ropLs[["orthoI"]] < 2) {
 
         if(length(plotVc) > 1 || plotVc != "none") {
             warning("A single component model has been selected by cross-validation: Only the 'overview' plot is available", call. = FALSE)
@@ -511,17 +511,17 @@ roplsF <- function(xMN,
 
     } else {
 
-        if(ropLs[["orthoN"]] > 0) {
-            if(parCompVn[2] > ropLs[["orthoN"]] + 1)
+        if(ropLs[["orthoI"]] > 0) {
+            if(parCompVi[2] > ropLs[["orthoI"]] + 1)
                 stop("Selected orthogonal component for plotting (ordinate) exceeds the total number of orthogonal components of the model", call. = FALSE)
-            ropLs[["tCompMN"]] <- cbind(ropLs[["tMN"]][, 1], ropLs[["tOrthoMN"]][, parCompVn[2] - 1])
-            ropLs[["pCompMN"]] <- cbind(ropLs[["pMN"]][, 1], ropLs[["pOrthoMN"]][, parCompVn[2] - 1])
-            colnames(ropLs[["pCompMN"]]) <- colnames(ropLs[["tCompMN"]]) <- c("h1", paste("o", parCompVn[2] - 1, sep = ""))
+            ropLs[["tCompMN"]] <- cbind(ropLs[["tMN"]][, 1], ropLs[["tOrthoMN"]][, parCompVi[2] - 1])
+            ropLs[["pCompMN"]] <- cbind(ropLs[["pMN"]][, 1], ropLs[["pOrthoMN"]][, parCompVi[2] - 1])
+            colnames(ropLs[["pCompMN"]]) <- colnames(ropLs[["tCompMN"]]) <- c("h1", paste("o", parCompVi[2] - 1, sep = ""))
         } else {
-            if(max(parCompVn) > ropLs[["predN"]])
+            if(max(parCompVi) > ropLs[["predI"]])
                 stop("Selected component for plotting as ordinate exceeds the total number of predictive components of the model", call. = FALSE)
-            ropLs[["tCompMN"]] <- ropLs[["tMN"]][, parCompVn, drop = FALSE]
-            ropLs[["pCompMN"]] <- ropLs[["pMN"]][, parCompVn, drop = FALSE]
+            ropLs[["tCompMN"]] <- ropLs[["tMN"]][, parCompVi, drop = FALSE]
+            ropLs[["pCompMN"]] <- ropLs[["pMN"]][, parCompVi, drop = FALSE]
         }
 
     }
@@ -533,16 +533,16 @@ roplsF <- function(xMN,
         cytCompMN <- cor(ropLs[["yModelMN"]], ropLs[["tCompMN"]], use = "pairwise.complete.obs")
 
 
-    if(parTopLoadN * 4 < ncol(ropLs[["xModelMN"]])) {
+    if(parTopLoadI * 4 < ncol(ropLs[["xModelMN"]])) {
 
-        pexVin <- integer(parTopLoadN * ncol(ropLs[["pCompMN"]]) * 2) ## 'ex'treme values
+        pexVin <- integer(parTopLoadI * ncol(ropLs[["pCompMN"]]) * 2) ## 'ex'treme values
 
         for(k in 1:ncol(ropLs[["pCompMN"]])) {
 
             pkVn <-  ropLs[["pCompMN"]][, k]
 
-            pexVin[1:(2 * parTopLoadN) + 2 * parTopLoadN * (k - 1)] <- c(order(pkVn)[1:parTopLoadN],
-                                                                         rev(order(pkVn, decreasing = TRUE)[1:parTopLoadN]))
+            pexVin[1:(2 * parTopLoadI) + 2 * parTopLoadI * (k - 1)] <- c(order(pkVn)[1:parTopLoadI],
+                                                                         rev(order(pkVn, decreasing = TRUE)[1:parTopLoadI]))
 
         }
 
@@ -562,11 +562,11 @@ roplsF <- function(xMN,
 
     ropLs[["topLoadMN"]] <- ropLs[["topLoadMN"]][pexVin, , drop = FALSE]
 
-    if(parTopLoadN * 4 < ncol(ropLs[["xModelMN"]]) &&
+    if(parTopLoadI * 4 < ncol(ropLs[["xModelMN"]]) &&
        ncol(ropLs[["pCompMN"]]) > 1) {
 
-        ropLs[["topLoadMN"]][(2 * parTopLoadN + 1):(4 * parTopLoadN), c(1, 3)] <- NA
-        ropLs[["topLoadMN"]][1:(2 * parTopLoadN), c(2, 4)] <- NA
+        ropLs[["topLoadMN"]][(2 * parTopLoadI + 1):(4 * parTopLoadI), c(1, 3)] <- NA
+        ropLs[["topLoadMN"]][1:(2 * parTopLoadI), c(2, 4)] <- NA
 
     }
 
@@ -604,7 +604,7 @@ roplsF <- function(xMN,
 
 
         if("summary" %in% plotVc)
-            plotVc <- c(ifelse(permN > 0, "permutation", "overview"),
+            plotVc <- c(ifelse(permI > 0, "permutation", "overview"),
                        "outlier",
                        "x-score",
                        "x-loading")
@@ -633,17 +633,17 @@ roplsF <- function(xMN,
                 stop("'parAsColVcn' must be of 'character' or 'numeric' type")
         }
 
-        if(permN == 0 && 'permutation' %in% plotVc)
-            stop("'permN' must be > 0 for 'permutation' graphic to be plotted", call. = FALSE)
+        if(permI == 0 && 'permutation' %in% plotVc)
+            stop("'permI' must be > 0 for 'permutation' graphic to be plotted", call. = FALSE)
 
-        if(ropLs[["orthoN"]] > 0)
-            if(parCompVn[1] != 1) {
-                parCompVn[1] <- 1
-                warning("OPLS: first component to display ('parCompVn' first value) set to 1", call. = FALSE)
+        if(ropLs[["orthoI"]] > 0)
+            if(parCompVi[1] != 1) {
+                parCompVi[1] <- 1
+                warning("OPLS: first component to display ('parCompVi' first value) set to 1", call. = FALSE)
             }
 
         if("xy-weight" %in% plotVc &&
-           (is.null(yMCN) || is.na(ropLs[["orthoN"]]) || ropLs[["orthoN"]] > 0))
+           (is.null(yMCN) || is.na(ropLs[["orthoI"]]) || ropLs[["orthoI"]] > 0))
             stop("'xy-weight graphic can be displayed only for PLS(-DA) models", call. = FALSE)
 
         if(any(grepl('predict', plotVc)) && (is.null(yMCN) || ncol(yMCN) != 1))
@@ -748,8 +748,8 @@ roplsF <- function(xMN,
                    parCexN = parCexN,
                    parEllipsesL = parEllipsesL,
                    parTitleL = parTitleL,
-                   parTopLoadN = parTopLoadN,
-                   parCompVn = parCompVn,
+                   parTopLoadI = parTopLoadI,
+                   parCompVi = parCompVi,
                    pexVin = pexVin,
                    plotVc = plotVc,
                    tesColVc = tesColVc,
@@ -907,11 +907,11 @@ roplsF <- function(xMN,
 ## Core algorithms for PCA, PLS(-DA), and OPLS(-DA)
 .coreF <- function(xMN,
                    yMCN,
-                   orthoN,
-                   predN,
+                   orthoI,
+                   predI,
                    scaleC,
                    algoC,
-                   crossvalN,
+                   crossvalI,
                    testVi,
                    c2nLs,
                    xZeroVarVi) {
@@ -994,18 +994,18 @@ roplsF <- function(xMN,
 
     autNcoL <- autNcpL <- FALSE
 
-    if(is.na(orthoN)) {
-        orthoN <- 14
-        predN <- 1
+    if(is.na(orthoI)) {
+        orthoI <- 14
+        predI <- 1
         autNcoL <- TRUE
-    } else if(is.na(predN)) {
-        if(orthoN > 0)
-            predN <- 1
+    } else if(is.na(predI)) {
+        if(orthoI > 0)
+            predI <- 1
         else {
             if(is.null(yMCN))
-                predN <- min(nrow(xMN), ncol(xMN))
+                predI <- min(nrow(xMN), ncol(xMN))
             else
-                predN <- 15
+                predI <- 15
         }
         autNcpL <- TRUE
     }
@@ -1051,17 +1051,17 @@ roplsF <- function(xMN,
     } else
         xvaNamVc <- paste("x", 1:ncol(xMN), sep = "")
 
-    predNamVc <- paste("h", 1:predN, sep = "")
+    predIamVc <- paste("h", 1:predI, sep = "")
 
     pMN <- matrix(0,
                   nrow = ncol(xMN),
-                  ncol = predN,
-                  dimnames = list(xvaNamVc, predNamVc))
+                  ncol = predI,
+                  dimnames = list(xvaNamVc, predIamVc))
 
     tMN <- uMN <- matrix(0,
                          nrow = nrow(xMN),
-                         ncol = predN,
-                         dimnames = list(obsNamVc, predNamVc))
+                         ncol = predI,
+                         dimnames = list(obsNamVc, predIamVc))
 
     ssxTotN <- sum(xMN^2, na.rm = TRUE)
 
@@ -1073,14 +1073,14 @@ roplsF <- function(xMN,
         ##------------------------------------
 
 
-        varVn <- numeric(predN)
-        names(varVn) <- predNamVc
+        varVn <- numeric(predI)
+        names(varVn) <- predIamVc
         vSumVn <- sum(apply(xMN, 2, function(y) var(y, na.rm = TRUE))) ## xMN is centered
 
         modelDF <- as.data.frame(matrix(0,
-                                      nrow = predN,
+                                      nrow = predI,
                                       ncol = 3,
-                                      dimnames = list(predNamVc, c("R2X", "R2X(cum)", "Iter."))))
+                                      dimnames = list(predIamVc, c("R2X", "R2X(cum)", "Iter."))))
 
         switch(algoC,
 
@@ -1091,7 +1091,7 @@ roplsF <- function(xMN,
 
                    xOldMN <- xMN
 
-                   for(hN in 1:predN) {
+                   for(hN in 1:predI) {
 
                        iteN <- 1
                        tOldVn <- xOldMN[, 1]
@@ -1145,7 +1145,7 @@ roplsF <- function(xMN,
                        modelDF[hN, "R2X"] <- sum(tcrossprod(tMN[, hN], pMN[, hN])^2) / ssxTotN
                        modelDF[hN, "Iter."] <- iteN
 
-                   } ## for(hN in 1:predN) {
+                   } ## for(hN in 1:predI) {
 
                }, ## nipals
 
@@ -1169,12 +1169,12 @@ roplsF <- function(xMN,
 
                    rm(pcaSvdLs)
 
-                   tMN <- tMN[, 1:predN]
-                   pMN <- pMN[, 1:predN]
-                   varVn <- varVn[1:predN]
+                   tMN <- tMN[, 1:predI]
+                   pMN <- pMN[, 1:predI]
+                   varVn <- varVn[1:predI]
                    rownames(tMN) <- obsNamVc
                    rownames(pMN) <- xvaNamVc
-                   names(varVn) <- colnames(pMN) <- colnames(tMN) <- predNamVc
+                   names(varVn) <- colnames(pMN) <- colnames(tMN) <- predIamVc
 
                    modelDF[, "R2X"] <- round(varVn / vSumVn, 3)
 
@@ -1185,16 +1185,16 @@ roplsF <- function(xMN,
         if(autNcpL) {
             vSelVl <- cumsum(varVn) / vSumVn > 0.5
             if(sum(vSelVl) == 0)
-                predN <- max(length(varVn), 2)
+                predI <- max(length(varVn), 2)
             else
-                predN <- max(which(vSelVl)[1], 2)
-            tMN <- tMN[, 1:predN]
-            pMN <- pMN[, 1:predN]
-            varVn <- varVn[1:predN]
-            modelDF <- modelDF[1:predN, ]
+                predI <- max(which(vSelVl)[1], 2)
+            tMN <- tMN[, 1:predI]
+            pMN <- pMN[, 1:predI]
+            varVn <- varVn[1:predI]
+            modelDF <- modelDF[1:predI, ]
         }
 
-        summaryDF <- modelDF[predN, c("R2X(cum)"), drop = FALSE]
+        summaryDF <- modelDF[predI, c("R2X(cum)"), drop = FALSE]
 
 
     } else { ## if(is.null(yMCN))
@@ -1234,17 +1234,17 @@ roplsF <- function(xMN,
 
         cMN <- matrix(0,
                       nrow = ncol(yMN),
-                      ncol = predN,
-                      dimnames = list(yvaNamVc, predNamVc))
+                      ncol = predI,
+                      dimnames = list(yvaNamVc, predIamVc))
 
 
 
 
         ## Cross-validation variables
 
-        cvfNamVc <- paste("cv", 1:crossvalN, sep = "")
-        cvfOutLs <- split(1:nrow(xMN), rep(1:crossvalN, length = nrow(xMN)))
-        prkVn <- numeric(crossvalN)
+        cvfNamVc <- paste("cv", 1:crossvalI, sep = "")
+        cvfOutLs <- split(1:nrow(xMN), rep(1:crossvalI, length = nrow(xMN)))
+        prkVn <- numeric(crossvalI)
 
         ## rules
 
@@ -1256,7 +1256,7 @@ roplsF <- function(xMN,
         hN <- 1
 
 
-        if(orthoN == 0) {
+        if(orthoI == 0) {
 
             ##------------------------------------
             ##   PLS
@@ -1268,15 +1268,15 @@ roplsF <- function(xMN,
             ## 'n' stands for NIPALS (OPLS followed by PLS); original matrices are needed for cross-validation
 
             modelDF <- as.data.frame(matrix(NA,
-                                          nrow = predN,
+                                          nrow = predI,
                                           ncol = 8,
-                                          dimnames = list(predNamVc, c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif.", "Iter."))))
+                                          dimnames = list(predIamVc, c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif.", "Iter."))))
             for(j in 1:ncol(modelDF))
                 mode(modelDF[, j]) <- ifelse(colnames(modelDF)[j] == "Signif.", "character", "numeric")
 
             rssN <- rs0N
 
-            while(hN < (predN + 1)) {
+            while(hN < (predI + 1)) {
 
                 iteN <- 1
 
@@ -1368,7 +1368,7 @@ roplsF <- function(xMN,
 
                 ## cross-validation
 
-                for(k in 1:crossvalN) {
+                for(k in 1:crossvalI) {
 
                     ckxMN <- xnMN[-cvfOutLs[[k]], , drop = FALSE]
                     ckyMN <- ynMN[-cvfOutLs[[k]], , drop = FALSE]
@@ -1448,7 +1448,7 @@ roplsF <- function(xMN,
                     } else
                         prkVn[k] <- sum((ynMN[cvfOutLs[[k]], , drop = FALSE] - xnMN[cvfOutLs[[k]], , drop = FALSE] %*% ckwVn %*% t(ckcVn))^2, na.rm = TRUE)
 
-                } ## for(k in 1:crossvalN) {
+                } ## for(k in 1:crossvalI) {
 
                 prsN <- sum(prkVn)
 
@@ -1472,7 +1472,7 @@ roplsF <- function(xMN,
 
                 hN <- hN + 1
 
-            } ## for(hN in 1:predN) {
+            } ## for(hN in 1:predI) {
 
             rm(ckxMN)
             rm(ckyMN)
@@ -1495,20 +1495,20 @@ roplsF <- function(xMN,
                 cMN <- cMN[, 1:hN, drop = FALSE]
                 uMN <- uMN[, 1:hN, drop = FALSE]
 
-                predNamVc <- predNamVc[1:hN]
+                predIamVc <- predIamVc[1:hN]
 
-                predN <- hN
+                predI <- hN
 
                 modelDF <- modelDF[1:hN, ]
 
             }
 
-            summaryDF <- modelDF[predN, c("R2X(cum)", "R2Y(cum)", "Q2(cum)")]
+            summaryDF <- modelDF[predI, c("R2X(cum)", "R2Y(cum)", "Q2(cum)")]
 
 
             ## Rotation matrix (W*)
 
-            if(predN == 1) {
+            if(predI == 1) {
 
                 rMN <- wMN
 
@@ -1516,7 +1516,7 @@ roplsF <- function(xMN,
 
                 pwMN <- crossprod(pMN, wMN)
                 rMN <- wMN %*% solve(pwMN)
-                colnames(rMN) <- predNamVc
+                colnames(rMN) <- predIamVc
 
             }
 
@@ -1555,7 +1555,7 @@ roplsF <- function(xMN,
                 yActMN <- yActMCN
 
 
-            summaryDF[, "RMSEE"] <- sqrt(.errorF(yActMN, yPreMN)^2 * nrow(yActMN) / (nrow(yActMN) - (1 + predN))) ## for SIMCA compatibility
+            summaryDF[, "RMSEE"] <- sqrt(.errorF(yActMN, yPreMN)^2 * nrow(yActMN) / (nrow(yActMN) - (1 + predI))) ## for SIMCA compatibility
 
 
             if(!is.null(testVi)) { ## tRaining/tEst partition
@@ -1600,7 +1600,7 @@ roplsF <- function(xMN,
                 yTestMCN <- NULL
 
 
-        } else { ## orthoN > 0
+        } else { ## orthoI > 0
 
 
             ##------------------------------------
@@ -1612,25 +1612,25 @@ roplsF <- function(xMN,
             ## Orthogonal projections to latent structures (O-PLS).
             ## Journal of Chemometrics. 16:119-128.
 
-            orthoNamVc <- paste("o", 1:orthoN, sep = "")
+            orthoIamVc <- paste("o", 1:orthoI, sep = "")
 
             tOrthoMN <- matrix(0,
                             nrow = nrow(xMN),
-                            ncol = orthoN,
-                            dimnames = list(obsNamVc, orthoNamVc))
+                            ncol = orthoI,
+                            dimnames = list(obsNamVc, orthoIamVc))
             wOrthoMN <- pOrthoMN <- matrix(0,
                                      nrow = ncol(xMN),
-                                     ncol = orthoN,
-                                     dimnames = list(xvaNamVc, orthoNamVc))
+                                     ncol = orthoI,
+                                     dimnames = list(xvaNamVc, orthoIamVc))
             cOrthoMN <- matrix(0,
                             nrow = ncol(yMN),
-                            ncol = orthoN,
-                            dimnames = list(yvaNamVc, orthoNamVc))
+                            ncol = orthoI,
+                            dimnames = list(yvaNamVc, orthoIamVc))
 
             modelDF <- as.data.frame(matrix(NA,
-                                          nrow = 3 + orthoN,
+                                          nrow = 3 + orthoI,
                                           ncol = 7,
-                                          dimnames = list(c("h1", "rot", orthoNamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
+                                          dimnames = list(c("h1", "rot", orthoIamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
             for(j in 1:ncol(modelDF))
                 mode(modelDF[, j]) <- ifelse(colnames(modelDF)[j] == "Signif.", "character", "numeric")
 
@@ -1642,7 +1642,7 @@ roplsF <- function(xMN,
 
             breL <- FALSE
 
-            for(noN in 1:(orthoN + 1)) {
+            for(noN in 1:(orthoI + 1)) {
 
                 if(breL)
                     break
@@ -1815,7 +1815,7 @@ roplsF <- function(xMN,
                     else
                         rowI <- 1 + noN
 
-                    if(cvN <= crossvalN) { ## cross-validation
+                    if(cvN <= crossvalI) { ## cross-validation
 
                         if(any(is.na(xcvTesLs[[cvN]]))) {
                             prxVn <- numeric(nrow(xcvTesLs[[cvN]]))
@@ -1838,7 +1838,7 @@ roplsF <- function(xMN,
 
                         xcvTesLs[[cvN]] <- xcvTesLs[[cvN]] - tcrossprod(tOrthoTesVn, pOrthoVn)
 
-                        if(cvN == crossvalN) {
+                        if(cvN == crossvalI) {
                             q2N <- 1 - sum(prkVn) / rs0N
                             if(noN == 1)
                                 modelDF["h1", "Q2(cum)"] <- modelDF["h1", "Q2"] <- q2N
@@ -1848,7 +1848,7 @@ roplsF <- function(xMN,
                             }
                         }
 
-                    } else { ## cvN == crossvalN + 1 (full matrix)
+                    } else { ## cvN == crossvalI + 1 (full matrix)
 
                         if(noN == 1) {
                             if(naxL)
@@ -1871,7 +1871,7 @@ roplsF <- function(xMN,
                         }
 
                         ## cOrthoMN[, noN] <- cOrthoVn
-                        if(noN <= orthoN) {
+                        if(noN <= orthoI) {
                             pOrthoMN[, noN] <- pOrthoVn
                             tOrthoMN[, noN] <- tOrthoVn
                             wOrthoMN[, noN] <- wOrthoVn
@@ -1906,12 +1906,12 @@ roplsF <- function(xMN,
 
                     ## step 11|
 
-                    if(noN < orthoN + 1)
+                    if(noN < orthoI + 1)
                         xcvLs[[cvN]] <- xcvLs[[cvN]] - tcrossprod(tOrthoVn, pOrthoVn)
 
                 } ## for(cvN in 1:length(xcvLs)) {
 
-            } ## for(noN in 1:(orthoN + 1)) {
+            } ## for(noN in 1:(orthoI + 1)) {
 
             rm(xcvLs)
             rm(xcvTesLs)
@@ -1927,23 +1927,23 @@ roplsF <- function(xMN,
                 modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum(tcrossprod(tMN, cMN)^2) / ssyTotN
 
             modelDF["rot", "R2X"] <- modelDF["rot", "R2X(cum)"] - modelDF["h1", "R2X(cum)"]
-            modelDF[2 + 1:orthoN, "R2X(cum)"] <- cumsum(modelDF[2 + 1:orthoN, "R2X"])
-            modelDF["sum", "R2X(cum)"] <- modelDF["rot", "R2X(cum)"] + modelDF[2 + orthoN, "R2X(cum)"]
+            modelDF[2 + 1:orthoI, "R2X(cum)"] <- cumsum(modelDF[2 + 1:orthoI, "R2X"])
+            modelDF["sum", "R2X(cum)"] <- modelDF["rot", "R2X(cum)"] + modelDF[2 + orthoI, "R2X(cum)"]
             modelDF["sum", "Q2(cum)"] <- modelDF["rot", "Q2(cum)"] <- sum(modelDF[, "Q2"], na.rm = TRUE)
 
             if(autNcoL) {
 
-                orthoN <- noN - 3
+                orthoI <- noN - 3
 
-                if(orthoN == 0)
+                if(orthoI == 0)
                     stop("No model was built because the first orthogonal component was already not significant;\nSelect a number of orthogonal components of 1 if you want the algorithm to compute a model despite this.", call. = FALSE)
 
-                pOrthoMN <- pOrthoMN[, 1:orthoN, drop = FALSE]
-                tOrthoMN <- tOrthoMN[, 1:orthoN, drop = FALSE]
-                wOrthoMN <- wOrthoMN[, 1:orthoN, drop = FALSE]
+                pOrthoMN <- pOrthoMN[, 1:orthoI, drop = FALSE]
+                tOrthoMN <- tOrthoMN[, 1:orthoI, drop = FALSE]
+                wOrthoMN <- wOrthoMN[, 1:orthoI, drop = FALSE]
 
-                orthoNamVc <- orthoNamVc[1:orthoN]
-                modelDF <- modelDF[c(1:(orthoN + 2), nrow(modelDF)), ]
+                orthoIamVc <- orthoIamVc[1:orthoI]
+                modelDF <- modelDF[c(1:(orthoI + 2), nrow(modelDF)), ]
 
                 if(naxL)
                     modelDF["rot", "R2X(cum)"] <- sum((tcrossprod(tMN, pMN)[!is.na(xMN)])^2) / ssxTotN
@@ -1954,7 +1954,7 @@ roplsF <- function(xMN,
                 else
                     modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum(tcrossprod(tMN, cMN)^2) / ssyTotN
                 modelDF["rot", "R2X"] <- modelDF["rot", "R2X(cum)"] - modelDF["h1", "R2X(cum)"]
-                modelDF["sum", "R2X(cum)"] <- modelDF["rot", "R2X(cum)"] + modelDF[2 + orthoN, "R2X(cum)"]
+                modelDF["sum", "R2X(cum)"] <- modelDF["rot", "R2X(cum)"] + modelDF[2 + orthoI, "R2X(cum)"]
                 modelDF["sum", "Q2(cum)"] <- modelDF["rot", "Q2(cum)"] <- sum(modelDF[, "Q2"], na.rm = TRUE)
 
             }
@@ -1993,14 +1993,14 @@ roplsF <- function(xMN,
             } else
                 yActMN <- yActMCN
 
-            summaryDF[, "RMSEE"] <- sqrt(.errorF(yActMN, yPreMN)^2 * nrow(yActMN) / (nrow(yActMN) - (1 + predN + orthoN)))
+            summaryDF[, "RMSEE"] <- sqrt(.errorF(yActMN, yPreMN)^2 * nrow(yActMN) / (nrow(yActMN) - (1 + predI + orthoI)))
 
 
             if(!is.null(testVi)) { ## tRaining/tEst partition
 
                 xteMN <- scale(xTesMN, xMeanVn, xSdVn)
 
-                for(noN in 1:orthoN) {
+                for(noN in 1:orthoI) {
                     if(naxL) {
                         xtoMN <- matrix(0, nrow = nrow(xteMN), ncol = 1)
                         for(i in 1:nrow(xtoMN)) {
@@ -2062,7 +2062,7 @@ roplsF <- function(xMN,
         ## Chong I.-G. and Jun C.-H. (2005)
         ## Wold S., Sjostrom M. and Eriksson L. (2001)
 
-        if(orthoN == 0 && (nrow(cMN) == 1)) { ## PLS with single quantitative yMCN
+        if(orthoI == 0 && (nrow(cMN) == 1)) { ## PLS with single quantitative yMCN
             ## VIP computation only implemented for single-response models
 
             ssqVn <- c(cMN)^2 * colSums(tMN^2)
@@ -2072,13 +2072,13 @@ roplsF <- function(xMN,
                                         ssqVn / wn2Vn,
                                         "*")) * nrow(wMN) / sum(ssqVn))
 
-        } else if(orthoN > 0) ## OPLS and OPLS-DA (single quant. or qual. yMCN)
+        } else if(orthoI > 0) ## OPLS and OPLS-DA (single quant. or qual. yMCN)
             vipVn <- sqrt(ncol(xMN)) * abs(wMN[, 1])
 
     }
 
-    summaryDF[, "pre"] <- predN
-    summaryDF[, "ort"] <- orthoN
+    summaryDF[, "pre"] <- predI
+    summaryDF[, "ort"] <- orthoI
 
 
     ##------------------------------------
@@ -2086,7 +2086,7 @@ roplsF <- function(xMN,
     ##------------------------------------
 
 
-    retLs <- list(predN = predN,
+    retLs <- list(predI = predI,
                   xMeanVn = xMeanVn,
                   xSdVn = xSdVn,
                   xZeroVarVi = xZeroVarVi,
@@ -2106,7 +2106,7 @@ roplsF <- function(xMN,
                   vipVn = vipVn,
                   yPreMN = yPreMN,
                   yTesMN = yTesMN,
-                  orthoN = orthoN,
+                  orthoI = orthoI,
                   tOrthoMN = tOrthoMN,
                   pOrthoMN = pOrthoMN,
                   wOrthoMN = wOrthoMN,
@@ -2352,8 +2352,8 @@ roplsF <- function(xMN,
                    parCexN,
                    parEllipsesL,
                    parTitleL,
-                   parTopLoadN,
-                   parCompVn,
+                   parTopLoadI,
+                   parCompVi,
                    pexVin,
                    plotVc,
                    tesColVc,
@@ -2375,16 +2375,16 @@ roplsF <- function(xMN,
             maiC <- "Variable correlations"
 
             xLabC <- paste("with t",
-                           parCompVn[1],
+                           parCompVi[1],
                            sep = "")
 
             yLabC <- paste("with t",
-                           parCompVn[2],
+                           parCompVi[2],
                            sep = "")
 
-            if(ropLs[["orthoN"]] > 0)
+            if(ropLs[["orthoI"]] > 0)
                 yLabC <- paste("with tOrtho",
-                               parCompVn[2] - 1,
+                               parCompVi[2] - 1,
                                sep = "")
 
             yLimVn <- xLimVn <- c(-1, 1)
@@ -2438,26 +2438,26 @@ roplsF <- function(xMN,
             maiC <- "Loadings"
 
             xLabC <- paste("p",
-                           parCompVn[1],
+                           parCompVi[1],
                            " (",
-                           round(ropLs[["modelDF"]][parCompVn[1], "R2X"] * 100),
+                           round(ropLs[["modelDF"]][parCompVi[1], "R2X"] * 100),
                            "%)",
                            sep = "")
 
             yLabC <- paste("p",
-                           parCompVn[2],
+                           parCompVi[2],
                            " (",
-                           round(ropLs[["modelDF"]][parCompVn[2], "R2X"] * 100),
+                           round(ropLs[["modelDF"]][parCompVi[2], "R2X"] * 100),
                            "%)",
                            sep = "")
 
             ploMN <- ropLs[["pCompMN"]]
 
-            if(!is.null(yMCN) && ropLs[["orthoN"]] > 0) {
+            if(!is.null(yMCN) && ropLs[["orthoI"]] > 0) {
                 yLabC <- paste("pOrtho",
-                               parCompVn[2] - 1,
+                               parCompVi[2] - 1,
                                " (",
-                               round(ropLs[["modelDF"]][parCompVn[2] - 1, "R2X"] * 100),
+                               round(ropLs[["modelDF"]][parCompVi[2] - 1, "R2X"] * 100),
                                "%)",
                                sep = "")
             }
@@ -2467,23 +2467,23 @@ roplsF <- function(xMN,
             maiC <- paste0("Scores (", ropLs[["typC"]], ")")
 
             xLabC <- paste("t",
-                           parCompVn[1],
+                           parCompVi[1],
                            " (",
-                           round(ropLs[["modelDF"]][parCompVn[1], "R2X"] * 100),
+                           round(ropLs[["modelDF"]][parCompVi[1], "R2X"] * 100),
                            "%)",
                            sep = "")
 
             yLabC <- paste("t",
-                           parCompVn[2],
+                           parCompVi[2],
                            " (",
-                           round(ropLs[["modelDF"]][parCompVn[2], "R2X"] * 100),
+                           round(ropLs[["modelDF"]][parCompVi[2], "R2X"] * 100),
                            "%)",
                            sep = "")
 
             ploMN <- ropLs[["tCompMN"]]
 
-            if(!is.null(yMCN) && ropLs[["orthoN"]] > 0) {
-                yLabC <- paste("to", parCompVn[2] - 1, sep = "")
+            if(!is.null(yMCN) && ropLs[["orthoI"]] > 0) {
+                yLabC <- paste("to", parCompVi[2] - 1, sep = "")
             }
 
             xLimVn <- c(-1, 1) * max(sqrt(var(ploMN[, 1]) * hotFisN), max(abs(ploMN[, 1])))
@@ -2494,21 +2494,21 @@ roplsF <- function(xMN,
         } else if(ploC == "xy-score") {
 
             maiC <- "XY-Scores"
-            xLabC <- paste("t", parCompVn[1], sep = "")
-            yLabC <- paste("u/c", parCompVn[1], sep = "")
+            xLabC <- paste("t", parCompVi[1], sep = "")
+            yLabC <- paste("u/c", parCompVi[1], sep = "")
 
-            ploMN <- cbind(ropLs[["tMN"]][, parCompVn[1]], ropLs[["uMN"]][, parCompVn[1]] / ropLs[["cMN"]][parCompVn[1]])
+            ploMN <- cbind(ropLs[["tMN"]][, parCompVi[1]], ropLs[["uMN"]][, parCompVi[1]] / ropLs[["cMN"]][parCompVi[1]])
 
             ploColVc <- obsColVc
 
         } else if(ploC == "xy-weight") {
 
             maiC <- "Weights"
-            xLabC <- paste("w*c", parCompVn[1], sep = "")
-            yLabC <- paste("w*c", parCompVn[2], sep = "")
+            xLabC <- paste("w*c", parCompVi[1], sep = "")
+            yLabC <- paste("w*c", parCompVi[2], sep = "")
 
-            ploMN <- rbind(ropLs[["rMN"]][, parCompVn],
-                           ropLs[["cMN"]][, parCompVn])
+            ploMN <- rbind(ropLs[["rMN"]][, parCompVi],
+                           ropLs[["cMN"]][, parCompVi])
 
             pchVn <- rep(17, times = nrow(ploMN))
             ploColVc <- rep("black", times = nrow(ploMN))
@@ -2609,7 +2609,7 @@ roplsF <- function(xMN,
                  cex = parCexN,
                  col = "red",
                  labels = pexLabVc,
-                 pos = rep(c(4, 2, 3, 1), each = parTopLoadN))
+                 pos = rep(c(4, 2, 3, 1), each = parTopLoadI))
 
         } else if(ploC == "x-score") {
 
@@ -2669,15 +2669,15 @@ roplsF <- function(xMN,
                       line = 3,
                       side = 1)
 
-                mtext(paste("pre", ropLs[["predN"]], sep = "\n"),
+                mtext(paste("pre", ropLs[["predI"]], sep = "\n"),
                       at = -pu1N * ifelse(layL, 0.92, 0.7),
                       cex = cexRqcN,
                       font = 1,
                       line = 3,
                       side = 1)
 
-                if(ropLs[["orthoN"]] > 0)
-                    mtext(paste("ort", ropLs[["orthoN"]], sep = "\n"),
+                if(ropLs[["orthoI"]] > 0)
+                    mtext(paste("ort", ropLs[["orthoI"]], sep = "\n"),
                           at = -pu1N * ifelse(layL, 1.1, 0.9),
                           cex = cexRqcN,
                           font = 1,
@@ -2798,7 +2798,7 @@ roplsF <- function(xMN,
 
         } else {
 
-            if(ropLs[["orthoN"]] == 0)
+            if(ropLs[["orthoI"]] == 0)
                 modBarDF <- ropLs[["modelDF"]]
             else
                 modBarDF <- ropLs[["modelDF"]][!(rownames(ropLs[["modelDF"]]) %in% c("rot", "sum")), ]

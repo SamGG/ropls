@@ -36,8 +36,8 @@ computational metabolomics (built upon the Galaxy environment).
   \tabular{ll}{
     Package: \tab ropls\cr
     Type: \tab Package\cr
-    Version: \tab 0.99.7\cr
-    Date: \tab 2015-07-14\cr
+    Version: \tab 1.0.1\cr
+    Date: \tab 2015-07-17\cr
     License: \tab CeCILL\cr
     LazyLoad: \tab yes\cr
   }
@@ -97,8 +97,8 @@ sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1))
 
 #### OPLS-DA
 
-sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1), predN
-= 1, orthoN = NA)
+sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1), predI
+= 1, orthoI = NA)
 
 detach(sacurine)
 

@@ -13,28 +13,28 @@
 \usage{
 roplsF(xMN,
 yMCN = NULL,
-predN = NA,
-orthoN = 0,
+predI = NA,
+orthoI = 0,
 plotVc = c("correlation", "none", "outlier", "overview",
 "permutation", "predict-train", "predict-test", "summary", "x-loading",
 "x-score", "x-variance", "xy-score", "xy-weight")[8],
 algoC = c("default", "nipals", "svd")[1],
-crossvalN = 7,
+crossvalI = 7,
 fileFig.pdfC = NULL,
 fileInfo.txtC = NULL,
 log10L = FALSE,
-permN = 0,
+permI = 0,
 scaleC = c("center", "pareto", "standard")[3],
 testVi = NULL,
 verboseC = c("all", "none", "overview", "summary")[1],
 parAsColVcn = NA,
 parCexN = 1,
-parCompVn = c(1, 2),
+parCompVi = c(1, 2),
 parDevNewL = TRUE,
 parEllipsesL = NA,
 parLabVc = NA,
 parTitleL = TRUE,
-parTopLoadN = 3)
+parTopLoadI = 3)
 }
 
 \arguments{
@@ -48,9 +48,9 @@ parTopLoadN = 3)
     (for classification), it will be transformed into a dummy matrix
     within the roplsF function; NAs are allowed (except for the 'classification' case)
   }
-  \item{predN}{
+  \item{predI}{
     Integer: number of components (predictive componenents in case of
-    PLS and OPLS) to extract; for OPLS, predN is (automatically) set to
+    PLS and OPLS) to extract; for OPLS, predI is (automatically) set to
     1; if set to NA [default], autofit is performed: components are
     extracted until (i) PCA case: the variance is less than the mean
     variance of all components (note that this rule requires all
@@ -58,7 +58,7 @@ parTopLoadN = 3)
     datasets) or (ii) PLS case: either R2Y of the component is < 0.01 (N4
     rule) or Q2Y is < 0 (for more than 100 observations) or 0.05 otherwise (R1 rule)
   }
-  \item{orthoN}{
+  \item{orthoI}{
     Integer: number of orthogonal components (for OPLS only); when set
     to 0 [default], PLS will be performed; otherwise OPLS will be
     peformed; when set to NA, OPLS is performed and the number of
@@ -85,10 +85,9 @@ parTopLoadN = 3)
     Default algorithm is 'svd' for PCA (in case of no missing values in
     xMN; 'nipals' otherwise) and 'nipals' for PLS and OPLS; when asking to use 'svd' for PCA on an xMN matrix containing missing values, NAs are set to half the minimum of non-missing values and a warning is generated
   }
-  \item{crossvalN}{
+  \item{crossvalI}{
     Integer: number of cross-validation segments (default is 7); The
-    number of samples (rows of xMN) must be at least >= crossvalN, and >= 2 *
-    crossvalN for CV-ANOVA computation
+    number of samples (rows of xMN) must be at least >= crossvalI
   }
   \item{fileFig.pdfC}{
     Figure filename (e.g. in case of batch mode) ending with '.pdf'; for multiple graphics,
@@ -102,7 +101,7 @@ parTopLoadN = 3)
     Should the xMN matrix be log10 transformed? Zeros are set to 1 prior
     to transformation
   }
-  \item{permN}{
+  \item{permI}{
     Integer: number of random permutations of response labels to
     estimate R2Y and Q2Y confidence [default: 0]
   }
@@ -129,7 +128,7 @@ parTopLoadN = 3)
   \item{parCexN}{
     Numeric: amount by which plotting text should be magnified relative to the default
   }
-  \item{parCompVn}{
+  \item{parCompVi}{
     Integer vector of length 2: indices of the two components to be displayed
     on the score plot (first two components by default)
   }
@@ -153,7 +152,7 @@ parTopLoadN = 3)
     TRUE); It may be convenient to set this argument to FALSE when
     the user wishes to add specific titles a posteriori
   }
-  \item{parTopLoadN}{
+  \item{parTopLoadI}{
     Integer: number of variables most contributing to loadings (colored
     in red on the plot) for which loading values and correlation
     with the components will be printed to facilitate interpretation
@@ -165,7 +164,7 @@ parTopLoadN = 3)
   \item{typC}{
     Character: model type (PCA, PLS, PLS-DA, OPLS, or OPLS-DA)
   }
-  \item{predN}{
+  \item{predI}{
     Integer: number of (predictive) components
   }
   \item{xMeanVn}{
@@ -178,15 +177,15 @@ parTopLoadN = 3)
     Numerical vector: indices of variables with variance < 2.22e-16
   }
   \item{tMN}{
-    Numerical matrix of xMN scores (dimensions: nrow(xMN) x predN)
+    Numerical matrix of xMN scores (dimensions: nrow(xMN) x predI)
     X = TP' + E; Y = TC' + F
   }
   \item{pMN}{
-    Numerical matrix of xMN loadings (dimensions: ncol(xMN) x predN)
+    Numerical matrix of xMN loadings (dimensions: ncol(xMN) x predI)
     X = TP' + E
   }
   \item{varVn}{
-    PCA: Numerical vector of variances of length: predN
+    PCA: Numerical vector of variances of length: predI
   }
   \item{modelDF}{
     Data frame with the model overview (number of components, R2X,
@@ -210,7 +209,7 @@ parTopLoadN = 3)
   }
   \item{cMN}{
     (O)PLS: Numerical matrix of yMCN loadings; dimensions: ncol(yMCN or
-    corresponding dummy matrix) x predN; Y = TC' + F
+    corresponding dummy matrix) x predI; Y = TC' + F
   }
   \item{uMN}{
     (O)PLS: Numerical matrix of yMCN scores (same dimensions as tMN); Y = UC' + G
@@ -236,14 +235,14 @@ parTopLoadN = 3)
     (O)PLS: In case of training/test partition indicated via the testVi
   argument, predicted response based on the test subset
   }
-  \item{orthoN}{
+  \item{orthoI}{
     OPLS: Integer: number of orthogonal components
   }
   \item{tOrthoMN}{
-    OPLS: Numerical matrix of orthogonal scores (dimensions: nrow(xMN) x orthoN)
+    OPLS: Numerical matrix of orthogonal scores (dimensions: nrow(xMN) x orthoI)
   }
   \item{pOrthoMN}{
-    OPLS: Numerical matrix of orthogonal loadings (dimensions: ncol(xMN) x orthoN)
+    OPLS: Numerical matrix of orthogonal loadings (dimensions: ncol(xMN) x orthoI)
   }
   \item{wOrthoMN}{
     OPLS: Numerical matrix of orthogonal weights (same dimensions as pOrthoMN)
@@ -251,7 +250,7 @@ parTopLoadN = 3)
   \item{permMN}{
     (O)PLS: Numerical matrix of the R2Y and Q2Y values from the actual
     model and the models after random permutation of response values (if
-    permN > 0)
+    permI > 0)
   }
   \item{tCompMN}{
     Score plot matrix
@@ -319,8 +318,8 @@ sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1))
 
 #### OPLS-DA
 
-sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1), predN
-= 1, orthoN = NA)
+sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1), predI
+= 1, orthoI = NA)
 
 detach(sacurine)
 

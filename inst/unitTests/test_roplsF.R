@@ -99,7 +99,7 @@ test_sacurine_OPLSDA <- function() {
     sacOplLs <- roplsF(sacurine[["dataMatrix"]],
                        matrix(sacurine[["sampleMetadata"]][, "genderVc"],
                               ncol = 1),
-                       orthoN = 1,
+                       orthoI = 1,
                        plotVc = "none", verboseC = "none")
     checkEqualsNumeric(sacOplLs[["tOrthoMN"]][1, 1],
                        4.980604,
@@ -110,9 +110,9 @@ test_sacurine_OPLSDA <- function() {
     sacOplPerLs <- roplsF(sacurine[["dataMatrix"]],
                           matrix(sacurine[["sampleMetadata"]][, "genderVc"],
                                  ncol = 1),
-                          predN = 1,
-                          orthoN = 1,
-                          permN = 10,
+                          predI = 1,
+                          orthoI = 1,
+                          permI = 10,
                           plotVc = "none", verboseC = "none")
     checkEqualsNumeric(sacOplPerLs[["permMN"]][1, 1],
                        0.1845708,
