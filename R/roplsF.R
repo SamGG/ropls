@@ -61,9 +61,54 @@ roplsF <- function(xMN,
         n2cVc <- names(c2nVn)
         names(n2cVc) <- c2nVn
 
-        c2nLs <- list(c2nVn = c2nVn,
-                      n2cVc = n2cVc)
-    }
+        ## c2nLs <- list(c2nVn = c2nVn,
+        ##               n2cVc = n2cVc)
+
+        .char2numF <- function(inpMCN,
+                               ## c2nLs,
+                               c2nL = TRUE) {
+
+            c2nLs <- list(c2nVn = c2nVn,
+                          n2cVc = n2cVc)
+
+            ## Discriminant Q2 (Westerhuis et al, 2008)
+            .DQ2F <- function(inpMN) {
+                ## ,
+                ##               c2nLs) {
+
+                ## epsN <- .Machine[["double.eps"]] ## [1] 2.22e-16
+
+                outMN <- matrix(as.numeric(sapply(drop(inpMN),
+                                                  function(inpN)
+                                                  ifelse(is.na(inpN),
+                                                         return(NA),
+                                                         ifelse(inpN < head(c2nLs[["c2nVn"]], 1) - 0.5,
+                                                                return(head(c2nLs[["c2nVn"]], 1) - 0.5 + epsN),
+                                                                ifelse(inpN > tail(c2nLs[["c2nVn"]], 1) + 0.5,
+                                                                       return(tail(c2nLs[["c2nVn"]], 1) + 0.5 - epsN),
+                                                                       inpN))))),
+                                ncol = 1)
+                dimnames(outMN) <- dimnames(inpMN)
+                return(outMN)
+
+            }
+
+
+            if(c2nL)
+                outMCN <- matrix(as.vector(c2nLs[["c2nVn"]][drop(inpMCN)]), ncol = 1)
+            else
+                outMCN <- matrix(as.vector(c2nLs[["n2cVc"]][as.character(round(drop(.DQ2F(inpMCN
+                                                                                          ## ,
+                                                                                          ## c2nLs = c2nLs
+                                                                                          ))))]), ncol = 1)
+
+            dimnames(outMCN) <- dimnames(inpMCN)
+            return(outMCN)
+
+        }
+
+    } else ## end of if(!is.null(yMCN)) {
+        .char2numF <- NULL
 
 
     ## Log file (in case of integration into Galaxy)
@@ -159,10 +204,10 @@ roplsF <- function(xMN,
     ##   Computations
     ##------------------------------------
 
-    cvaVc <- paste("cv", 1:crossvalI, sep = "")
-    cvaLs <- vector(length = length(cvaVc), mode = "list")
-    names(cvaLs) <- cvaVc
-    cvaOutLs <- split(1:nrow(xMN), rep(1:crossvalI, length = nrow(xMN)))
+    ## cvaVc <- paste("cv", 1:crossvalI, sep = "")
+    ## cvaLs <- vector(length = length(cvaVc), mode = "list")
+    ## names(cvaLs) <- cvaVc
+    ## cvaOutLs <- split(1:nrow(xMN), rep(1:crossvalI, length = nrow(xMN)))
 
     ## rownames and colnames
 
@@ -217,9 +262,9 @@ roplsF <- function(xMN,
 
     if(!is.null(testVi)) {
         xVarIndLs[[1]] <- setdiff(1:nrow(xMN), testVi)
-    } else if(!is.null(yMCN) && ncol(yMCN) == 1 && nrow(xMN) >= 2 * crossvalI)
-        for(cvkN in 1:crossvalI)
-            xVarIndLs <- c(xVarIndLs, list(setdiff(1:nrow(xMN), cvaOutLs[[cvkN]])))
+    } ## else if(!is.null(yMCN) && ncol(yMCN) == 1 && nrow(xMN) >= 2 * crossvalI)
+      ##   for(cvkN in 1:crossvalI)
+      ##       xVarIndLs <- c(xVarIndLs, list(setdiff(1:nrow(xMN), cvaOutLs[[cvkN]])))
 
     xVarVarLs <- lapply(xVarIndLs,
                         function(xVarVi) {
@@ -256,8 +301,13 @@ roplsF <- function(xMN,
                     algoC = algoC,
                     crossvalI = crossvalI,
                     testVi = testVi,
-                    c2nLs = c2nLs,
-                    xZeroVarVi = xZeroVarVi)
+                    .char2numF = .char2numF)
+                    ## c2nLs = c2nLs)
+                    ## ,
+                    ## xZeroVarVi = xZeroVarVi)
+
+    ## ropLs[[".char2numF"]] <- .char2numF
+    ropLs[["xZeroVarVi"]] <- xZeroVarVi
 
     tCompMN <- NULL
     pCompMN <- NULL
@@ -284,8 +334,10 @@ roplsF <- function(xMN,
     ##                     algoC = algoC,
     ##                     crossvalI = crossvalI,
     ##                     testVi = ropLs[["testVi"]],
-    ##                     c2nLs = c2nLs,
-    ##                     xZeroVarVi = ropLs[["xZeroVarVi"]])
+    ##                     .char2numF = .char2numF)
+    ##                     c2nLs = c2nLs)
+    ## ,
+    ## ##                     xZeroVarVi = ropLs[["xZeroVarVi"]])
 
     ##     ropLs[["summaryDF"]][, "RMSER"] <- rndLs[["summaryDF"]][, "RMSEP"]
 
@@ -336,12 +388,17 @@ roplsF <- function(xMN,
                             algoC = algoC,
                             crossvalI = crossvalI,
                             testVi = ropLs[["testVi"]],
-                            c2nLs = c2nLs,
-                            xZeroVarVi = ropLs[["xZeroVarVi"]])
+                            .char2numF = .char2numF)
+                            ## c2nLs = c2nLs)
+            ## ,
+            ##                 xZeroVarVi = ropLs[["xZeroVarVi"]])
 
             permMN[1 + k, ] <- as.matrix(perLs[["summaryDF"]])
 
-            perSimVn[1 + k] <- .similarityF(yMCN, yPerMCN, c2nLs = c2nLs, charL = mode(yMCN) == "character")
+            perSimVn[1 + k] <- .similarityF(yMCN, yPerMCN,
+                                            ## c2nLs = c2nLs,
+                                            .char2numF = .char2numF,
+                                            charL = mode(yMCN) == "character")
 
         }
 
@@ -371,8 +428,10 @@ roplsF <- function(xMN,
 
     ropLs <- c(list(typC = ropTypC),
                ropLs,
-               list(permMN = permMN,
-                    cvaLs = cvaLs))
+               list(permMN = permMN
+                    ## ,
+                    ## cvaLs = cvaLs
+                    ))
 
 
     ##------------------------------------
@@ -738,7 +797,8 @@ roplsF <- function(xMN,
         for(ploC in plotVc)
             .plotF(ploC,
                    ropLs = ropLs,
-                   c2nLs = c2nLs,
+                   ## .char2numF = .char2numF,
+                   ## c2nLs = c2nLs,
                    cxtCompMN = cxtCompMN,
                    cytCompMN = cytCompMN,
                    obsColVc = obsColVc,
@@ -776,8 +836,9 @@ roplsF <- function(xMN,
     if("yPreMN" %in% names(ropLs)) {
 
         if(mode(yMCN) == "character") {
-            ropLs[["yPredMCN"]] <- .char2numF(ropLs[["yPreMN"]], c2nLs = c2nLs,
-                                   c2nL = FALSE)
+            ropLs[["yPredMCN"]] <- ropLs[[".char2numF"]](ropLs[["yPreMN"]],
+                                              ## c2nLs = c2nLs,
+                                              c2nL = FALSE)
         } else
             ropLs[["yPredMCN"]] <- ropLs[["yPreMN"]]
 
@@ -788,7 +849,8 @@ roplsF <- function(xMN,
     if("yTesMN" %in% names(ropLs)) {
 
         if(mode(yMCN) == "character") {
-            ropLs[["yTestMCN"]] <- .char2numF(ropLs[["yTesMN"]], c2nLs = c2nLs,
+            ropLs[["yTestMCN"]] <- ropLs[[".char2numF"]](ropLs[["yTesMN"]],
+                                              ## c2nLs = c2nLs,
                                               c2nL = FALSE)
         } else
             ropLs[["yTestMCN"]] <- ropLs[["yTesMN"]]
@@ -818,19 +880,19 @@ roplsF <- function(xMN,
 } ## end of roplsF
 
 
-.char2numF <- function(inpMCN,
-                       c2nLs,
-                       c2nL = TRUE) {
+## .char2numF <- function(inpMCN,
+##                        c2nLs,
+##                        c2nL = TRUE) {
 
-    if(c2nL)
-        outMCN <- matrix(as.vector(c2nLs[["c2nVn"]][drop(inpMCN)]), ncol = 1)
-    else
-        outMCN <- matrix(as.vector(c2nLs[["n2cVc"]][as.character(round(drop(.DQ2F(inpMCN, c2nLs = c2nLs))))]), ncol = 1)
+##     if(c2nL)
+##         outMCN <- matrix(as.vector(c2nLs[["c2nVn"]][drop(inpMCN)]), ncol = 1)
+##     else
+##         outMCN <- matrix(as.vector(c2nLs[["n2cVc"]][as.character(round(drop(.DQ2F(inpMCN, c2nLs = c2nLs))))]), ncol = 1)
 
-    dimnames(outMCN) <- dimnames(inpMCN)
-    return(outMCN)
+##     dimnames(outMCN) <- dimnames(inpMCN)
+##     return(outMCN)
 
-}
+## }
 
 
 ## Transforms a character or numeric vector into colors
@@ -913,8 +975,10 @@ roplsF <- function(xMN,
                    algoC,
                    crossvalI,
                    testVi,
-                   c2nLs,
-                   xZeroVarVi) {
+                   .char2numF = .char2numF){
+                   ## c2nLs){
+                   ## ,
+                   ## xZeroVarVi) {
 
     epsN <- .Machine[["double.eps"]] ## [1] 2.22e-16
 
@@ -965,7 +1029,9 @@ roplsF <- function(xMN,
     if(!is.null(yMCN)) {
 
         if(mode(yMCN) == "character")
-            yMN <- .char2numF(yMCN, c2nLs = c2nLs)
+            yMN <- .char2numF(yMCN)
+                              ## ,
+                              ## c2nLs = c2nLs)
 
         ## training and a test partition
 
@@ -1487,7 +1553,7 @@ roplsF <- function(xMN,
                 hN <- hN - 1
 
                 if(hN == 0)
-                    stop("No model was built because the first predictive component was already not significant;\nSelect a number of predictive components of 2 if you want the algorithm to compute a model despite this.", call. = FALSE)
+                    stop("No model was built because the first predictive component was already not significant", call. = FALSE)
 
                 wMN <- wMN[, 1:hN, drop = FALSE]
                 tMN <- tMN[, 1:hN, drop = FALSE]
@@ -1550,7 +1616,8 @@ roplsF <- function(xMN,
                 yActMCN <- yMCN
 
             if(mode(yMCN) == "character") {
-                yActMN <- .char2numF(yActMCN, c2nLs = c2nLs)
+                yActMN <- .char2numF(yActMCN)
+                                     ## , c2nLs = c2nLs)
             } else
                 yActMN <- yActMCN
 
@@ -1584,13 +1651,17 @@ roplsF <- function(xMN,
                 attr(yTesMN, "scaled:scale") <- NULL
 
                 if(mode(yMCN) == "character") {
-                    yTestMCN <- .char2numF(yTesMN, c2nLs = c2nLs, c2nL = FALSE)
+                    yTestMCN <- .char2numF(yTesMN,
+                                           ## c2nLs = c2nLs,
+                                           c2nL = FALSE)
                 } else
                     yTestMCN <- yTesMN
 
                 yTesActMCN <- yMCN[testVi, , drop = FALSE] ## actual values
                 if(mode(yMCN) == "character") {
-                    yTesActMN <- .char2numF(yTesActMCN, c2nLs = c2nLs)
+                    yTesActMN <- .char2numF(yTesActMCN)
+                                            ## ,
+                                            ## c2nLs = c2nLs)
                 } else
                     yTesActMN <- yTesActMCN
 
@@ -1989,7 +2060,8 @@ roplsF <- function(xMN,
                 yActMCN <- yMCN
 
             if(mode(yMCN) == "character") {
-                yActMN <- .char2numF(yActMCN, c2nLs = c2nLs)
+                yActMN <- .char2numF(yActMCN)
+                                     ## , c2nLs = c2nLs)
             } else
                 yActMN <- yActMCN
 
@@ -2036,14 +2108,16 @@ roplsF <- function(xMN,
 
                 if(mode(yMCN) == "character") {
                     yTestMCN <- .char2numF(yTesMN,
-                                           c2nLs = c2nLs, c2nL = FALSE)
+                                           ## c2nLs = c2nLs,
+                                           c2nL = FALSE)
                 } else
                     yTestMCN <- yTesMN
 
                 yTesActMCN <- yMCN[testVi, , drop = FALSE] ## actual values
                 if(mode(yMCN) == "character") {
-                    yTesActMN <- .char2numF(yTesActMCN,
-                                            c2nLs = c2nLs)
+                    yTesActMN <- .char2numF(yTesActMCN)
+                                            ## ,
+                                            ## c2nLs = c2nLs)
                 } else
                     yTesActMN <- yTesActMCN
 
@@ -2089,7 +2163,7 @@ roplsF <- function(xMN,
     retLs <- list(predI = predI,
                   xMeanVn = xMeanVn,
                   xSdVn = xSdVn,
-                  xZeroVarVi = xZeroVarVi,
+                  ## xZeroVarVi = xZeroVarVi,
                   testVi = testVi,
                   tMN = tMN,
                   pMN = pMN,
@@ -2111,32 +2185,33 @@ roplsF <- function(xMN,
                   pOrthoMN = pOrthoMN,
                   wOrthoMN = wOrthoMN,
                   xModelMN = xMN,
-                  yModelMN = yMN)
+                  yModelMN = yMN,
+                  .char2numF = .char2numF)
 
 
 } ## .coreF
 
 
-## Discriminant Q2 (Westerhuis et al, 2008)
-.DQ2F <- function(inpMN,
-                  c2nLs) {
+## ## Discriminant Q2 (Westerhuis et al, 2008)
+## .DQ2F <- function(inpMN,
+##                   c2nLs) {
 
-    epsN <- .Machine[["double.eps"]] ## [1] 2.22e-16
+##     epsN <- .Machine[["double.eps"]] ## [1] 2.22e-16
 
-    outMN <- matrix(as.numeric(sapply(drop(inpMN),
-                                      function(inpN)
-                                      ifelse(is.na(inpN),
-                                             return(NA),
-                                             ifelse(inpN < head(c2nLs[["c2nVn"]], 1) - 0.5,
-                                                    return(head(c2nLs[["c2nVn"]], 1) - 0.5 + epsN),
-                                                    ifelse(inpN > tail(c2nLs[["c2nVn"]], 1) + 0.5,
-                                                           return(tail(c2nLs[["c2nVn"]], 1) + 0.5 - epsN),
-                                                           inpN))))),
-                    ncol = 1)
-    dimnames(outMN) <- dimnames(inpMN)
-    return(outMN)
+##     outMN <- matrix(as.numeric(sapply(drop(inpMN),
+##                                       function(inpN)
+##                                       ifelse(is.na(inpN),
+##                                              return(NA),
+##                                              ifelse(inpN < head(c2nLs[["c2nVn"]], 1) - 0.5,
+##                                                     return(head(c2nLs[["c2nVn"]], 1) - 0.5 + epsN),
+##                                                     ifelse(inpN > tail(c2nLs[["c2nVn"]], 1) + 0.5,
+##                                                            return(tail(c2nLs[["c2nVn"]], 1) + 0.5 - epsN),
+##                                                            inpN))))),
+##                     ncol = 1)
+##     dimnames(outMN) <- dimnames(inpMN)
+##     return(outMN)
 
-}
+## }
 
 
 ## Draws Mahalanobis ellipse
@@ -2342,7 +2417,8 @@ roplsF <- function(xMN,
 
 .plotF <- function(ploC,
                    ropLs,
-                   c2nLs,
+                   ## .char2numF,
+                   ## c2nLs,
                    cxtCompMN,
                    cytCompMN,
                    obsColVc,
@@ -2426,7 +2502,8 @@ roplsF <- function(xMN,
             }
 
             if(mode(yMCN) == "character") {
-                yaMN <- .char2numF(yaMCN, c2nLs = c2nLs)
+                yaMN <- ropLs[[".char2numF"]](yaMCN)
+                                   ## , c2nLs = c2nLs)
             } else
                 yaMN <- yaMCN
 
@@ -2907,12 +2984,17 @@ roplsF <- function(xMN,
 } ## .plotF
 
 
-.similarityF <- function(x, y, c2nLs, charL = FALSE) {
+.similarityF <- function(x, y,
+                         .char2numF,
+                         ## c2nLs,
+                         charL = FALSE) {
 
     if(charL) {
 
-        x <- .char2numF(x, c2nLs = c2nLs)
-        y <- .char2numF(y, c2nLs = c2nLs)
+        x <- .char2numF(x)
+        y <- .char2numF(y)
+        ## x <- .char2numF(x, c2nLs = c2nLs)
+        ## y <- .char2numF(y, c2nLs = c2nLs)
 
     }
 

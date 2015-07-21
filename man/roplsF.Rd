@@ -173,8 +173,8 @@ parTopLoadI = 3)
   \item{xSdVn}{
     Numerical vector: variable standard deviations of the xMN matrix
   }
-  \item{xZeroVarVi}{
-    Numerical vector: indices of variables with variance < 2.22e-16
+  \item{testVi}{
+    Integer vector: indices of observations in the test data set
   }
   \item{tMN}{
     Numerical matrix of xMN scores (dimensions: nrow(xMN) x predI)
@@ -227,14 +227,6 @@ parTopLoadI = 3)
     (O)PLS: Numerical vector of Variable Importance in Projection
     (computed with all components)
   }
-  \item{yPredMCN}{
-    (O)PLS: Predicted reponse based on the reference
-    subset (which is the whole xMN matrix in case of no partition: testVi = NA)
-  }
-  \item{yTestMCN}{
-    (O)PLS: In case of training/test partition indicated via the testVi
-  argument, predicted response based on the test subset
-  }
   \item{orthoI}{
     OPLS: Integer: number of orthogonal components
   }
@@ -246,6 +238,13 @@ parTopLoadI = 3)
   }
   \item{wOrthoMN}{
     OPLS: Numerical matrix of orthogonal weights (same dimensions as pOrthoMN)
+  }
+  \item{.char2numF}{
+    (O)PLS-DA: Function for character to numeric convertion of the
+    response
+  }
+  \item{xZeroVarVi}{
+    Numerical vector: indices of variables with variance < 2.22e-16
   }
   \item{permMN}{
     (O)PLS: Numerical matrix of the R2Y and Q2Y values from the actual
@@ -261,7 +260,15 @@ parTopLoadI = 3)
   \item{topLoadMN}{
     Matrix (numeric; dimensions = topLoadN x 4): For the 'topLoadN'
     variables most contributing to loadings, gives the loadings values
-  and the correlation with each of the 2 'parCompN' displayed component.
+    and the correlation with each of the 2 'parCompN' displayed component.
+  }
+  \item{yPredMCN}{
+    (O)PLS: Predicted reponse based on the reference
+    subset (which is the whole xMN matrix in case of no partition: testVi = NA)
+  }
+  \item{yTestMCN}{
+    (O)PLS: In case of training/test partition indicated via the testVi
+  argument, predicted response based on the test subset
   }
 }
 
