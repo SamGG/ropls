@@ -36,8 +36,8 @@ computational metabolomics (built upon the Galaxy environment).
   \tabular{ll}{
     Package: \tab ropls\cr
     Type: \tab Package\cr
-    Version: \tab 1.0.2\cr
-    Date: \tab 2015-07-21\cr
+    Version: \tab 1.1.1\cr
+    Date: \tab 2015-07-25\cr
     License: \tab CeCILL\cr
     LazyLoad: \tab yes\cr
   }
@@ -49,9 +49,10 @@ computational metabolomics (built upon the Galaxy environment).
   Maintainer: Etienne A. Thevenot <etienne.thevenot@cea.fr>
 
   Please cite: Etienne A. Thevenot, Aurelie Roux, Ying Xu, Eric Ezan,
-  and Christophe Junot. Analysis of the human adult urinary metabolome
+  and Christophe Junot (2015). Analysis of the human adult urinary metabolome
   variations with age, body mass index and gender by implementing a
-  comprehensive workflow for univariate and OPLS statistical analyses. submitted.
+  comprehensive workflow for univariate and OPLS statistical
+  analyses. Journal of Proteome Research. DOI: 10.1021/acs.jproteome.5b00354.
 
 }
 
@@ -63,42 +64,37 @@ computational metabolomics (built upon the Galaxy environment).
 
 data(foods) ## see Eriksson et al. (2001); presence of 3 missing values (NA)
 head(foods)
-fooMN <- as.matrix(foods[, colnames(foods) != "Country"])
-rownames(fooMN) <- foods[, "Country"]
-head(fooMN)
-fooPcaLs <- roplsF(fooMN)
-
+foodMN <- as.matrix(foods[, colnames(foods) != "Country"])
+rownames(foodMN) <- foods[, "Country"]
+head(foodMN)
+foo.pca <- opls(foodMN)
 
 #### PLS with a single response
 
 data(cornell) ## see Tenenhaus, 1998
 head(cornell)
-corPlsLs <- roplsF(as.matrix(cornell[, grep("x", colnames(cornell))]),
-                   matrix(cornell[, "y"], ncol = 1))
+cornell.pls <- opls(as.matrix(cornell[, grep("x", colnames(cornell))]),
+                    cornell[, "y"])
 ## Complementary graphics
-corPlsLs <- roplsF(as.matrix(cornell[, grep("x", colnames(cornell))]),
-                   matrix(cornell[, "y"], ncol = 1),
-                   plotVc = c("outlier", "predict-train", "xy-score", "xy-weight"))
+plot(cornell.pls, plotVc = c("outlier", "predict-train", "xy-score", "xy-weight"))
 
 #### PLS with multiple (quantitative) responses
 
 data(lowarp) ## see Eriksson et al. (2001); presence of NAs
 head(lowarp)
-lowPlsLs <- roplsF(as.matrix(lowarp[, c("glas", "crtp", "mica", "amtp")]),
+lowarp.pls <- opls(as.matrix(lowarp[, c("glas", "crtp", "mica", "amtp")]),
                    as.matrix(lowarp[, grepl("^wrp", colnames(lowarp)) |
                                       grepl("^st", colnames(lowarp))]))
-
 
 #### PLS-DA
 
 data(sacurine)
 attach(sacurine)
-sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1))
+sacurine.plsda <- opls(dataMatrix, sampleMetadata[, "genderFc"])
 
 #### OPLS-DA
 
-sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1), predI
-= 1, orthoI = NA)
+sacurine.oplsda <- opls(dataMatrix, sampleMetadata[, "genderFc"], predI = 1, orthoI = NA)
 
 detach(sacurine)
 

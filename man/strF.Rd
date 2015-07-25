@@ -12,17 +12,17 @@
 }
 
 \usage{
-strF(inpMF, borN = 2, mrkC = ",")
+strF(inpMF, borderN = 2, bigMarkC = ",")
 }
 
 \arguments{
   \item{inpMF}{
     Input matrix, dataframe or vector
   }
-  \item{borN}{
+  \item{borderN}{
     Number of border (first and last) rows and columns to display
   }
-  \item{mrkC}{
+  \item{bigMarkC}{
     Big mark separator for summary results
   }
 }

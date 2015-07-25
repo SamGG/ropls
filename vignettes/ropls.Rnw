@@ -103,15 +103,23 @@ strF(variableMetadata)
 
 \subsection{Principal Component Analysis (PCA)}
 
-We perform a PCA on the \emph{dataMatrix} matrix (samples as rows, variables as columns). Scores are visualized on Figure \ref{fig:pca}.
+We perform a PCA on the \emph{dataMatrix} matrix (samples as rows, variables as columns):
 
 <<eval=FALSE,results=hide>>=
-sacPcaLs <- roplsF(dataMatrix, plotVc = "x-score")
+sacurine.pca <- opls(dataMatrix)
+@
+<<echo=FALSE>>=
+sacurine.pca <- opls(dataMatrix, plotL = FALSE)
+@
+
+A summary of the model (8 components were selected) is printed. In addition a 4-plot figure displays an inertia barplot, outlier diagnostics, and the score and loading plots. To plot the scores only (Figure \ref{fig:pca}):
+
+<<eval=FALSE,results=hide>>=
+plot(sacurine.pca, plotVc = "x-score")
 @
 
 Note:
 \begin{enumerate}
-\item The \texttt{plotVc = 'x-score'} (score plot only) is used in all examples of this document for compatibility with the Sweave software used to generate this pdf; However, the default \texttt{'summary'} argument can be useful to visualize a 4-plot graphics with additional information about inertia, outliers and x-loadings,
 \item Since \emph{dataMatrix} does not contain missing value, the singular value decomposition was used by default; NIPALS can be selected with the \texttt{algoC} argument specifying the \textbf{algo}rithm (\textbf{C}haracter),
 \item The \texttt{predI = NA} default number of \textbf{pred}ictive components (\textbf{I}nteger) means that only components with a variance superior to the mean variance of all components are kept (note that this rule requires all components to be computed and can be quite time-consuming for large datasets with the NIPALS algorithm; in such cases, one may specify a limited number of components with the \texttt{predI} parameter).
 \end{enumerate}
@@ -119,48 +127,52 @@ Note:
 \begin{figure}
 \begin{center}
 <<label=figPca,fig=TRUE,echo=FALSE,results=hide>>=
-sacPcaLs <- roplsF(dataMatrix, parDevNewL = FALSE, plotVc = "x-score")
+plot(sacurine.pca, plotVc = "x-score", parDevNewL = FALSE)
 @
+
 \end{center}
-\caption{PCA score plot. The displayed components can be specified with \texttt{parCompVi} (plotting \textbf{par}ameter specifying the \textbf{comp}onents: \textbf{V}ector of \textbf{i}nteger type)}
+\caption{PCA score plot. The displayed components can be specified with \texttt{parCompVi} (plotting \textbf{par}ameter specifying the \textbf{Comp}onents: \textbf{V}ector of 2 \textbf{i}ntegers)}
 \label{fig:pca}
 \end{figure}
 
 Let us see if we notice any partition according to gender, by labeling/coloring the samples according to the gender and drawing the Mahalanobis ellipses for the male and female subgroups (Figure \ref{fig:pcaMah}).
 
 <<eval=FALSE,results=hide>>=
-sacPcaMahLs <- roplsF(dataMatrix, plotVc = "x-score",
-parAsColVcn = sampleMetadata[, "genderVc"], parEllipsesL = TRUE)
+genderFc <- sampleMetadata[, "genderFc"]
+plot(sacurine.pca, plotVc = "x-score",
+parAsColFcVn = genderFc, parEllipsesL = TRUE)
 @
 
 \begin{figure}
 \begin{center}
 <<label=figPcaMah,fig=TRUE,echo=FALSE,results=hide>>=
-sacPcaMahLs <- roplsF(dataMatrix, parAsColVcn = sampleMetadata[, "genderVc"],
-parEllipsesL = TRUE, parDevNewL = FALSE, plotVc = "x-score")
+genderFc <- sampleMetadata[, "genderFc"]
+plot(sacurine.pca, plotVc = "x-score",
+parAsColFcVn = genderFc, parEllipsesL = TRUE, parDevNewL = FALSE)
 @
 \end{center}
 \caption{PCA score plot colored according to gender.}
 \label{fig:pcaMah}
 \end{figure}
 
-Note that the plotting \textbf{par}ameter to be used \textbf{as} \textbf{col}ors (\textbf{V}ector of either \textbf{c}haracter or \textbf{n}umeric type) has a length equal to the number of rows of the dataMatrix matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColVcn = sampleMetadata[, "ageVn"]}.
+Note that the plotting \textbf{par}ameter to be used \textbf{As} \textbf{Col}ors (\textbf{F}actor of \textbf{c}haracter type or \textbf{V}ector of \textbf{n}umeric type) has a length equal to the number of rows of the dataMatrix matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColFcVn = sampleMetadata[, "ageVn"]}.
 
 
 \subsection{Partial least-squares: PLS and PLS-DA}
 
-For PLS (and OPLS), the Y matrix of responses must be provided. Y must be either a numerical matrix with one or several columns (PLS model of quantitative responses, see the \emph{lowarp} dataset) or a character matrix of a single column (PLS-DA model of a single qualitative response) as in the following example (Figure \ref{fig:pls}).
+For PLS (and OPLS), the Y response(s) must be provided. Y can be either a numeric vector (respectively matrix) for single (respectively multiple) (O)PLS regression, or a character factor for (O)PLS-DA classification as in the following example (The score plot is displayed on Figure \ref{fig:pls}).
 
 <<eval=FALSE,results=hide>>=
-sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
-plotVc = "x-score")
+sacurine.plsda <- opls(dataMatrix, genderFc)
+@
+<<echo=FALSE>>=
+sacurine.plsda <- opls(dataMatrix, genderFc, plotL = FALSE)
 @
 
 \begin{figure}
 \begin{center}
 <<label=figPls,fig=TRUE,echo=FALSE,results=hide>>=
-sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
-parDevNewL = FALSE, plotVc = "x-score")
+plot(sacurine.plsda, plotVc = "x-score", parDevNewL = FALSE)
 @
 \end{center}
 \caption{PLS-DA model of the 'gender' response (score plot). The number of components and the cumulative R2X, R2Y and Q2Y are indicated below the plot.}
@@ -173,50 +185,77 @@ Note:
 \item As for PCA, the default \texttt{predI} value is NA: components are computed until either R2Y of the component is < 0.01 or Q2Y is < 0 (for more than 100 observations) or 0.05 otherwise.
 \end{enumerate}
 
-Let us look at the parameters of the model:
-
-<<label=tab1>>=
-print(sacPlsLs[["summaryDF"]])
-@
-
-We see that 3 predictive components were computed (pre) and that R2Y and Q2Y are quite high. Let us assess the significance of these values by comparing to models generated after random permutation of the labels (Figure \ref{fig:plsPer}).
+We see that 3 predictive ('pre') components were computed and that the (cum)ulative R2Y and Q2Y are quite high. Let us assess the significance of these values by comparing to models generated after random permutation of the labels (Figure \ref{fig:plsPer}).
 
 <<eval=FALSE,results=hide>>=
-sacPlsPerLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
-permI = 100, plotVc = "permutation")
+sacurine.plsPer <- opls(dataMatrix, genderFc,
+permI = 100)
+@
+<<echo=FALSE>>=
+sacurine.plsPer <- opls(dataMatrix, genderFc,
+permI = 100, printL = FALSE, plotL = FALSE)
 @
 
 \begin{figure}
 \begin{center}
 <<label=figPlsPer,fig=TRUE,echo=FALSE,results=hide>>=
-sacPlsLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
-permI = 100, parDevNewL = FALSE, plotVc = "permutation")
+plot(sacurine.plsPer, plotVc = "permutation", parDevNewL = FALSE)
 @
 \end{center}
 \caption{Significance of R2Y and Q2Y evaluated by permutation testing.}
 \label{fig:plsPer}
 \end{figure}
 
+The R2Y and Q2Y values of the model trained on the models with randomly permuted response labels are all below the values of the model with the true response (horizontal lines). Significance of our PLS-DA model should be further confirmed by using a higher number of permutations.
+
 
 \subsection{Orthogonal partial least squares: OPLS and OPLS-DA}
 
-To perform OPLS(-DA), we set \texttt{orthoI} (number of components which are \textbf{ortho}gonal; \textbf{N}umeric) to either a specific number of orthogonal components, or to NA. Let us build an OPLS-DA model of the 'gender' response (Figure \ref{fig:plsPer}). Note that for OPLS modeling of a single response, the number of predictive component is 1.
+To perform OPLS(-DA), we set \texttt{orthoI} (number of components which are \textbf{ortho}gonal; \textbf{I}nteger) to either a specific number of orthogonal components, or to NA. Let us build an OPLS-DA model of the 'gender' response (Figure \ref{fig:plsPer}). Note that for OPLS modeling of a single response, the number of predictive component is 1.
 
 <<eval=FALSE,results=hide>>=
-sacOplLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
-predI = 1, orthoI = NA, plotVc = "x-score")
+sacurine.oplsda <- opls(dataMatrix, genderFc,
+predI = 1, orthoI = NA)
+@
+<<echo=FALSE>>=
+sacurine.oplsda <- opls(dataMatrix, genderFc,
+predI = 1, orthoI = NA, plotL = FALSE)
 @
 
 \begin{figure}
 \begin{center}
 <<label=figOpl,fig=TRUE,echo=FALSE,results=hide>>=
-sacOplLs <- roplsF(dataMatrix, matrix(sampleMetadata[, "genderVc"], ncol = 1),
-predI = 1, orthoI = NA, parDevNewL = FALSE, plotVc = "x-score")
+plot(sacurine.oplsda, plotVc = "x-score", parDevNewL = FALSE)
 @
 \end{center}
 \caption{OPLS-DA model of the 'gender' response (score plot). The predictive component is displayed as abscissa and the orthogonal component as ordinate.}
 \label{fig:opl}
 \end{figure}
+
+Let us assess the predictive performance of our model. We first train the model on a subset of the samples (here we use the 'odd' subset value which splits the data set into two halves with similar proportions of samples for each class; alternatively, we could have used a specific subset of indices for training):
+
+<<eval=FALSE,results=hide>>=
+sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA, subset = "odd")
+@
+<<echo=FALSE>>=
+sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA, subset = "odd", plotL = FALSE)
+@
+
+We compute the performances on the training subset:
+
+<<>>=
+trainVi <- sacurine.oplsda[["subset"]]
+table(genderFc[trainVi], fitted(sacurine.oplsda))
+@
+
+We then compute the performances on the test subset:
+
+<<>>=
+table(genderFc[-trainVi],
+      predict(sacurine.oplsda, dataMatrix[-trainVi, ]))
+@
+
+As expected, the predictions on the test subset are slightly lower. The classifier however still achieves 91\% of correct predictions.
 
 Before closing this example session, we detach \emph{sacurine} from the search path:
 
@@ -230,7 +269,6 @@ detach(sacurine)
 <<eval=FALSE,results=hide>>=
 sessionInfo()
 @
-
 <<echo=FALSE,results=tex>>=
 toLatex(sessionInfo())
 @
@@ -276,7 +314,7 @@ sampleVc <- grep("^ko|^wt", colnames(diffreport), value = TRUE)
 dataMatrix <- t(as.matrix(diffreport[, sampleVc]))
 dimnames(dataMatrix) <- list(sampleVc, diffreport[, "name"])
 sampleMetadata <- data.frame(row.names = sampleVc,
-genotypeVc = substr(sampleVc, 1, 2), stringsAsFactors = FALSE)
+genotypeFc = substr(sampleVc, 1, 2))
 variableMetadata <- diffreport[, !(colnames(diffreport) %in% c("name", sampleVc))]
 rownames(variableMetadata) <- diffreport[, "name"]
 @
@@ -285,8 +323,8 @@ The data can now be analysed with the \emph{ropls} package as described in the p
 
 <<eval=FALSE,fig=FALSE,results=hide>>=
 library(ropls)
-roplsF(dataMatrix)
-roplsF(dataMatrix, matrix(sampleMetadata[, "genotypeVc"], ncol = 1))
+opls(dataMatrix)
+opls(dataMatrix, sampleMetadata[, "genotypeFc"])
 @
 
 <<eval=FALSE,echo=FALSE>>=
@@ -296,7 +334,7 @@ rm(list = ls())
 
 \section{Other datasets}
 
-In addition to the \emph{sacurine} dataset presented above, the package contains the following datasets to illustrate the functionalities of PCA, PLS and OPLS (see the examples in the documentation of the roplsF function):
+In addition to the \emph{sacurine} dataset presented above, the package contains the following datasets to illustrate the functionalities of PCA, PLS and OPLS (see the examples in the documentation of the opls function):
 
 \paragraph{aminoacids} Amino-Acids Dataset. Quantitative structure property relationship (QSPR; \cite{Wold2001}).
 

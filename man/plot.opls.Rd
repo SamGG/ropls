@@ -1,0 +1,134 @@
+\name{plot.opls}
+
+\alias{plot.opls}
+
+\title{
+    Plot Method for (O)PLS(-DA)
+}
+
+\description{
+   This function plots values based upon a model trained by \code{opls}.
+}
+
+\usage{
+\method{plot}{opls}(x,
+y,
+plotVc = c("correlation",
+"outlier",
+"overview",
+"permutation",
+"predict-train",
+"predict-test",
+"summary",
+"x-loading",
+"x-score",
+"x-variance",
+"xy-score",
+"xy-weight")[7],
+parAsColFcVn = NA,
+parCexN = 1,
+parCompVi = c(1, 2),
+parDevNewL = TRUE,
+parEllipsesL = NA,
+parLabVc = NA,
+parTitleL = TRUE,
+file.pdfC = NULL,
+...)
+}
+
+\arguments{
+  \item{x}{
+    Object of class \code{"opls"}, created by \code{opls}.
+  }
+  \item{y}{
+    Currently not used.
+  }
+  \item{plotVc}{
+    Character vector: the following plots are available:
+    'correlation': Variable correlations with the components, 'outlier':
+    Observation diagnostics (score and orthogonal distances), 'overview':
+    Model overview showing R2Ycum and Q2cum (or 'Variance explained' for
+    PCA), 'permutation': Scatterplot of R2Y and Q2Y actual and simulated
+    models after random permutation of response values;
+    'predict-train' and 'predict-test': Predicted vs Actual Y for reference
+    and test sets (only if Y has a single column), 'summary' [default]: 4-plot
+    summary showing overview, permutation, x-loading and x-score together,
+    'x-variance': Spread of raw
+    variables corresp. with min, median, and max variances,
+    'x-loading': X-loadings (the 6 of variables most contributing to
+    loadings are colored in red to facilitate interpretation), 'x-score': X-Scores, 'xy-score': XY-Scores,
+    'xy-weight': XY-Weights
+  }
+  \item{parAsColFcVn}{
+    Optional factor character or numeric vector to be converted into colors for the score plot; default is NA [ie colors will be
+    converted from 'y' in case of (O)PLS(-DA) or will be 'black' for PCA]
+  }
+  \item{parCexN}{
+    Numeric: amount by which plotting text should be magnified relative to the default
+  }
+  \item{parCompVi}{
+    Integer vector of length 2: indices of the two components to be displayed
+    on the score plot (first two components by default)
+  }
+  \item{parDevNewL}{
+    Should the graphics be displayed in a new window [default]; If
+    FALSE, parLayL must be set to FALSE also
+  }
+  \item{parEllipsesL}{
+    Should the Mahalanobis ellipses be drawn? If 'NA' [default],
+    ellipses are drawn when either a parAsColVcn is provided (PCA
+    case), or when 'y' is a character factor ((O)PLS-DA cases).
+  }
+  \item{parLabVc}{
+    Optional character vector for the labels of observations on the
+    plot; default is NA [ie row names of 'x', if available, or indices of
+    'x', otherwise, will be used]
+  }
+  \item{parTitleL}{
+    Should the titles of the plots be printed on the graphics (default =
+    TRUE); It may be convenient to set this argument to FALSE when
+    the user wishes to add specific titles a posteriori
+  }
+  \item{file.pdfC}{
+    Figure filename (e.g. in case of batch mode) ending with '.pdf'; for multiple graphics,
+    set parLayL to TRUE; default is NULL (no saving; displaying instead)
+  }
+  \item{\dots}{
+    Currently not used.
+  }
+}
+
+\author{
+  Etienne Thevenot (CEA)
+}
+
+\examples{
+data(sacurine)
+attach(sacurine)
+
+for(plotC in c("correlation", "outlier", "overview",
+               "permutation", "predict-train","predict-test",
+               "summary", "x-loading", "x-score", "x-variance",
+               "xy-score", "xy-weight")) {
+
+    print(plotC)
+
+    if(grepl("predict", plotC))
+        subset <- "odd"
+    else
+        subset <- NULL
+
+    opLs <- opls(dataMatrix, sampleMetadata[, "genderFc"],
+                 predI = ifelse(plotC != "xy-weight", 1, 2),
+                 orthoI = ifelse(plotC != "xy-weight", 1, 0),
+                 permI = ifelse(plotC == "permutation", 10, 0),
+                 subset = subset,
+                 printL = FALSE, plotL = FALSE)
+
+    plot(opLs, plotVc = plotC)
+
+}
+
+detach(sacurine)
+
+}
