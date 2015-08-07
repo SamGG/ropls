@@ -103,8 +103,8 @@ opls.default <- function(x,
     if((is.na(orthoI) || orthoI > 0) && ncol(yMCN) > 1)
         stop("OPLS(-DA) only available for a single 'y' response", call. = FALSE)
 
-    if(!(length(scaleC) == 1 && scaleC %in% c('none', 'center', 'pareto', 'standard')))
-        stop("'scaleC' must be either 'none', 'center', 'pareto', or 'standard'", call. = FALSE)
+    if(!(length(scaleC) == 1 && scaleC %in% c('center', 'pareto', 'standard')))
+        stop("'scaleC' must be either 'center', 'pareto', or 'standard'", call. = FALSE)
 
     if(!is.null(subset) && (is.null(yMCN) || ncol(yMCN) > 1))
         stop("external validation only available for a single 'y' response", call. = FALSE)
@@ -233,18 +233,21 @@ opls.default <- function(x,
 
     obsIniVi <- 1:nrow(xMN)
 
-    if(!is.null(subset) &&
-       subset == "odd") {
+    if(!is.null(subset)) {
+        if(length(subset) == 1 && subset == "odd") {
 
-        if(mode(yMCN) == "numeric")
-            subset <- seq(1, nrow(xMN), by = 2)
-        else {
-            subset <- integer()
-            for(claC in unique(drop(yMCN)))
-                subset <- c(subset,
-                            which(drop(yMCN) == claC)[seq(1, sum(drop(yMCN) == claC), by = 2)])
-            subset <- sort(subset)
+            if(mode(yMCN) == "numeric")
+                subset <- seq(1, nrow(xMN), by = 2)
+            else {
+                subset <- integer()
+                for(claC in unique(drop(yMCN)))
+                    subset <- c(subset,
+                                which(drop(yMCN) == claC)[seq(1, sum(drop(yMCN) == claC), by = 2)])
+                subset <- sort(subset)
+            }
         }
+        if(crossvalI > length(subset))
+            stop("'crossvalI' must be less than the number of samples in the subset", call. = FALSE)
     }
 
 

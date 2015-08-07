@@ -71,13 +71,13 @@ plot.opls <- function(x,
         stop("'predict' graphics available for single response models only", call. = FALSE)
 
     if(is.na(parEllipsesL)) {
-        if((x[["typeC"]] == "PCA" && !all(is.na(parAsColFcVn))) || ## PCA case
+        if((x[["typeC"]] == "PCA" && !all(is.na(parAsColFcVn)) && is.factor(parAsColFcVn)) || ## PCA case
            grepl("-DA$", x[["typeC"]])) { ## (O)PLS-DA cases
             parEllipsesL <- TRUE
         } else
             parEllipsesL <- FALSE
-    } else if(parEllipsesL && !grepl("-DA$", x[["typeC"]]) && all(is.na(parAsColFcVn)))
-        stop("Ellipses can be plotted for PCA (or PLS regression) only if the 'parAsColFcVn' is not 'NA'",
+    } else if(parEllipsesL && !grepl("-DA$", x[["typeC"]]) && (all(is.na(parAsColFcVn)) || !is.factor(parAsColFcVn)))
+        stop("Ellipses can be plotted for PCA (or PLS regression) only if the 'parAsColFcVn' is a factor",
              call. = FALSE)
 
     if(x[["summaryDF"]][, "pre"] + x[["summaryDF"]][, "ort"] < 2) {

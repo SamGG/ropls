@@ -36,8 +36,8 @@ computational metabolomics (built upon the Galaxy environment).
   \tabular{ll}{
     Package: \tab ropls\cr
     Type: \tab Package\cr
-    Version: \tab 1.1.2\cr
-    Date: \tab 2015-07-27\cr
+    Version: \tab 1.1.3\cr
+    Date: \tab 2015-08-07\cr
     License: \tab CeCILL\cr
     LazyLoad: \tab yes\cr
   }
