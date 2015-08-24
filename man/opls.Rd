@@ -29,7 +29,7 @@ plotL = TRUE,
 
 \arguments{
   \item{x}{
-    Numerical matrix (observations * X variables); NAs are allowed
+    Numerical matrix (observations x variables); NAs are allowed
   }
   \item{y}{
     Response to be modelled: Either 1) 'NULL' for PCA (default) or
@@ -59,14 +59,14 @@ plotL = TRUE,
   }
   \item{algoC}{
     Default algorithm is 'svd' for PCA (in case of no missing values in
-    xMN; 'nipals' otherwise) and 'nipals' for PLS and OPLS; when asking to use 'svd' for PCA on an xMN matrix containing missing values, NAs are set to half the minimum of non-missing values and a warning is generated
+    'x'; 'nipals' otherwise) and 'nipals' for PLS and OPLS; when asking to use 'svd' for PCA on an 'x' matrix containing missing values, NAs are set to half the minimum of non-missing values and a warning is generated
   }
   \item{crossvalI}{
     Integer: number of cross-validation segments (default is 7); The
-    number of samples (rows of xMN) must be at least >= crossvalI
+    number of samples (rows of 'x') must be at least >= crossvalI
   }
   \item{log10L}{
-    Should the xMN matrix be log10 transformed? Zeros are set to 1 prior
+    Should the 'x' matrix be log10 transformed? Zeros are set to 1 prior
     to transformation
   }
   \item{permI}{
@@ -141,17 +141,17 @@ plotL = TRUE,
   and the predicted responses
   }
   \item{xMeanVn}{
-     Numerical vector: variable means of the xMN matrix
+     Numerical vector: variable means of the 'x' matrix
   }
   \item{xSdVn}{
-    Numerical vector: variable standard deviations of the xMN matrix
+    Numerical vector: variable standard deviations of the 'x' matrix
   }
   \item{yMeanVn}{
-    (O)PLS: Numerical vector: variable means of the yMCN matrix (transformed
+    (O)PLS: Numerical vector: variable means of the 'y' response (transformed
     into a dummy matrix in case it is of 'character' mode initially)
   }
   \item{ySdVn}{
-    (O)PLS: Numerical vector: variable standard deviations of the yMCN matrix (transformed
+    (O)PLS: Numerical vector: variable standard deviations of the 'y' response (transformed
     into a dummy matrix in case it is of 'character' mode initially)
   }
   \item{xZeroVarVi}{
@@ -159,15 +159,15 @@ plotL = TRUE,
   which were excluded from 'x' before building the model
   }
   \item{scoreMN}{
-    Numerical matrix of xMN scores (T; dimensions: nrow(xMN) x predI)
+    Numerical matrix of x scores (T; dimensions: nrow(x) x predI)
     X = TP' + E; Y = TC' + F
   }
   \item{loadingMN}{
-    Numerical matrix of xMN loadings (P; dimensions: ncol(xMN) x predI)
+    Numerical matrix of x loadings (P; dimensions: ncol(x) x predI)
     X = TP' + E
   }
   \item{weightMN}{
-    (O)PLS: Numerical matrix of xMN-yMCN weights (W; same dimensions as loadingMN)
+    (O)PLS: Numerical matrix of x weights (W; same dimensions as loadingMN)
   }
     \item{orthoScoreMN}{
     OPLS: Numerical matrix of orthogonal scores (Tortho; dimensions:
@@ -181,17 +181,17 @@ plotL = TRUE,
     OPLS: Numerical matrix of orthogonal weights (same dimensions as orthoLoadingMN)
   }
   \item{cMN}{
-    (O)PLS: Numerical matrix of Y loadings (C; dimensions: number of
+    (O)PLS: Numerical matrix of Y weights (C; dimensions: number of
   responses or number of classes in case of qualitative response) x
   number of predictive components; Y = TC' + F
   }
   \item{uMN}{
     (O)PLS: Numerical matrix of Y scores (U; same dimensions as scoreMN); Y = UC' + G
   }
-  \item{rotationMN}{
-    Numerical matrix of projections W* (same dimensions as loadingMN); whereas
+  \item{weightStarMN}{
+    Numerical matrix of projections (W*; same dimensions as loadingMN); whereas
     columns of weightMN are derived from successively deflated matrices,
-    columns of rotationMN relate to the original X matrix: T = XW*
+    columns of weightStarMN relate to the original 'x' matrix: T = XW*; W*=W(P'W)inv
   }
   \item{suppLs}{
     List of additional objects to be used internally by the 'print',

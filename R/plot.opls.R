@@ -430,14 +430,14 @@ plot.opls <- function(x,
             xLabC <- paste0("w*c", parCompVi[1])
             yLabC <- paste0("w*c", parCompVi[2])
 
-            ploMN <- rbind(opLs[["rotationMN"]][, parCompVi],
+            ploMN <- rbind(opLs[["weightStarMN"]][, parCompVi],
                            opLs[["cMN"]][, parCompVi])
 
             pchVn <- rep(17, times = nrow(ploMN))
             ploColVc <- rep("black", times = nrow(ploMN))
 
-            pchVn[(nrow(opLs[["rotationMN"]]) + 1):nrow(ploMN)] <- 15
-            ploColVc[(nrow(opLs[["rotationMN"]]) + 1):nrow(ploMN)] <- "red"
+            pchVn[(nrow(opLs[["weightStarMN"]]) + 1):nrow(ploMN)] <- 15
+            ploColVc[(nrow(opLs[["weightStarMN"]]) + 1):nrow(ploMN)] <- "red"
 
         }
 
@@ -630,7 +630,7 @@ plot.opls <- function(x,
             text(ploMN[, 1:2],
                  cex = parCexN,
                  col = ploColVc,
-                 labels = c(rownames(opLs[["rotationMN"]]), rownames(opLs[["cMN"]])))
+                 labels = c(rownames(opLs[["weightStarMN"]]), rownames(opLs[["cMN"]])))
 
             if(!layL)
                 legend("topleft",

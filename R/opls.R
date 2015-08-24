@@ -1176,7 +1176,7 @@ opls.default <- function(x,
             summaryDF <- modelDF[predI, c("R2X(cum)", "R2Y(cum)", "Q2(cum)")]
 
 
-            ## Rotation matrix (W*)
+            ## WeightStar matrix (W*)
 
             if(predI == 1) {
 
@@ -1296,14 +1296,14 @@ opls.default <- function(x,
                                      ncol = orthoI,
                                      dimnames = list(xvaNamVc, orthoIamVc))
             cOrthoMN <- matrix(0,
-                            nrow = ncol(yMN),
-                            ncol = orthoI,
-                            dimnames = list(yvaNamVc, orthoIamVc))
+                               nrow = ncol(yMN),
+                               ncol = orthoI,
+                               dimnames = list(yvaNamVc, orthoIamVc))
 
             modelDF <- as.data.frame(matrix(NA,
-                                          nrow = 3 + orthoI,
-                                          ncol = 7,
-                                          dimnames = list(c("h1", "rot", orthoIamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
+                                            nrow = 3 + orthoI,
+                                            ncol = 7,
+                                            dimnames = list(c("h1", "rot", orthoIamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
             for(j in 1:ncol(modelDF))
                 mode(modelDF[, j]) <- ifelse(colnames(modelDF)[j] == "Signif.", "character", "numeric")
 
@@ -1634,7 +1634,7 @@ opls.default <- function(x,
 
             summaryDF <- modelDF["sum", c("R2X(cum)", "R2Y(cum)", "Q2(cum)")]
 
-            ## Rotation matrix (W*)
+            ## WeightStar matrix (W*)
 
             rMN <- wMN ## only 1 predictive component for OPLS
 
@@ -1785,7 +1785,7 @@ opls.default <- function(x,
                   orthoWeightMN = woMN,
                   cMN = cMN,
                   uMN = uMN,
-                  rotationMN = rMN,
+                  weightStarMN = rMN,
 
                   suppLs = list(.char2numF = .char2numF,
                       yLevelVc = NULL,

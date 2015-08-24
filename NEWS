@@ -1,3 +1,11 @@
+CHANGES IN VERSION 1.1.4
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    renamed slot of opls object
+        rotationMN -> weightStarMN
+
 CHANGES IN VERSION 1.1.3
 ------------------------------
 

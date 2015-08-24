@@ -41,7 +41,7 @@ test_PLS_multiple <- function() {
                        as.matrix(lowarp[, grepl("^wrp", colnames(lowarp)) |
                                         grepl("^st", colnames(lowarp))]),
                        printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(lowarp.pls[["rotationMN"]][2, 1],
+    checkEqualsNumeric(lowarp.pls[["weightStarMN"]][2, 1],
                        -0.0861,
                        tolerance = 1e-3)
     checkEqualsNumeric(lowarp.pls[["uMN"]]["s5", "h2"],
