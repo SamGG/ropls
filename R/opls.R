@@ -56,6 +56,7 @@ opls.default <- function(x,
                 stop("'y' factor length must be equal to the number of rows of 'x'", call. = FALSE)
 
             yLevelVc <- levels(y)
+
             yMCN <- matrix(as.character(y), ncol = 1)
 
         } else if(is.matrix(y)) {
@@ -77,6 +78,8 @@ opls.default <- function(x,
     } else
         yMCN <- NULL
 
+    if(!is.null(yMCN) && ncol(yMCN) == 1 && mode(yMCN) == "character" && length(unique(c(yMCN))) > 2)
+        stop("'opls' currently supports two-class only classification", call. = FALSE)
 
     if(!is.logical(log10L))
         stop("'log10L' must be a logical", call. = FALSE)
