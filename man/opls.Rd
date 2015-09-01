@@ -24,6 +24,8 @@ scaleC = c("center", "pareto", "standard")[3],
 subset = NULL,
 printL = TRUE,
 plotL = TRUE,
+
+.sinkC = NULL,
 ...)
 }
 
@@ -90,6 +92,11 @@ plotL = TRUE,
   }
   \item{plotL}{
     Logical: Should the 'summary' plot be displayed? [default = TRUE]
+  }
+  \item{.sinkC}{
+    Character: Name of the file for R output diversion [default = NULL:
+    no diversion]; Diversion of messages is required for the integration
+    into Galaxy
   }
   \item{\dots}{
     Currently not used.

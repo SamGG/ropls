@@ -18,8 +18,12 @@ opls.default <- function(x,
 
                          printL = TRUE,
                          plotL = TRUE,
+
+                         .sinkC = NULL,
                          ...) {
 
+    if(!is.null(.sinkC)) ##  Diversion of messages is required for the integration into Galaxy
+        sink(.sinkC, append = TRUE)
 
     ## Checking arguments
     ##-------------------
@@ -564,6 +568,12 @@ opls.default <- function(x,
 
     if(plotL)
         plot(opLs, plotVc = ifelse(opLs[["summaryDF"]][, "pre"] + opLs[["summaryDF"]][, "ort"] > 1, "summary", "overview"))
+
+    ## Closing connection
+    ##-------------------
+
+    if(!is.null(.sinkC)) ## Used in the Galaxy module
+        sink()
 
     ## Returning
     ##----------

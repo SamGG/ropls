@@ -1,4 +1,4 @@
-print.opls <- function(x, ...) {
+print.opls <- function(x, .sinkC = NULL, ...) {
 
     message(x[["typeC"]])
 

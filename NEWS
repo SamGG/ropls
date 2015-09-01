@@ -1,3 +1,11 @@
+CHANGES IN VERSION 1.1.6
+------------------------------
+
+USED INTERNALLY (NOT EXPORTED)
+
+    .sinkC argument added in the opls and plot.opls methods: Diversion of messages is required for Galaxy integration
+
+
 CHANGES IN VERSION 1.1.5
 ------------------------------
 

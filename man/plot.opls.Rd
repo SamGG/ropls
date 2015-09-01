@@ -33,6 +33,7 @@ parEllipsesL = NA,
 parLabVc = NA,
 parTitleL = TRUE,
 file.pdfC = NULL,
+.sinkC = NULL,
 ...)
 }
 
@@ -92,6 +93,11 @@ file.pdfC = NULL,
   \item{file.pdfC}{
     Figure filename (e.g. in case of batch mode) ending with '.pdf'; for multiple graphics,
     set parLayL to TRUE; default is NULL (no saving; displaying instead)
+  }
+  \item{.sinkC}{
+    Character: Name of the file for R output diversion [default = NULL:
+    no diversion]; Diversion of messages is required for the integration
+    into Galaxy
   }
   \item{\dots}{
     Currently not used.

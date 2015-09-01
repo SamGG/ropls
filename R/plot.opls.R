@@ -20,7 +20,14 @@ plot.opls <- function(x,
                       parLabVc = NA,
                       parTitleL = TRUE,
                       file.pdfC = NULL,
+
+                      .sinkC = NULL,
                       ...) {
+
+
+    if(!is.null(.sinkC)) ##  Diversion of messages is required for the integration into Galaxy
+        sink(.sinkC, append = TRUE)
+
 
     if("summary" %in% plotVc)
         plotVc <- c(ifelse(!is.null(x[["suppLs"]][["permMN"]]), "permutation", "overview"),
@@ -268,6 +275,13 @@ plot.opls <- function(x,
 
     if(!is.null(file.pdfC))
         dev.off()
+
+
+    ## Closing connection
+    ##-------------------
+
+    if(!is.null(.sinkC)) ## Used in the Galaxy module
+        sink()
 
 
 } ## plot.opls
