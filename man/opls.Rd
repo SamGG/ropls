@@ -19,7 +19,7 @@ orthoI = 0,
 algoC = c("default", "nipals", "svd")[1],
 crossvalI = 7,
 log10L = FALSE,
-permI = 0,
+permI = 100,
 scaleC = c("center", "pareto", "standard")[3],
 subset = NULL,
 printL = TRUE,
@@ -73,7 +73,8 @@ plotL = TRUE,
   }
   \item{permI}{
     Integer: number of random permutations of response labels to
-    estimate R2Y and Q2Y confidence [default: 0]
+    estimate R2Y and Q2Y significance by permutation testing [default is
+    100 for single response models (without train/test partition), and 0 otherwise]
   }
   \item{scaleC}{
     Character: either mean-centering ('center'),

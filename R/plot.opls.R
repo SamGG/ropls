@@ -13,7 +13,7 @@ plot.opls <- function(x,
                           "xy-score",
                           "xy-weight")[7],
                       parAsColFcVn = NA,
-                      parCexN = 1,
+                      parCexN = 0.8,
                       parCompVi = c(1, 2),
                       parDevNewL = TRUE,
                       parEllipsesL = NA,
@@ -29,11 +29,18 @@ plot.opls <- function(x,
         sink(.sinkC, append = TRUE)
 
 
-    if("summary" %in% plotVc)
-        plotVc <- c(ifelse(!is.null(x[["suppLs"]][["permMN"]]), "permutation", "overview"),
-                    "outlier",
-                    "x-score",
-                    "x-loading")
+    if("summary" %in% plotVc) {
+        if(!is.null(x[["suppLs"]][["permMN"]]))
+            plotVc <- c("permutation",
+                        "overview",
+                        "outlier",
+                        "x-score")
+        else
+            plotVc <- c("overview",
+                        "outlier",
+                        "x-score",
+                        "x-loading")
+    }
 
 
     ## Checking arguments

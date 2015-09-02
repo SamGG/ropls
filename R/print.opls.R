@@ -10,12 +10,14 @@ print.opls <- function(x, .sinkC = NULL, ...) {
                    paste0(" and ", ncol(x[["yPredMCN"]]), " response", ifelse(ncol(x[["yPredMCN"]]) > 1, "s", "")),
                    ""))
 
-    message(x[["descriptionMC"]]["missing_values", ], " NAs")
+    message(x[["suppLs"]][["scaleC"]], " scaling of predictors", ifelse(x[["typeC"]] != "PCA", " and response(s)", ""))
 
-    message(x[["descriptionMC"]]["near_zero_excluded_X_variables", ],
-            " excluded variables (near zero variance)")
+    if(substr(x[["descriptionMC"]]["missing_values", ], 1, 1) != "0")
+        message(x[["descriptionMC"]]["missing_values", ], " NAs")
 
-    message(x[["suppLs"]][["scaleC"]], " x", ifelse(x[["typeC"]] != "PCA", " and y", ""), " scaling")
+    if(substr(x[["descriptionMC"]]["near_zero_excluded_X_variables", ], 1, 1) != "0")
+        message(x[["descriptionMC"]]["near_zero_excluded_X_variables", ],
+                " excluded variables (near zero variance)")
 
     optDigN <- options()[["digits"]]
     options(digits = 3)

@@ -26,7 +26,7 @@ plotVc = c("correlation",
 "xy-score",
 "xy-weight")[7],
 parAsColFcVn = NA,
-parCexN = 1,
+parCexN = 0.8,
 parCompVi = c(1, 2),
 parDevNewL = TRUE,
 parEllipsesL = NA,
@@ -53,7 +53,7 @@ file.pdfC = NULL,
     models after random permutation of response values;
     'predict-train' and 'predict-test': Predicted vs Actual Y for reference
     and test sets (only if Y has a single column), 'summary' [default]: 4-plot
-    summary showing overview, permutation, x-loading and x-score together,
+    summary showing permutation, overview, outlier, and x-score together,
     'x-variance': Spread of raw
     variables corresp. with min, median, and max variances,
     'x-loading': X-loadings (the 6 of variables most contributing to

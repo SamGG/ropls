@@ -1,10 +1,18 @@
+CHANGES IN VERSION 1.1.7
+------------------------------
+
+USED INTERNALLY (NOT EXPORTED)
+
+    Control to avoid overfitting was strenghtened by:
+        setting the default number of permutations to 100 (instead of 0)
+        changing the default plot ("summary") to include both the "permutation" and the "overview" graphics
+
 CHANGES IN VERSION 1.1.6
 ------------------------------
 
 USED INTERNALLY (NOT EXPORTED)
 
     .sinkC argument added in the opls and plot.opls methods: Diversion of messages is required for Galaxy integration
-
 
 CHANGES IN VERSION 1.1.5
 ------------------------------

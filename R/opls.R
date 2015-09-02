@@ -10,7 +10,7 @@ opls.default <- function(x,
                          algoC = c("default", "nipals", "svd")[1],
                          crossvalI = 7,
                          log10L = FALSE,
-                         permI = 0,
+                         permI = 100,
                          scaleC = c("center",
                              "pareto",
                              "standard")[3],
@@ -92,11 +92,12 @@ opls.default <- function(x,
         stop("'permI' must be an integer", call. = FALSE)
 
     if(permI > 0 && (is.null(yMCN) || ncol(yMCN) > 1))
-        stop("Permutation testing available only for a single 'y' response", call. = FALSE)
+        permI <- 0
 
-    if(permI > 0 && !is.null(subset))
-        stop("Permutation testing and external validation cannot be performed simultaneously", call. = FALSE)
-    ## compatibility between permutation testing and external cross-validation to be verified
+    if(permI > 0 && !is.null(subset)) {
+        permI <- 0
+        warning("'permI' set to 0 because train/test partition is selected", immediate. = TRUE)
+    }
 
     if(!(algoC %in% c('default', 'nipals', 'svd')))
         stop("'algoC' must be either 'default', 'nipals', or 'svd'", call. = FALSE)
@@ -114,7 +115,7 @@ opls.default <- function(x,
         stop("'scaleC' must be either 'center', 'pareto', or 'standard'", call. = FALSE)
 
     if(!is.null(subset) && (is.null(yMCN) || ncol(yMCN) > 1))
-        stop("external validation only available for a single 'y' response", call. = FALSE)
+        stop("train/test partition with 'subset' only available for a single 'y' response", call. = FALSE)
 
     if(!is.null(subset) &&
        !(mode(subset) == 'character' && subset == 'odd') &&
@@ -329,9 +330,9 @@ opls.default <- function(x,
         modSumVc <- colnames(opLs[["summaryDF"]])
 
         permMN <- matrix(0,
-                        nrow = 1 + permI,
-                        ncol = length(modSumVc),
-                        dimnames = list(NULL, modSumVc))
+                         nrow = 1 + permI,
+                         ncol = length(modSumVc),
+                         dimnames = list(NULL, modSumVc))
 
         perSimVn <- numeric(1 + permI)
         perSimVn[1] <- 1
@@ -339,13 +340,7 @@ opls.default <- function(x,
 
         permMN[1, ] <- as.matrix(opLs[["summaryDF"]])
 
-        if(printL)
-            bar <- txtProgressBar(1, permI, style = 3)
-
         for(k in 1:permI) {
-
-            if(printL)
-                setTxtProgressBar(bar, k)
 
             yVcn <- drop(opLs[["suppLs"]][["yMCN"]])
             if(is.null(opLs[["subset"]])) {
@@ -376,9 +371,6 @@ opls.default <- function(x,
                                             charL = mode(opLs[["suppLs"]][["yMCN"]]) == "character")
 
         }
-
-        if(printL)
-            close(bar)
 
         permMN <- cbind(permMN, sim = perSimVn)
 
