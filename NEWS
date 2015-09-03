@@ -1,3 +1,12 @@
+CHANGES IN VERSION 1.1.8
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    sacurine dataset name simplification:
+        names of sample metadata are now 'age', 'bmi', and 'gender' instead of 'ageVn', 'bmiVn', and 'genderFc'
+        names of variableMetadata are now 'msiLevel', 'hmdb', 'chemicalClass' instead of 'msiLevelVn', 'hmdbVc', 'chemicalClassVc'
+
 CHANGES IN VERSION 1.1.7
 ------------------------------
 

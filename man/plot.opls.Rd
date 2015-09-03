@@ -124,7 +124,7 @@ for(plotC in c("correlation", "outlier", "overview",
     else
         subset <- NULL
 
-    opLs <- opls(dataMatrix, sampleMetadata[, "genderFc"],
+    opLs <- opls(dataMatrix, sampleMetadata[, "gender"],
                  predI = ifelse(plotC != "xy-weight", 1, 2),
                  orthoI = ifelse(plotC != "xy-weight", 1, 0),
                  permI = ifelse(plotC == "permutation", 10, 0),

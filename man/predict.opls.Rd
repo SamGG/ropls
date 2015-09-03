@@ -36,7 +36,7 @@ data(sacurine)
 attach(sacurine)
 
 predictorMN <- dataMatrix
-responseFc <- sampleMetadata[, "genderFc"]
+responseFc <- sampleMetadata[, "gender"]
 
 sacurine.plsda <- opls(predictorMN,
                        responseFc,

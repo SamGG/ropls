@@ -559,7 +559,7 @@ opls.default <- function(x,
     ##---------
 
     if(plotL)
-        plot(opLs, plotVc = ifelse(opLs[["summaryDF"]][, "pre"] + opLs[["summaryDF"]][, "ort"] > 1, "summary", "overview"))
+        plot(opLs, plotVc = "summary")
 
     ## Closing connection
     ##-------------------

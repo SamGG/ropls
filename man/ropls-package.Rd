@@ -90,11 +90,11 @@ lowarp.pls <- opls(as.matrix(lowarp[, c("glas", "crtp", "mica", "amtp")]),
 
 data(sacurine)
 attach(sacurine)
-sacurine.plsda <- opls(dataMatrix, sampleMetadata[, "genderFc"])
+sacurine.plsda <- opls(dataMatrix, sampleMetadata[, "gender"])
 
 #### OPLS-DA
 
-sacurine.oplsda <- opls(dataMatrix, sampleMetadata[, "genderFc"], predI = 1, orthoI = NA)
+sacurine.oplsda <- opls(dataMatrix, sampleMetadata[, "gender"], predI = 1, orthoI = NA)
 
 detach(sacurine)
 

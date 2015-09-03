@@ -96,8 +96,10 @@ plot.opls <- function(x,
 
     if(x[["summaryDF"]][, "pre"] + x[["summaryDF"]][, "ort"] < 2) {
 
-        if(length(plotVc) > 1 || plotVc != "overview")
-            stop("Only the 'overview' plot is available for single component models", call. = FALSE)
+        if(!all(plotVc %in% c("permutation", "overview"))) {
+            warning("Single component model: only 'permutation' and 'overview' plot types available", call. = FALSE)
+            plotVc <- c("permutation", "overview")
+        }
 
         tCompMN <- x[["scoreMN"]]
         pCompMN <- x[["loadingMN"]]

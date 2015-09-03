@@ -146,7 +146,7 @@ plot(sacurine.pca, plotVc = "x-score", parDevNewL = FALSE)
 Let us see if we notice any partition according to gender, by labeling/coloring the samples according to the gender and drawing the Mahalanobis ellipses for the male and female subgroups (Figure \ref{fig:pcaMah}).
 
 <<eval=FALSE,results=hide>>=
-genderFc <- sampleMetadata[, "genderFc"]
+genderFc <- sampleMetadata[, "gender"]
 plot(sacurine.pca, plotVc = "x-score",
 parAsColFcVn = genderFc, parEllipsesL = TRUE)
 @
@@ -154,7 +154,7 @@ parAsColFcVn = genderFc, parEllipsesL = TRUE)
 \begin{figure}
 \begin{center}
 <<label=figPcaMah,fig=TRUE,echo=FALSE,results=hide>>=
-genderFc <- sampleMetadata[, "genderFc"]
+genderFc <- sampleMetadata[, "gender"]
 plot(sacurine.pca, plotVc = "x-score",
 parAsColFcVn = genderFc, parEllipsesL = TRUE, parDevNewL = FALSE)
 @
@@ -163,7 +163,7 @@ parAsColFcVn = genderFc, parEllipsesL = TRUE, parDevNewL = FALSE)
 \label{fig:pcaMah}
 \end{figure}
 
-Note that the plotting \textbf{par}ameter to be used \textbf{As} \textbf{Col}ors (\textbf{F}actor of \textbf{c}haracter type or \textbf{V}ector of \textbf{n}umeric type) has a length equal to the number of rows of the dataMatrix matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColFcVn = sampleMetadata[, "ageVn"]}.
+Note that the plotting \textbf{par}ameter to be used \textbf{As} \textbf{Col}ors (\textbf{F}actor of \textbf{c}haracter type or \textbf{V}ector of \textbf{n}umeric type) has a length equal to the number of rows of the dataMatrix matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColFcVn = sampleMetadata[, "age"]}.
 
 
 \subsection{Partial least-squares: PLS and PLS-DA}

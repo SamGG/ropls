@@ -73,13 +73,13 @@ test_sacurine_PLSDA <- function() {
     data(sacurine)
 
     sac.plsda <- opls(sacurine[["dataMatrix"]],
-                      matrix(sacurine[["sampleMetadata"]][, "genderFc"], ncol = 1),
+                      matrix(sacurine[["sampleMetadata"]][, "gender"], ncol = 1),
                       permI = 0, printL = FALSE, plotL = FALSE)
     checkEqualsNumeric(sac.plsda[["summaryDF"]]["h3", "Q2(cum)"],
                        0.5835585,
                        tolerance = 1e-7)
     sac.plsda <- opls(sacurine[["dataMatrix"]],
-                      sacurine[["sampleMetadata"]][, "genderFc"],
+                      sacurine[["sampleMetadata"]][, "gender"],
                       permI = 0, printL = FALSE, plotL = FALSE)
     checkEqualsNumeric(sac.plsda[["vipVn"]][5],
                        0.7034828,
@@ -88,7 +88,7 @@ test_sacurine_PLSDA <- function() {
     ## splitting the dataset between a reference and a test subsets
 
     sac.plsdaCrv <- opls(sacurine[["dataMatrix"]],
-                         sacurine[["sampleMetadata"]][, "genderFc"],
+                         sacurine[["sampleMetadata"]][, "gender"],
                          subset = setdiff(1:nrow(sacurine[["dataMatrix"]]), 1:10),
                          permI = 0, printL = FALSE, plotL = FALSE)
     checkEqualsNumeric(sac.plsdaCrv[["summaryDF"]]["h3", "RMSEP"],
@@ -105,7 +105,7 @@ test_sacurine_OPLSDA <- function() {
     data(sacurine)
 
     sac.oplsda <- opls(sacurine[["dataMatrix"]],
-                       matrix(sacurine[["sampleMetadata"]][, "genderFc"],
+                       matrix(sacurine[["sampleMetadata"]][, "gender"],
                               ncol = 1),
                        orthoI = 1,
                        permI = 0, printL = FALSE, plotL = FALSE)
@@ -118,7 +118,7 @@ test_sacurine_OPLSDA <- function() {
     ## permutation testing
 
     sac.oplsdaPer <- opls(sacurine[["dataMatrix"]],
-                          sacurine[["sampleMetadata"]][, "genderFc"],
+                          sacurine[["sampleMetadata"]][, "gender"],
                           predI = 1,
                           orthoI = 1,
                           permI = 10,
@@ -135,14 +135,14 @@ test_sacurine_PLSDA_pareto <- function() {
     data(sacurine)
 
     sac.plsdaPar <- opls(sacurine[["dataMatrix"]],
-                         matrix(sacurine[["sampleMetadata"]][, "genderFc"], ncol = 1),
+                         matrix(sacurine[["sampleMetadata"]][, "gender"], ncol = 1),
                          scaleC = "pareto",
                          permI = 0, printL = FALSE, plotL = FALSE)
     checkEqualsNumeric(sac.plsdaPar[["summaryDF"]]["h2", "Q2(cum)"],
                        0.5210747,
                        tolerance = 1e-7)
     sac.plsdaPar <- opls(sacurine[["dataMatrix"]],
-                         sacurine[["sampleMetadata"]][, "genderFc"],
+                         sacurine[["sampleMetadata"]][, "gender"],
                          scaleC = "pareto",
                          permI = 0, printL = FALSE, plotL = FALSE)
     checkEqualsNumeric(sac.plsdaPar[["vipVn"]][5],
