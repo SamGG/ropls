@@ -19,7 +19,7 @@ orthoI = 0,
 algoC = c("default", "nipals", "svd")[1],
 crossvalI = 7,
 log10L = FALSE,
-permI = 100,
+permI = 10,
 scaleC = c("center", "pareto", "standard")[3],
 subset = NULL,
 printL = TRUE,
@@ -45,7 +45,7 @@ plotL = TRUE,
   \item{predI}{
     Integer: number of components (predictive componenents in case of
     PLS and OPLS) to extract; for OPLS, predI is (automatically) set to
-    1; if set to NA [default], autofit is performed: components are
+    1; if set to NA [default], autofit is performed: a maximum of 10 components are
     extracted until (i) PCA case: the variance is less than the mean
     variance of all components (note that this rule requires all
     components to be computed and can be quite time-consuming for large
@@ -57,7 +57,7 @@ plotL = TRUE,
     to 0 [default], PLS will be performed; otherwise OPLS will be
     peformed; when set to NA, OPLS is performed and the number of
     orthogonal components is automatically computed by using the
-    cross-validation
+    cross-validation (with a maximum of 9 orthogonal components).
   }
   \item{algoC}{
     Default algorithm is 'svd' for PCA (in case of no missing values in
@@ -74,7 +74,7 @@ plotL = TRUE,
   \item{permI}{
     Integer: number of random permutations of response labels to
     estimate R2Y and Q2Y significance by permutation testing [default is
-    100 for single response models (without train/test partition), and 0 otherwise]
+    10 for single response models (without train/test partition), and 0 otherwise]
   }
   \item{scaleC}{
     Character: either mean-centering ('center'),

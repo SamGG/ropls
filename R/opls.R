@@ -10,7 +10,7 @@ opls.default <- function(x,
                          algoC = c("default", "nipals", "svd")[1],
                          crossvalI = 7,
                          log10L = FALSE,
-                         permI = 100,
+                         permI = 10,
                          scaleC = c("center",
                              "pareto",
                              "standard")[3],
@@ -91,12 +91,14 @@ opls.default <- function(x,
     if(permI < 0 || (permI - floor(permI)) > 1e-10)
         stop("'permI' must be an integer", call. = FALSE)
 
-    if(permI > 0 && (is.null(yMCN) || ncol(yMCN) > 1))
+    if(permI > 0 && (is.null(yMCN) || ncol(yMCN) > 1)) {
+        ## warning("Permutation testing available for single response (O)PLS(-DA) models only", call. = FALSE)
         permI <- 0
+    }
 
     if(permI > 0 && !is.null(subset)) {
         permI <- 0
-        warning("'permI' set to 0 because train/test partition is selected", immediate. = TRUE)
+        warning("'permI' set to 0 because train/test partition is selected", call. = FALSE)
     }
 
     if(!(algoC %in% c('default', 'nipals', 'svd')))
@@ -668,20 +670,17 @@ opls.default <- function(x,
     ##---------------
 
     autNcoL <- autNcpL <- FALSE
+    autMaxN <- 10
 
     if(is.na(orthoI)) {
-        orthoI <- 14
+        orthoI <- autMaxN - 1
         predI <- 1
         autNcoL <- TRUE
     } else if(is.na(predI)) {
-        if(orthoI > 0)
+        if(orthoI > 0) {
             predI <- 1
-        else {
-            if(is.null(yMCN))
-                predI <- min(nrow(xMN), ncol(xMN))
-            else
-                predI <- 15
-        }
+        } else
+            predI <- autMaxN
         autNcpL <- TRUE
     }
 
@@ -859,14 +858,16 @@ opls.default <- function(x,
 
         if(autNcpL) {
             vSelVl <- cumsum(varVn) / vSumVn > 0.5
-            if(sum(vSelVl) == 0)
-                predI <- max(length(varVn), 2)
-            else
-                predI <- max(which(vSelVl)[1], 2)
-            tMN <- tMN[, 1:predI]
-            pMN <- pMN[, 1:predI]
+            vSelVi <- which(vSelVl)
+            if(sum(vSelVl) == 0) {
+                warning("The maximum number of components for the automated mode (", autMaxN, ") has been reached whereas the cumulative variance ", round(tail(modelDF[, "R2X(cum)"], 1) * 100), "% is still less than 50%.", call. = FALSE)
+            } else
+                predI <- max(which(vSelVl)[1])
+
+            tMN <- tMN[, 1:predI, drop = FALSE]
+            pMN <- pMN[, 1:predI, drop = FALSE]
             varVn <- varVn[1:predI]
-            modelDF <- modelDF[1:predI, ]
+            modelDF <- modelDF[1:predI, , drop = FALSE]
         }
 
         summaryDF <- modelDF[predI, c("R2X(cum)"), drop = FALSE]
@@ -1133,9 +1134,8 @@ opls.default <- function(x,
                     modelDF[hN, "Signif."] <- "N4"
                 } else if(modelDF[hN, "Q2"] < ru1ThrN) {
                     modelDF[hN, "Signif."] <- "NS"
-                } else {
+                } else
                     modelDF[hN, "Signif."] <- "R1"
-                }
 
                 if(autNcpL && modelDF[hN, "Signif."] != "R1" && hN >= 1)
                     break
@@ -1164,6 +1164,9 @@ opls.default <- function(x,
                 if(hN == 0)
                     stop("No model was built because the first predictive component was already not significant", call. = FALSE)
 
+                if(hN == autMaxN)
+                    warning("The maximum number of components in the automated mode (", autMaxN, ") has been reached whereas R2Y (", round(modelDF[hN, 'R2Y'] * 100), "%) is still above 1% and Q2Y (", round(modelDF[hN, 'Q2'] * 100), "%) is still above ", round(ru1ThrN * 100), "%.", call. = FALSE)
+
                 wMN <- wMN[, 1:hN, drop = FALSE]
                 tMN <- tMN[, 1:hN, drop = FALSE]
                 pMN <- pMN[, 1:hN, drop = FALSE]
@@ -1174,7 +1177,7 @@ opls.default <- function(x,
 
                 predI <- hN
 
-                modelDF <- modelDF[1:hN, ]
+                modelDF <- modelDF[1:hN, , drop = FALSE]
 
             }
 
@@ -1559,11 +1562,11 @@ opls.default <- function(x,
                                 modelDF[2 + noN, "R2X"] <- sum(tcrossprod(tOrthoVn, pOrthoVn)^2) / ssxTotN
                         }
 
-                        if(modelDF[rowI, "R2Y"] < 0.01)
+                        if(modelDF[rowI, "R2Y"] < 0.01) {
                             modelDF[rowI, "Signif."] <- "N4"
-                        else if(modelDF[rowI, "Q2"] < ru1ThrN)
+                        } else if(modelDF[rowI, "Q2"] < ru1ThrN) {
                             modelDF[rowI, "Signif."] <- "NS"
-                        else
+                        } else
                             modelDF[rowI, "Signif."] <- "R1"
 
 
@@ -1611,10 +1614,16 @@ opls.default <- function(x,
 
             if(autNcoL) {
 
-                orthoI <- noN - 3
+                if(all(modelDF[, "Signif."] == "R1", na.rm = TRUE)) {
+                    orthoI <- noN - 1
+                } else
+                    orthoI <- noN - 3
 
                 if(orthoI == 0)
                     stop("No model was built because the first orthogonal component was already not significant;\nSelect a number of orthogonal components of 1 if you want the algorithm to compute a model despite this.", call. = FALSE)
+
+                if(orthoI == autMaxN - 1)
+                    warning("The maximum number of orthogonal components in the automated mode (", autMaxN - 1, ") has been reached whereas R2Y (", round(modelDF[2 + orthoI, 'R2Y'] * 100), "%) is still above 1% and Q2Y (", round(modelDF[2 + orthoI, 'Q2'] * 100), "%) is still above ", round(ru1ThrN * 100), "%.", call. = FALSE)
 
                 poMN <- poMN[, 1:orthoI, drop = FALSE]
                 toMN <- toMN[, 1:orthoI, drop = FALSE]
@@ -1623,13 +1632,13 @@ opls.default <- function(x,
                 orthoIamVc <- orthoIamVc[1:orthoI]
                 modelDF <- modelDF[c(1:(orthoI + 2), nrow(modelDF)), ]
 
-                if(naxL)
+                if(naxL) {
                     modelDF["rot", "R2X(cum)"] <- sum((tcrossprod(tMN, pMN)[!is.na(xMN)])^2) / ssxTotN
-                else
+                } else
                     modelDF["rot", "R2X(cum)"] <- sum(tcrossprod(tMN, pMN)^2) / ssxTotN
-                if(nayL)
+                if(nayL) {
                     modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum((tcrossprod(tMN, cMN)[!is.na(yMN)])^2) / ssyTotN
-                else
+                } else
                     modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum(tcrossprod(tMN, cMN)^2) / ssyTotN
                 modelDF["rot", "R2X"] <- modelDF["rot", "R2X(cum)"] - modelDF["h1", "R2X(cum)"]
                 modelDF["sum", "R2X(cum)"] <- modelDF["rot", "R2X(cum)"] + modelDF[2 + orthoI, "R2X(cum)"]

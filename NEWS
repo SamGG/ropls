@@ -1,3 +1,15 @@
+CHANGES IN VERSION 1.1.9
+------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    opls:
+        default number of permutations set to 10 (instead of 100) as a compromise to enable both quick computation and a first hint at model significance
+        maximum number of components in automated mode (predI = NA or orthoI = NA) set to 10 (instead of 15)
+    plot.opls:
+        bug corrected in case of single component model without permutation testing
+
+
 CHANGES IN VERSION 1.1.8
 ------------------------------
 
