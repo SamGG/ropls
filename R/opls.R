@@ -138,11 +138,8 @@ opls.default <- function(x,
             warning("OPLS: number of predictive components ('predI' argument) set to 1", call. = FALSE)
         }
 
-    if(!is.na(predI))
-        if(predI > min(nrow(xMN), ncol(xMN))) {
-            predI <- min(nrow(xMN), ncol(xMN))
-            warning("'predI' set to the minimum of the 'x' matrix dimensions: ", predI, call. = FALSE)
-        }
+    if(!is.na(predI) && !is.na(orthoI) && ((predI + orthoI) > min(dim(xMN))))
+        stop("The sum of 'predI' (", predI, ") and 'orthoI' (", orthoI, ") exceeds the minimum dimension of the 'x' data matrix (", min(dim(xMN)), ")" , call. = FALSE)
 
 
     ## Constants
@@ -275,7 +272,7 @@ opls.default <- function(x,
 
     xVarVarLs <- lapply(xVarIndLs,
                         function(xVarVi) {
-                            apply(xMN[xVarVi, ],
+                            apply(xMN[xVarVi, , drop = FALSE],
                                   2,
                                   function(colVn) var(colVn, na.rm = TRUE))
                         })
@@ -286,7 +283,7 @@ opls.default <- function(x,
 
     if(length(xZeroVarVi) > 0) {
         names(xZeroVarVi) <- colnames(xMN)[xZeroVarVi]
-        xMN <- xMN[, -xZeroVarVi]
+        xMN <- xMN[, -xZeroVarVi, drop = FALSE]
         warning("The variance of the ",
                 length(xZeroVarVi),
                 " following variables is less than ",
@@ -418,7 +415,7 @@ opls.default <- function(x,
         names(xVarVn) <- 1:length(xVarVn)
         xVarVn <- sort(xVarVn)
         xVarSorVin <- as.numeric(names(xVarVn[seq(1, length(xVarVn), length = opLs[["topLoadI"]])]))
-        opLs[["suppLs"]][["xSubIncVarMN"]] <- xMN[, xVarSorVin]
+        opLs[["suppLs"]][["xSubIncVarMN"]] <- xMN[, xVarSorVin, drop = FALSE]
     } else
         opLs[["suppLs"]][["xSubIncVarMN"]] <- xMN
 
@@ -670,18 +667,33 @@ opls.default <- function(x,
     ##---------------
 
     autNcoL <- autNcpL <- FALSE
-    autMaxN <- 10
+    autMaxN <- min(c(10, dim(xMN)))
 
     if(is.na(orthoI)) {
-        orthoI <- autMaxN - 1
-        predI <- 1
-        autNcoL <- TRUE
-    } else if(is.na(predI)) {
-        if(orthoI > 0) {
+        if(autMaxN == 1) {
+            orthoI <- 0
             predI <- 1
-        } else
+            warning("The data contain a single variable (or sample): A PLS model with a single component will be built", call. = FALSE)
+        } else {
+            orthoI <- autMaxN - 1
+            predI <- 1
+            autNcoL <- TRUE
+        }
+    }
+    if(is.na(predI)) {
+        if(orthoI > 0) {
+            if(autMaxN == 1) {
+                orthoI <- 0
+                warning("The data contain a single variable (or sample): A PLS model with a single component will be built", call. = FALSE)
+            } else
+                warning("OPLS(-DA): The number of predictive component is set to 1 for a single response model", call. = FALSE)
+            predI <- 1
+            if((predI + orthoI) > min(dim(xMN)))
+                stop("The sum of 'predI' (", predI, ") and 'orthoI' (", orthoI, ") exceeds the minimum dimension of the 'x' data matrix (", min(dim(xMN)), ")" , call. = FALSE)
+        } else {
             predI <- autMaxN
-        autNcpL <- TRUE
+            autNcpL <- TRUE
+        }
     }
 
 
