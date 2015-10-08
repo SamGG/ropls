@@ -77,7 +77,7 @@ file.pdfC = NULL,
   }
   \item{parEllipsesL}{
     Should the Mahalanobis ellipses be drawn? If 'NA' [default],
-    ellipses are drawn when either a parAsColVcn is provided (PCA
+    ellipses are drawn when either a character parAsColVcn is provided (PCA
     case), or when 'y' is a character factor ((O)PLS-DA cases).
   }
   \item{parLabVc}{

@@ -1,100 +1,103 @@
+CHANGES IN VERSION 1.1.11
+------------------------------
+
+NEW FEATURES
+
+    o NEWS format updated
+
 CHANGES IN VERSION 1.1.10
 ------------------------------
 
-SIGNIFICANT USER-VISIBLE CHANGES
+NEW FEATURES
 
-    opls:
-        PLS models can now be built for 'x' data with a single variable
+    o opls: PLS models can now be built for 'x' data with a single variable
         
 CHANGES IN VERSION 1.1.9
 ------------------------------
 
-SIGNIFICANT USER-VISIBLE CHANGES
+NEW FEATURES
 
-    opls:
-        default number of permutations set to 10 (instead of 100) as a compromise to enable both quick computation and a first hint at model significance
-        maximum number of components in automated mode (predI = NA or orthoI = NA) set to 10 (instead of 15)
-    plot.opls:
-        bug corrected in case of single component model without permutation testing
+    o opls: default number of permutations set to 10 (instead of 100) as a compromise to enable both quick computation and a first hint at model significance
 
+    o opls: maximum number of components in automated mode (predI = NA or orthoI = NA) set to 10 (instead of 15)
+
+    o plot.opls: bug corrected in case of single component model without permutation testing
 
 CHANGES IN VERSION 1.1.8
 ------------------------------
 
 SIGNIFICANT USER-VISIBLE CHANGES
 
-    sacurine dataset name simplification:
-        names of sample metadata are now 'age', 'bmi', and 'gender' instead of 'ageVn', 'bmiVn', and 'genderFc'
-        names of variableMetadata are now 'msiLevel', 'hmdb', 'chemicalClass' instead of 'msiLevelVn', 'hmdbVc', 'chemicalClassVc'
+    o sacurine dataset name simplification: names of sample metadata are now 'age', 'bmi', and 'gender' instead of 'ageVn', 'bmiVn', and 'genderFc'; names of variableMetadata are now 'msiLevel', 'hmdb', 'chemicalClass' instead of 'msiLevelVn', 'hmdbVc', 'chemicalClassVc'
 
 CHANGES IN VERSION 1.1.7
 ------------------------------
 
-USED INTERNALLY (NOT EXPORTED)
+NEW FEATURES
 
-    Control to avoid overfitting was strenghtened by:
-        setting the default number of permutations to 100 (instead of 0)
-        changing the default plot ("summary") to include both the "permutation" and the "overview" graphics
+    o Control to avoid overfitting was strenghtened by: i) setting the default number of permutations to 100 (instead of 0) and ii) changing the default plot ("summary") to include both the "permutation" and the "overview" graphics
 
 CHANGES IN VERSION 1.1.6
 ------------------------------
 
-USED INTERNALLY (NOT EXPORTED)
+NEW FEATURES
 
-    .sinkC argument added in the opls and plot.opls methods: Diversion of messages is required for Galaxy integration
+    o .sinkC argument added in the opls and plot.opls methods: Diversion of messages is required for Galaxy integration
 
 CHANGES IN VERSION 1.1.5
 ------------------------------
 
-SIGNIFICANT USER-VISIBLE CHANGES
+NEW FEATURES
 
-    current implementation supports two-class only classification
+    o current implementation supports two-class only classification
 
 CHANGES IN VERSION 1.1.4
 ------------------------------
 
-SIGNIFICANT USER-VISIBLE CHANGES
+NEW FEATURES
 
-    renamed slot of opls object
-        rotationMN -> weightStarMN
+    o renamed slot of opls object: rotationMN -> weightStarMN
 
 CHANGES IN VERSION 1.1.3
 ------------------------------
 
-USED INTERNALLY (NOT EXPORTED)
+NEW FEATURES
 
-    Minor internal changes regarding default ellipse plotting options and checking the compatibility between the subset size and the cross-validation fold
+    o Minor internal changes regarding default ellipse plotting options and checking the compatibility between the subset size and the cross-validation fold
 
 CHANGES IN VERSION 1.1.2
 ------------------------------
 
-USED INTERNALLY (NOT EXPORTED)
+BUG FIXES
 
-    Minor internal changes
+    o Minor internal changes
 
 CHANGES IN VERSION 1.1.1
 ------------------------------
 
-The packaging was modified (but not the algorithms) to be consistent with other machine learning packages: 'opls' is now a class and the 'print', 'plot', 'predict', 'summary', 'fitted', 'coefficients' and 'residuals' methods are available (see the vignette)
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o The packaging was modified (but not the algorithms) to be consistent with other machine learning packages: 'opls' is now a class and the 'print', 'plot', 'predict', 'summary', 'fitted', 'coefficients' and 'residuals' methods are available (see the vignette)
 
 SIGNIFICANT USER-VISIBLE CHANGES
 
-    rename
-        roplsF -> opls
-            arguments
-                testVi -> now 'subset' which indicates the indices of the training (instead of the testing) observations
-            values:
-                tMN -> scoreMN
-                pMN -> loadingMN
-                wMN -> weightMN
-                bMN -> coefficients
-                rMN -> rotationMN
-                varVn -> pcaVarVn
-                tOrthoMN -> orthoScoreMN
-                pOrthoMN -> orthoLoadingMN
-                wOrthoMN -> orthoWeightMN
+    o renamed method: roplsF -> opls
 
-    new (S3) methods for objects of class 'opls'
+    o renamed arguments
+        testVi -> now 'subset' which indicates the indices of the training (instead of the testing) observations
+
+    o values:
+        tMN -> scoreMN
+        pMN -> loadingMN
+        wMN -> weightMN
+        bMN -> coefficients
+        rMN -> rotationMN
+        varVn -> pcaVarVn
+        tOrthoMN -> orthoScoreMN
+        pOrthoMN -> orthoLoadingMN
+        wOrthoMN -> orthoWeightMN
+
+    o new (S3) methods for objects of class 'opls'
         print
         summary
         plot
@@ -106,26 +109,22 @@ SIGNIFICANT USER-VISIBLE CHANGES
 CHANGES IN VERSION 1.0.2
 ------------------------------
 
-USED INTERNALLY (NOT EXPORTED)
+NEW FEATURES
 
-    roplsF outputs
-        '.char2numF' function (required for class prediction on new datasets); replaces 'c2nLs'
-
+    o roplsF outputs: '.char2numF' function (required for class prediction on new datasets); replaces 'c2nLs'
 
 CHANGES IN VERSION 1.0.1
 ------------------------------
 
 SIGNIFICANT USER-VISIBLE CHANGES
 
-    o rename roplsF arguments (to indicate integers more explicitly)
+    o renamed roplsF arguments (to indicate integers more explicitly)
         'predN' -> 'predI'
         'orthoN' -> 'orthoI'
         'crossvalN' -> 'crossvalI'
         'permN' -> 'permI'
         'parCompVn' -> 'parCompVi'
         'parTopLoadN' -> 'parTopLoadI'
-        
-
 
 CHANGES IN VERSION 0.99.7
 ------------------------------
@@ -185,7 +184,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
         parMaiL -> parTitleL
         parNexN -> parTopLoadN		
 
-USED INTERNALLY (NOT EXPORTED)
+NEW FEATURES
 
-    ropColF -> now split between .colorF and .legendF
-    ropMahF -> now .ellipseF
+    o ropColF -> now split between .colorF and .legendF
+    o ropMahF -> now .ellipseF
