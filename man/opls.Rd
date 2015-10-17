@@ -31,7 +31,7 @@ plotL = TRUE,
 
 \arguments{
   \item{x}{
-    Numerical matrix (observations x variables); NAs are allowed
+    Numerical data frame or matrix (observations x variables); NAs are allowed
   }
   \item{y}{
     Response to be modelled: Either 1) 'NULL' for PCA (default) or

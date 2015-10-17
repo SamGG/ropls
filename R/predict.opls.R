@@ -1,6 +1,8 @@
 predict.opls <- function(object, newdata, ...) {
 
-    ## TO DO: PCA prediction
+    if(object[["typeC"]] == "PCA")
+        stop("Predictions currently available for (O)PLS(-DA) models only (not PCA)",
+             call. = FALSE)
 
     if(missing(newdata)) {
 
@@ -8,8 +10,23 @@ predict.opls <- function(object, newdata, ...) {
 
     } else {
 
-        if(class(newdata) != "matrix" || mode(newdata) != "numeric")
-            stop("'newdata' must be a numerical matrix")
+        if(is.data.frame(newdata)) {
+            if(!all(sapply(newdata, data.class) == "numeric")) {
+                stop("'newdata' data frame must contain numeric columns only", call. = FALSE)
+            } else
+                newdata <- as.matrix(newdata)
+        } else if(is.matrix(newdata)) {
+            if(mode(newdata) != "numeric")
+                stop("'newdata' matrix must be of 'numeric' mode", call. = FALSE)
+        } else
+            stop("'newdata' must be either a data.frame or a matrix", call. = FALSE)
+
+        if(ncol(newdata) != as.numeric(object[["descriptionMC"]]["X_variables", ]))
+            stop("'newdata' number of variables is ",
+                 ncol(newdata),
+                 " whereas the number of variables used for model training was ", as.numeric(object[["descriptionMC"]]["X_variables", ]),
+                 ".",
+                 call. = FALSE)
 
         if(length(object[["xZeroVarVi"]]))
             newdata <- newdata[, -object[["xZeroVarVi"]]]
@@ -59,25 +76,39 @@ predict.opls <- function(object, newdata, ...) {
 
             yTestMCN <- object[["suppLs"]][[".char2numF"]](yTesMN,
                                                            c2nL = FALSE)
-            predMNFcVcn <- as.character(yTestMCN)
-            names(predMNFcVcn) <- rownames(newdata)
-            predMNFcVcn <- factor(predMNFcVcn, levels = object[["suppLs"]][["yLevelVc"]])
+            predMCNFcVcn <- as.character(yTestMCN)
+            names(predMCNFcVcn) <- rownames(newdata)
+            predMCNFcVcn <- factor(predMCNFcVcn, levels = object[["suppLs"]][["yLevelVc"]])
 
         } else if(is.vector(object[["fitted"]])) {
 
-            predMNFcVcn <- as.vector(yTestMCN)
-            names(predMNFcVcn) <- rownames(newdata)
+            if(is.character(object[["fitted"]])) {
+
+                yTestMCN <- object[["suppLs"]][[".char2numF"]](yTesMN,
+                                                               c2nL = FALSE)
+                predMCNFcVcn <- as.character(yTestMCN)
+                names(predMCNFcVcn) <- rownames(newdata)
+
+            } else {
+
+                predMCNFcVcn <- as.numeric(yTesMN)
+                names(predMCNFcVcn) <- rownames(newdata)
+
+            }
 
         } else if(is.matrix(object[["fitted"]])) {
 
-            predMNFcVcn <- yTestMCN
-            rownames(predMNFcVcn) <- rownames(newdata)
+            if(mode(object[["fitted"]]) == "character") {
+               predMCNFcVcn  <- object[["suppLs"]][[".char2numF"]](yTesMN,
+                                                               c2nL = FALSE)
+            } else
+                predMCNFcVcn <- yTesMN
 
-        } else
-            stop() ## should not occur
+            dimnames(predMCNFcVcn) <- list(rownames(newdata), "pred")
 
+        }
 
-        return(predMNFcVcn)
+        return(predMCNFcVcn)
 
     }
 
