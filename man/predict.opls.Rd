@@ -19,7 +19,9 @@
     Object of class \code{"opls"}, created by \code{opls}.
   }
   \item{newdata}{
-    newdata
+    Either a data frame or a matrix, containing numeric columns only,
+    with the same number of columns (variables) as the 'x' used
+    for model training with 'opls'.
   }
   \item{\dots}{
     Currently not used.

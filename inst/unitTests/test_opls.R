@@ -150,3 +150,24 @@ test_sacurine_PLSDA_pareto <- function() {
                        tolerance = 1e-7)
 
 }
+
+test_sacurine_PLS_predict <- function() {
+
+    data(sacurine)
+
+    trainVi <- 1:floor(nrow(sacurine[["dataMatrix"]]) / 2)
+
+    sac.pls.tr <- opls(sacurine[["dataMatrix"]],
+                       sacurine[["sampleMetadata"]][, "age"],
+                       subset = trainVi,
+                       permI = 0, printL = FALSE, plotL = FALSE)
+    checkEqualsNumeric(as.numeric(sac.pls.tr[["descriptionMC"]]["samples", 1]),
+                       length(trainVi),
+                       tolerance = 0)
+    testVi <- setdiff(1:nrow(sacurine[["dataMatrix"]]), trainVi)
+    predVn <- predict(sac.pls.tr, sacurine[["dataMatrix"]][testVi, ])
+    checkEqualsNumeric(predVn["HU_207"],
+                       36.38991,
+                       tolerance = 1e-5)
+
+}

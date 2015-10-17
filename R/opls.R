@@ -30,8 +30,16 @@ opls.default <- function(x,
 
     ## x -> xMN
 
-    if(!is.matrix(x) || mode(x) != "numeric")
-        stop("'x' must be a matrix of 'numeric' type", call. = FALSE)
+    if(is.data.frame(x)) {
+        if(!all(sapply(x, data.class) == "numeric")) {
+            stop("'x' data frame must contain columns of 'numeric' vectors only", call. = FALSE)
+        } else
+            x <- as.matrix(x)
+    } else if(is.matrix(x)) {
+        if(mode(x) != "numeric")
+            stop("'x' matrix must be of 'numeric' mode", call. = FALSE)
+    } else
+        stop("'x' must be either a data.frame or a matrix", call. = FALSE)
 
     if(any(apply(x, 2, function(colVn) all(is.na(colVn)))))
         stop("'x' contains columns with 'NA' only", call. = FALSE)
@@ -193,8 +201,7 @@ opls.default <- function(x,
             if(c2nL) {
                 outMCN <- matrix(as.vector(c2nLs[["c2nVn"]][drop(inpMCN)]), ncol = 1)
             } else
-                outMCN <- matrix(as.vector(c2nLs[["n2cVc"]][as.character(round(drop(.DQ2F(inpMCN
-                                                                                          ))))]), ncol = 1)
+                outMCN <- matrix(as.vector(c2nLs[["n2cVc"]][as.character(round(drop(.DQ2F(inpMCN))))]), ncol = 1)
 
             dimnames(outMCN) <- dimnames(inpMCN)
             return(outMCN)
@@ -386,7 +393,9 @@ opls.default <- function(x,
     ##   Numerical results
     ##------------------------------------
 
-    opLs[["descriptionMC"]] <- rbind(samples = nrow(xMN),
+    opLs[["descriptionMC"]] <- rbind(samples = ifelse(is.null(subset),
+                                         nrow(xMN),
+                                         length(subset)),
                                      X_variables = ncol(xMN),
                                      near_zero_excluded_X_variables = length(opLs[["xZeroVarVi"]]))
 
