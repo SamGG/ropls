@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.3.2
+------------------------------
+
+NEW FEATURES
+
+    o plot.opls: 'plotVc' argument renamed 'typeVc' similarly to the default 'plot' function
+
 CHANGES IN VERSION 1.3.1
 ------------------------------
 

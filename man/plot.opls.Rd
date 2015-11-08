@@ -13,7 +13,7 @@
 \usage{
 \method{plot}{opls}(x,
 y,
-plotVc = c("correlation",
+typeVc = c("correlation",
 "outlier",
 "overview",
 "permutation",
@@ -44,7 +44,7 @@ file.pdfC = NULL,
   \item{y}{
     Currently not used.
   }
-  \item{plotVc}{
+  \item{typeVc}{
     Character vector: the following plots are available:
     'correlation': Variable correlations with the components, 'outlier':
     Observation diagnostics (score and orthogonal distances), 'overview':
@@ -112,26 +112,26 @@ file.pdfC = NULL,
 data(sacurine)
 attach(sacurine)
 
-for(plotC in c("correlation", "outlier", "overview",
+for(typeC in c("correlation", "outlier", "overview",
                "permutation", "predict-train","predict-test",
                "summary", "x-loading", "x-score", "x-variance",
                "xy-score", "xy-weight")) {
 
-    print(plotC)
+    print(typeC)
 
-    if(grepl("predict", plotC))
+    if(grepl("predict", typeC))
         subset <- "odd"
     else
         subset <- NULL
 
     opLs <- opls(dataMatrix, sampleMetadata[, "gender"],
-                 predI = ifelse(plotC != "xy-weight", 1, 2),
-                 orthoI = ifelse(plotC != "xy-weight", 1, 0),
-                 permI = ifelse(plotC == "permutation", 10, 0),
+                 predI = ifelse(typeC != "xy-weight", 1, 2),
+                 orthoI = ifelse(typeC != "xy-weight", 1, 0),
+                 permI = ifelse(typeC == "permutation", 10, 0),
                  subset = subset,
                  printL = FALSE, plotL = FALSE)
 
-    plot(opLs, plotVc = plotC)
+    plot(opLs, typeVc = typeC)
 
 }
 

@@ -24,9 +24,9 @@ data(sacurine)
 
 \format{
   A list with the following elements: 1) dataMatrix: a 183 samples x 109
-  variables [M]atrix of [N]umeric type corresponding to the intensity
+  variables matrix of numeric type corresponding to the intensity
   profiles (values have been log10-transformed); 2) sampleMetadata: a 183 x 3
-  [D]ata [F]rame, with the volunteers' age ('age', numeric), body mass
+  data frame, with the volunteers' age ('age', numeric), body mass
   index ('bmi', numeric), and gender ('gender', factor), and 3) variableMetadata: a 109 x 3 data
   frame, with the metabolites' MSI identification level ('msiLevel':
   either 1 or 2), HMDB ID when available ('hmdb', character), chemical

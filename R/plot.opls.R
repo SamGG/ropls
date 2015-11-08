@@ -1,6 +1,6 @@
 plot.opls <- function(x,
                       y,
-                      plotVc = c("correlation",
+                      typeVc = c("correlation",
                           "outlier",
                           "overview",
                           "permutation",
@@ -29,14 +29,14 @@ plot.opls <- function(x,
         sink(.sinkC, append = TRUE)
 
 
-    if("summary" %in% plotVc) {
+    if("summary" %in% typeVc) {
         if(!is.null(x[["suppLs"]][["permMN"]]))
-            plotVc <- c("permutation",
+            typeVc <- c("permutation",
                         "overview",
                         "outlier",
                         "x-score")
         else
-            plotVc <- c("overview",
+            typeVc <- c("overview",
                         "outlier",
                         "x-score",
                         "x-loading")
@@ -46,10 +46,10 @@ plot.opls <- function(x,
     ## Checking arguments
     ##-------------------
 
-    if(!all(plotVc %in% c('correlation', 'outlier', 'overview', 'permutation', 'predict-train', 'predict-test', 'x-loading', 'x-score', 'x-variance', 'xy-score', 'xy-weight')))
-        stop("'plotVc' elements must be either 'correlation', 'outlier', 'overview', 'permutation', 'predict-train', 'predict-test', 'x-loading', 'x-score', 'x-variance', 'xy-score', 'xy-weight'", call. = FALSE)
+    if(!all(typeVc %in% c('correlation', 'outlier', 'overview', 'permutation', 'predict-train', 'predict-test', 'x-loading', 'x-score', 'x-variance', 'xy-score', 'xy-weight')))
+        stop("'typeVc' elements must be either 'correlation', 'outlier', 'overview', 'permutation', 'predict-train', 'predict-test', 'x-loading', 'x-score', 'x-variance', 'xy-score', 'xy-weight'", call. = FALSE)
 
-    if('predict-test' %in% plotVc && is.null(x[["subset"]]))
+    if('predict-test' %in% typeVc && is.null(x[["subset"]]))
         stop("For the 'predict-test' graphic to be generated, 'subset' must not be kept to NULL", call. = FALSE)
 
     if(!any(is.na(parLabVc))) {
@@ -66,7 +66,7 @@ plot.opls <- function(x,
             stop("'parAsColFcVn' must be of 'character' or 'numeric' type")
     }
 
-    if(is.null(x[["suppLs"]][["permMN"]]) && 'permutation' %in% plotVc)
+    if(is.null(x[["suppLs"]][["permMN"]]) && 'permutation' %in% typeVc)
         stop("'permI' must be > 0 for 'permutation' graphic to be plotted", call. = FALSE)
 
     if(x[["summaryDF"]][, "ort"] > 0)
@@ -75,13 +75,13 @@ plot.opls <- function(x,
             warning("OPLS: first component to display ('parCompVi' first value) set to 1", call. = FALSE)
         }
 
-    if("xy-weight" %in% plotVc &&
+    if("xy-weight" %in% typeVc &&
        substr(x[["typeC"]], 1, 3) != "PLS")
        ## (is.null(yMCN) || is.na(x[["summaryDF"]][, "ort"]) || x[["summaryDF"]][, "ort"] > 0))
         stop("'xy-weight graphic can be displayed only for PLS(-DA) models", call. = FALSE)
 
-    if(any(grepl('predict', plotVc)) && is.matrix(x[["fitted"]]) && ncol(x[["fitted"]]) > 1)
-        ## if(any(grepl('predict', plotVc)) && (is.null(yMCN) || ncol(yMCN) != 1))
+    if(any(grepl('predict', typeVc)) && is.matrix(x[["fitted"]]) && ncol(x[["fitted"]]) > 1)
+        ## if(any(grepl('predict', typeVc)) && (is.null(yMCN) || ncol(yMCN) != 1))
         stop("'predict' graphics available for single response models only", call. = FALSE)
 
     if(is.na(parEllipsesL)) {
@@ -96,11 +96,11 @@ plot.opls <- function(x,
 
     if(x[["summaryDF"]][, "pre"] + x[["summaryDF"]][, "ort"] < 2) {
 
-        if(!all(plotVc %in% c("permutation", "overview"))) {
+        if(!all(typeVc %in% c("permutation", "overview"))) {
             warning("Single component model: only 'overview' and 'permutation' (in case of single response (O)PLS(-DA)) plots available", call. = FALSE)
-            plotVc <- "overview"
+            typeVc <- "overview"
             if(!is.null(x[["suppLs"]][["permMN"]]))
-                plotVc <- c("permutation", plotVc)
+                typeVc <- c("permutation", typeVc)
         }
 
         tCompMN <- x[["scoreMN"]]
@@ -225,11 +225,11 @@ plot.opls <- function(x,
     ## Layout
     ##-------
 
-    if(!parDevNewL && length(plotVc) != 1)
-        stop("'plotVc' must be of length 1 when 'parDevNewL' is set to FALSE", call. = FALSE)
+    if(!parDevNewL && length(typeVc) != 1)
+        stop("'typeVc' must be of length 1 when 'parDevNewL' is set to FALSE", call. = FALSE)
 
     if(parDevNewL) {
-        layRowN <- ceiling(sqrt(length(plotVc)))
+        layRowN <- ceiling(sqrt(length(typeVc)))
         if(is.null(file.pdfC))
             dev.new()
         else
@@ -237,7 +237,7 @@ plot.opls <- function(x,
         layout(matrix(1:layRowN^2, byrow = TRUE, nrow = layRowN))
     }
 
-    layL <- !parDevNewL || length(plotVc) > 1
+    layL <- !parDevNewL || length(typeVc) > 1
 
 
     ## Par
@@ -256,7 +256,7 @@ plot.opls <- function(x,
     ## Graph
     ##------
 
-    for(ploC in plotVc)
+    for(ploC in typeVc)
         .plotF(ploC,
                opLs = x,
                obsColVc = obsColVc,
@@ -267,7 +267,7 @@ plot.opls <- function(x,
                parEllipsesL = parEllipsesL,
                parTitleL = parTitleL,
                parCompVi = parCompVi,
-               plotVc = plotVc,
+               typeVc = typeVc,
                tCompMN = tCompMN,
                pCompMN = pCompMN,
                cxtCompMN = cxtCompMN,
@@ -308,7 +308,7 @@ plot.opls <- function(x,
                    parEllipsesL,
                    parTitleL,
                    parCompVi,
-                   plotVc,
+                   typeVc,
                    tCompMN,
                    pCompMN,
                    cxtCompMN,
@@ -520,7 +520,7 @@ plot.opls <- function(x,
                  labels = corNamVc[corPexVi],
                  pos = 3)
 
-            if(opLs[["typeC"]] != "PCA" && length(plotVc) == 1)
+            if(opLs[["typeC"]] != "PCA" && length(typeVc) == 1)
                 legend("topleft",
                        pch = c(18, 15),
                        legend = c("X vars", "Y vars"))

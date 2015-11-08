@@ -240,7 +240,7 @@ cornell.pls <- opls(as.matrix(cornell[, grep("x", colnames(cornell))]),
 
 ## Complementary graphics
 
-plot(cornell.pls, plotVc = c("outlier", "predict-train", "xy-score", "xy-weight"))
+plot(cornell.pls, typeVc = c("outlier", "predict-train", "xy-score", "xy-weight"))
 
 #### PLS with multiple (quantitative) responses
 
