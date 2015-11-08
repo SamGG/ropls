@@ -123,7 +123,7 @@ A summary of the model (8 components were selected) is printed. In addition the 
 To plot the scores only (Figure \ref{fig:pca}):
 
 <<eval=FALSE,results=hide>>=
-plot(sacurine.pca, plotVc = "x-score")
+plot(sacurine.pca, typeVc = "x-score")
 @
 
 Note:
@@ -135,7 +135,7 @@ Note:
 \begin{figure}
 \begin{center}
 <<label=figPca,fig=TRUE,echo=FALSE,results=hide>>=
-plot(sacurine.pca, plotVc = "x-score", parDevNewL = FALSE)
+plot(sacurine.pca, typeVc = "x-score", parDevNewL = FALSE)
 @
 
 \end{center}
@@ -147,7 +147,7 @@ Let us see if we notice any partition according to gender, by labeling/coloring 
 
 <<eval=FALSE,results=hide>>=
 genderFc <- sampleMetadata[, "gender"]
-plot(sacurine.pca, plotVc = "x-score",
+plot(sacurine.pca, typeVc = "x-score",
 parAsColFcVn = genderFc, parEllipsesL = TRUE)
 @
 
@@ -155,7 +155,7 @@ parAsColFcVn = genderFc, parEllipsesL = TRUE)
 \begin{center}
 <<label=figPcaMah,fig=TRUE,echo=FALSE,results=hide>>=
 genderFc <- sampleMetadata[, "gender"]
-plot(sacurine.pca, plotVc = "x-score",
+plot(sacurine.pca, typeVc = "x-score",
 parAsColFcVn = genderFc, parEllipsesL = TRUE, parDevNewL = FALSE)
 @
 \end{center}
@@ -180,7 +180,7 @@ sacurine.plsda <- opls(dataMatrix, genderFc, plotL = FALSE)
 \begin{figure}
 \begin{center}
 <<label=figPls,fig=TRUE,echo=FALSE,results=hide>>=
-plot(sacurine.plsda, plotVc = "x-score", parDevNewL = FALSE)
+plot(sacurine.plsda, typeVc = "x-score", parDevNewL = FALSE)
 @
 \end{center}
 \caption{PLS-DA model of the \emph{gender} response (\texttt{score} plot). The number of components and the cumulative R2X, R2Y and Q2Y are indicated below the plot.}
@@ -212,7 +212,7 @@ predI = 1, orthoI = NA, plotL = FALSE)
 \begin{figure}
 \begin{center}
 <<label=figOpl,fig=TRUE,echo=FALSE,results=hide>>=
-plot(sacurine.oplsda, plotVc = "x-score", parDevNewL = FALSE)
+plot(sacurine.oplsda, typeVc = "x-score", parDevNewL = FALSE)
 @
 \end{center}
 \caption{OPLS-DA model of the \emph{gender} response (\texttt{score} plot). The predictive component is displayed as abscissa and the orthogonal component as ordinate.}
@@ -263,7 +263,7 @@ toLatex(sessionInfo())
 \section{Pre-processing and annotation of mass spectrometry data}
 
 
-To illustrate how \emph{dataMatrix}, \emph{sampleMetadata} and \emph{variableMetadata} can be obtained from raw mass spectra file, we use the LC-MS data from the \emph{faahKO} package \cite{Saghatelian2004}, which will pre-process with the \emph{xcms} package \cite{Smith2006} and annotate isotopes and adducts with the \emph{CAMERA} package \cite{Kuhl2012}, as described in the corresponding vignettes (all these packages are from \emph{bioconductor}).
+To illustrate how \emph{dataMatrix}, \emph{sampleMetadata} and \emph{variableMetadata} can be obtained from raw mass spectra file, we use the LC-MS data from the \emph{faahKO} package \cite{Saghatelian2004}. We will pre-process the raw files with the \emph{xcms} package \cite{Smith2006} and annotate isotopes and adducts with the \emph{CAMERA} package \cite{Kuhl2012}, as described in the corresponding vignettes (all these packages are from \emph{bioconductor}).
 
 Let us start by getting the paths to the 12 raw files (6 KO and 6 WT mice) in the ".cdf" open format. The files are grouped in two sub-directories ("KO" and "WT") since \emph{xcms} can use sample class information when grouping the peaks and correcting retention times.
 

@@ -36,8 +36,8 @@ computational metabolomics (built upon the Galaxy environment).
   \tabular{ll}{
     Package: \tab ropls\cr
     Type: \tab Package\cr
-    Version: \tab 1.2.1\cr
-    Date: \tab 2015-10-17\cr
+    Version: \tab 1.2.2\cr
+    Date: \tab 2015-11-08\cr
     License: \tab CeCILL\cr
     LazyLoad: \tab yes\cr
   }
@@ -76,7 +76,7 @@ head(cornell)
 cornell.pls <- opls(as.matrix(cornell[, grep("x", colnames(cornell))]),
                     cornell[, "y"])
 ## Complementary graphics
-plot(cornell.pls, plotVc = c("outlier", "predict-train", "xy-score", "xy-weight"))
+plot(cornell.pls, typeVc = c("outlier", "predict-train", "xy-score", "xy-weight"))
 
 #### PLS with multiple (quantitative) responses
 

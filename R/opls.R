@@ -567,7 +567,7 @@ opls.default <- function(x,
     ##---------
 
     if(plotL)
-        plot(opLs, plotVc = "summary")
+        plot(opLs, typeVc = "summary")
 
     ## Closing connection
     ##-------------------
