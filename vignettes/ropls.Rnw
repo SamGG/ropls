@@ -189,12 +189,16 @@ plot(sacurine.plsda, typeVc = "x-score", parDevNewL = FALSE)
 
 Note:
 \begin{enumerate}
-\item For (O)PLS modeling of a single response, the significance of R2Y and Q2Y are estimated permutation testing (and displayed as the first \texttt{permutation} graphic) in order to check that the R2Y and Q2Y of the model with the true response are higher than the values obtained after randomly permutating the values of the response (The default number of permutations is 100 and can be increased with the \texttt{permI} parameter to further confirm the significance)
-\item The NIPALS algorithm is used for PLS (and OPLS); \emph{dataMatrix} matrices with (a moderate amount of) missing values can thus be analysed,
-\item As for PCA, the default \texttt{predI} value is NA: components are computed until either R2Y of the component is < 0.01 or Q2Y is < 0 (for more than 100 observations) or 0.05 otherwise.
+\item When set to NA (as in the default), the number of components \texttt{predI} is determined automatically as follows (\cite{Eriksson2001}): A new component \emph{h} is added to the model if :
+\begin{enumerate}
+\item $R2Y_h \geq 1\%$, i.e., the percentage of Y dispersion (i.e., sum of squares) explained by component \emph{h} is more than 1\%, and
+\item $Q2Y_h=1-PRESS_h/RSS_{h-1} \geq 0$ (or 5\% when the number of samples is less than 100), i.e., the predicted residual sum of squares ($PRESS_h$) of the model including the new component \emph{h} estimated by 7-fold cross-validation is less than the residual sum of squares ($RSS_{h-1}$) of the model with the previous components only (with $RSS_0$ being the sum of squared Y values).
+\end{enumerate}
+\item The predictive performance of the full model is assessed by the cumulative Q2Y metric: $Q2Y=1-\prod\limits_{h=1}^r (1-Q2Y_h)$. We have $Q2Y \in [0,1]$, and the higher the Q2Y, the better the performance. Models trained on datasets with a larger number of features compared with the number of samples can be prone to overfitting: in that case, high Q2Y values are obtained by chance only. To estimate the significance of Q2Y (and R2Y) for single response models, permutation testing can be used \cite{Szymanska2012}: models are built after random permutation of the Y values, and $Q2Y_{perm}$ are computed. The \textit{p}-value is equal to the proportion of $Q2Y_{perm}$ above $Q2Y$ (the default number of permutations is 100 as a compromise between quality control and computation speed; it can be increased with the \texttt{permI} parameter to further confirm the significance of the model),
+\item The NIPALS algorithm is used for PLS (and OPLS); \emph{dataMatrix} matrices with (a moderate amount of) missing values can thus be analysed.
 \end{enumerate}
 
-We see that our model with 3 predictive (\texttt{pre}) components has significant and quite high (cum)ulative R2Y and Q2Y.
+We see that our model with 3 predictive (\texttt{pre}) components has significant and quite high R2Y and Q2Y values.
 
 \subsection{Orthogonal partial least squares: OPLS and OPLS-DA}
 
