@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.2.4
+------------------------------
+
+NEW FEATURES
+
+    o vignette: minor correction in the default number of permutations for single response (O)PLS(-DA) models
+
 CHANGES IN VERSION 1.2.3
 ------------------------------
 
