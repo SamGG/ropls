@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.2.5
+------------------------------
+
+NEW FEATURES
+
+    o unit tests: warning message corrected in order to allow test coverage display on the Bioconductor page
+    
 CHANGES IN VERSION 1.2.4
 ------------------------------
 
