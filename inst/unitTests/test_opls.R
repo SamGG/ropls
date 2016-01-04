@@ -107,6 +107,7 @@ test_sacurine_OPLSDA <- function() {
     sac.oplsda <- opls(sacurine[["dataMatrix"]],
                        matrix(sacurine[["sampleMetadata"]][, "gender"],
                               ncol = 1),
+                       predI = 1,
                        orthoI = 1,
                        permI = 0, printL = FALSE, plotL = FALSE)
     checkEqualsNumeric(sac.oplsda[["orthoScoreMN"]][1, 1],
