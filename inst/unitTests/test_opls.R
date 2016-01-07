@@ -1,3 +1,65 @@
+test_str <- function() {
+
+    data(foods)
+
+    strF(foods)
+    strF(foods, border = 3)
+
+    fatML <- matrix(TRUE, nrow = 1, ncol = 1000)
+    strF(fatML, bigMarkC = "'")
+
+    testMC <- matrix("a", nrow = 10, ncol = 10)
+    strF(testMC)
+
+    data(sacurine)
+
+    strF(sacurine[["dataMatrix"]])
+
+    strF(sacurine[["sampleMetadata"]])
+
+}
+
+test_plot <- function() {
+
+    data(sacurine)
+
+    for(typeC in c("correlation", "outlier", "overview",
+               "permutation", "predict-train","predict-test",
+               "summary", "x-loading", "x-score", "x-variance",
+               "xy-score", "xy-weight")) {
+
+        if(grepl("predict", typeC))
+            subset <- "odd"
+        else
+            subset <- NULL
+
+        opLs <- opls(sacurine[["dataMatrix"]],
+                     sacurine[["sampleMetadata"]][, "gender"],
+                     predI = ifelse(typeC != "xy-weight", 1, 2),
+                     orthoI = ifelse(typeC != "xy-weight", 1, 0),
+                     permI = ifelse(typeC == "permutation", 10, 0),
+                     subset = subset,
+                     printL = FALSE, plotL = FALSE)
+
+        plot(opLs, typeVc = typeC)
+
+    }
+
+}
+
+test_print <- function() {
+
+    data(sacurine)
+    pcaLs <- opls(sacurine[["dataMatrix"]], predI = 2, printL = FALSE, plotL = FALSE)
+    print(pcaLs)
+    plsLs <- opls(sacurine[["dataMatrix"]],
+                  sacurine[["sampleMetadata"]][, "gender"],
+                  predI = 2, printL = FALSE, plotL = FALSE)
+    print(plsLs)
+
+
+}
+
 test_PCA <- function() {
 
     data(foods)
@@ -156,6 +218,26 @@ test_sacurine_PLS_predict <- function() {
 
     data(sacurine)
 
+    sac.opls <- opls(sacurine[["dataMatrix"]],
+                     sacurine[["sampleMetadata"]][, "age"],
+                     predI = 1,
+                     orthoI = 1,
+                     permI = 0, printL = FALSE, plotL = FALSE)
+    checkEqualsNumeric(predict(sac.opls)[107],
+                       42.97439,
+                       tolerance = 1e-5)
+
+    sac.opls <- opls(sacurine[["dataMatrix"]],
+                     sacurine[["sampleMetadata"]][, "gender"],
+                     predI = 1,
+                     orthoI = 1,
+                     permI = 0, printL = FALSE, plotL = FALSE)
+    pred107Fc <- "M"
+    names(pred107Fc) <- "HU_125"
+    pred107Fc <- factor(pred107Fc, levels = c("M", "F"))
+    checkEquals(predict(sac.opls)[107],
+                pred107Fc)
+
     trainVi <- 1:floor(nrow(sacurine[["dataMatrix"]]) / 2)
 
     sac.pls.tr <- opls(sacurine[["dataMatrix"]],
@@ -165,6 +247,9 @@ test_sacurine_PLS_predict <- function() {
     checkEqualsNumeric(as.numeric(sac.pls.tr[["descriptionMC"]]["samples", 1]),
                        length(trainVi),
                        tolerance = 0)
+    checkEqualsNumeric(predict(sac.pls.tr)[90],
+                       42.94277,
+                       tolerance = 1e-5)
     testVi <- setdiff(1:nrow(sacurine[["dataMatrix"]]), trainVi)
     predVn <- predict(sac.pls.tr, sacurine[["dataMatrix"]][testVi, ])
     checkEqualsNumeric(predVn["HU_207"],
