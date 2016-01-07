@@ -105,43 +105,33 @@ strF(variableMetadata)
 
 We perform a PCA on the \emph{dataMatrix} matrix (samples as rows, variables as columns):
 
-<<eval=FALSE,results=hide>>=
+<<echo=TRUE, eval=FALSE>>=
 sacurine.pca <- opls(dataMatrix)
 @
+
 <<echo=FALSE>>=
 sacurine.pca <- opls(dataMatrix, plotL = FALSE)
 @
 
-A summary of the model (8 components were selected) is printed. In addition the default \texttt{summary} 4-plot figure displays:
-\begin{enumerate}
-\item An inertia \texttt{overview} barplot (or \emph{scree} plot): The graphic here suggests that 3 components may be sufficient to capture most of the inertia (see below),
-\item \texttt{outlier} diagnostics (distances within and orthogonal to the projection plane; \cite{Hubert2005}): The name of the samples with a high value for at least one of the distances are indicated,
-\item The \texttt{x-score} plot,
-\item The \texttt{x-loading} plot.
-\end{enumerate}
-
-To plot the scores only (Figure \ref{fig:pca}):
-
-<<eval=FALSE,results=hide>>=
-plot(sacurine.pca, typeVc = "x-score")
+\begin{figure}
+\begin{center}
+<<label=figPca,fig=TRUE,echo=FALSE,results=hide>>=
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("overview", "outlier", "x-score", "x-loading"))
+plot(sacurine.pca, typeVc = typeC, parDevNewL = FALSE)
 @
+\end{center}
+\caption{PCA \texttt{summary} plot. Top left \texttt{overview}: the \emph{scree} plot (i.e., inertia barplot) suggests that 3 components may be sufficient to capture most of the inertia; Top right \texttt{outlier}: this graphics shows the distances within and orthogonal to the projection plane (\cite{Hubert2005}): the name of the samples with a high value for at least one of the distances are indicated; Bottom left \texttt{x-score}; Bottom right \texttt{x-loading}.}
+\label{fig:pca}
+\end{figure}
+
+A summary of the model (8 components were selected) is printed. In addition the default \texttt{summary} figure is displayed (Figure~\ref{fig:pca}).
 
 Note:
 \begin{enumerate}
 \item Since \emph{dataMatrix} does not contain missing value, the singular value decomposition was used by default; NIPALS can be selected with the \texttt{algoC} argument specifying the \textbf{algo}rithm (\textbf{C}haracter),
 \item The \texttt{predI = NA} default number of \textbf{pred}ictive components (\textbf{I}nteger) means that only components with a variance superior to the mean variance of all components are kept (note that this rule requires all components to be computed and can be quite time-consuming for large datasets with the NIPALS algorithm; in such cases, one may specify a limited number of components with the \texttt{predI} parameter).
 \end{enumerate}
-
-\begin{figure}
-\begin{center}
-<<label=figPca,fig=TRUE,echo=FALSE,results=hide>>=
-plot(sacurine.pca, typeVc = "x-score", parDevNewL = FALSE)
-@
-
-\end{center}
-\caption{PCA \texttt{score} plot. The displayed components can be specified with \texttt{parCompVi} (plotting \textbf{par}ameter specifying the \textbf{Comp}onents: \textbf{V}ector of 2 \textbf{i}ntegers)}
-\label{fig:pca}
-\end{figure}
 
 Let us see if we notice any partition according to gender, by labeling/coloring the samples according to the gender and drawing the Mahalanobis ellipses for the male and female subgroups (Figure \ref{fig:pcaMah}).
 
@@ -158,17 +148,18 @@ genderFc <- sampleMetadata[, "gender"]
 plot(sacurine.pca, typeVc = "x-score",
 parAsColFcVn = genderFc, parEllipsesL = TRUE, parDevNewL = FALSE)
 @
+
 \end{center}
-\caption{PCA \texttt{score} plot colored according to \emph{gender}.}
+\caption{PCA \texttt{score} plot colored according to \emph{gender}. The displayed components can be specified with \texttt{parCompVi} (plotting \textbf{par}ameter specifying the \textbf{Comp}onents: \textbf{V}ector of 2 \textbf{i}ntegers)}
 \label{fig:pcaMah}
 \end{figure}
 
-Note that the plotting \textbf{par}ameter to be used \textbf{As} \textbf{Col}ors (\textbf{F}actor of \textbf{c}haracter type or \textbf{V}ector of \textbf{n}umeric type) has a length equal to the number of rows of the dataMatrix matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the age of the individuals by specifying \texttt{parAsColFcVn = sampleMetadata[, "age"]}.
+Note that the plotting \textbf{par}ameter to be used \textbf{As} \textbf{Col}ors (\textbf{F}actor of \textbf{c}haracter type or \textbf{V}ector of \textbf{n}umeric type) has a length equal to the number of rows of the dataMatrix matrix (ie of samples) and that this qualitative or quantitative variable is converted into colors (by using an internal palette or color scale, respectively). We could have visualized the \emph{age} of the individuals by specifying \texttt{parAsColFcVn = sampleMetadata[, "age"]}.
 
 
 \subsection{Partial least-squares: PLS and PLS-DA}
 
-For PLS (and OPLS), the Y response(s) must be provided. Y can be either a numeric vector (respectively matrix) for single (respectively multiple) (O)PLS regression, or a character factor for (O)PLS-DA classification as in the following example (The score plot is displayed on Figure \ref{fig:pls}).
+For PLS (and OPLS), the \textbf{Y} response(s) must be provided. \textbf{Y} can be either a numeric vector (respectively matrix) for single (respectively multiple) (O)PLS regression, or a character factor for (O)PLS-DA classification as in the following example (Figure \ref{fig:pls}).
 
 <<eval=FALSE,results=hide>>=
 sacurine.plsda <- opls(dataMatrix, genderFc)
@@ -180,10 +171,12 @@ sacurine.plsda <- opls(dataMatrix, genderFc, plotL = FALSE)
 \begin{figure}
 \begin{center}
 <<label=figPls,fig=TRUE,echo=FALSE,results=hide>>=
-plot(sacurine.plsda, typeVc = "x-score", parDevNewL = FALSE)
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("permutation", "overview", "outlier", "x-score"))
+plot(sacurine.plsda, typeVc = typeC, parDevNewL = FALSE)
 @
 \end{center}
-\caption{PLS-DA model of the \emph{gender} response (\texttt{score} plot). The number of components and the cumulative R2X, R2Y and Q2Y are indicated below the plot.}
+\caption{PLS-DA model of the \emph{gender} response. The default \texttt{overview} figure displays: Top left: \emph{significance} diagnostic: the $R2Y$ and $Q2Y$ of the model are compared with the corresponding values obtained after random permutation of the \textbf{y} response; Top right: \emph{inertia} barplot: the graphic here suggests that 3 orthogonal components may be sufficient to capture most of the inertia; Bottom left: \emph{outlier} diagnostics (see Figure~\ref{fig:pca}); Bottom right: \emph{X-score} plot: the number of components and the cumulative $R2X$, $R2Y$ and $Q2Y$ are indicated below the plot.}
 \label{fig:pls}
 \end{figure}
 
@@ -216,10 +209,12 @@ predI = 1, orthoI = NA, plotL = FALSE)
 \begin{figure}
 \begin{center}
 <<label=figOpl,fig=TRUE,echo=FALSE,results=hide>>=
-plot(sacurine.oplsda, typeVc = "x-score", parDevNewL = FALSE)
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("permutation", "overview", "outlier", "x-score"))
+plot(sacurine.oplsda, typeVc = typeC, parDevNewL = FALSE)
 @
 \end{center}
-\caption{OPLS-DA model of the \emph{gender} response (\texttt{score} plot). The predictive component is displayed as abscissa and the orthogonal component as ordinate.}
+\caption{OPLS-DA model of the \emph{gender} response. In the (\texttt{score} plot), the predictive component is displayed as abscissa and the (selected; default = 1) orthogonal component as ordinate.}
 \label{fig:opl}
 \end{figure}
 
@@ -229,7 +224,7 @@ Let us assess the predictive performance of our model. We first train the model 
 sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA, subset = "odd")
 @
 <<echo=FALSE>>=
-sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA, subset = "odd", plotL = FALSE)
+sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA, permI = 0, subset = "odd", plotL = FALSE)
 @
 
 We compute the performances on the training subset:
