@@ -13,7 +13,7 @@ strF <- function(inpMF,
                                        class = class(inpMF),
                                        mode = mode(inpMF),
                                        typeof = typeof(inpMF),
-                                       size = format(object.size(inpMF), big.mark = bigMarkC))
+                                       size = format(object.size(inpMF), units = "Mb"))
 
                    if(numL)
                        topDF <- cbind.data.frame(topDF,
@@ -36,7 +36,7 @@ strF <- function(inpMF,
                                        class = class(inpMF),
                                        mode = mode(inpMF),
                                        typeof = typeof(inpMF),
-                                       size = format(object.size(inpMF), big.mark = bigMarkC),
+                                       size = format(object.size(inpMF), units = "Mb"),
                                        NAs = length(which(is.na(inpMF))))
 
                    if(numL)
@@ -57,16 +57,15 @@ strF <- function(inpMF,
 
                    claVc <- sapply(inpMF, data.class)
 
-                   if(length(claVc) <= 2) {
-                       claVc <- claVc
-                   } else
+                   if(length(claVc) > 2 * borderN)
                        claVc <- c(head(claVc, borderN),
                                   "...",
                                   tail(claVc, borderN))
 
                    if(!is.null(names(claVc))) {
 
-                       names(claVc)[borderN + 1] <- "..."
+                       if(length(claVc) > 2 * borderN)
+                           names(claVc)[borderN + 1] <- "..."
 
                        claDF <- as.data.frame(t(claVc))
 
@@ -85,7 +84,7 @@ strF <- function(inpMF,
 
                    topDF <- data.frame(nRow = format(dim(inpMF)[1], big.mark = bigMarkC),
                                        nCol = format(dim(inpMF)[2], big.mark = bigMarkC),
-                                       size = format(object.size(inpMF), big.mark = bigMarkC),
+                                       size = format(object.size(inpMF), units = "Mb"),
                                        NAs = length(which(is.na(inpMF))))
                }) ## data.frame
 
@@ -102,46 +101,99 @@ strF <- function(inpMF,
 
             tabDF <- inpMF
 
-            if(class(inpMF) == "matrix")
-                tabDF <- as.data.frame(tabDF)
+            dimAbbVl <- dim(tabDF) > 2 * borderN
 
-            dimAbbVl <- rep(TRUE, 2)
+            if(is.data.frame(tabDF)) {
+                if(dimAbbVl[2]) {
+                    bordColVi <- c(1:borderN,
+                                   (ncol(tabDF) - borderN + 1):ncol(tabDF))
+                } else
+                    bordColVi <- 1:ncol(tabDF)
 
-            ## checking arguments dimensions
-
-            if(all(dim(tabDF) < 4)) {
-                stop("Table row or col dimension must be at least 4 to be abbreviated")
-            } else
-                dimAbbVl <- dimAbbVl & 6 <= dim(tabDF)
+                for(borderI in bordColVi)
+                    if(is.factor(tabDF[, borderI]))
+                        tabDF[, borderI] <- as.character(tabDF[, borderI])
+            }
 
             if(all(dimAbbVl)) {
 
-                tabClaVc <- sapply(tabDF, data.class)
-
-                tabDF <- rbind(cbind(tabDF[1:borderN, 1:borderN],
+                tabDF <- rbind(cbind(tabDF[1:borderN, 1:borderN, drop = FALSE],
                                      ... = rep("...", times = borderN),
-                                     tabDF[1:borderN, (ncol(tabDF) - borderN + 1):ncol(tabDF)]),
-                               ifelse(c(tabClaVc[1:borderN], "...", tabClaVc[(ncol(tabDF) - borderN + 1):ncol(tabDF)]) == "factor", NA, "..."),
-                               cbind(tabDF[(nrow(tabDF) - borderN + 1):nrow(tabDF), 1:borderN],
+                                     tabDF[1:borderN, (ncol(tabDF) - borderN + 1):ncol(tabDF), drop = FALSE]),
+                               rep("...", 2 * borderN + 1),
+                               cbind(tabDF[(nrow(tabDF) - borderN + 1):nrow(tabDF), 1:borderN, drop = FALSE],
                                      ... = rep("...", times = borderN),
-                                     tabDF[(nrow(tabDF) - borderN + 1):nrow(tabDF), (ncol(tabDF) - borderN + 1):ncol(tabDF)]))
+                                     tabDF[(nrow(tabDF) - borderN + 1):nrow(tabDF), (ncol(tabDF) - borderN + 1):ncol(tabDF), drop = FALSE]))
 
-                rownames(tabDF)[borderN + 1] <- "..."
+                if(is.matrix(inpMF)) {
+
+                    if(!is.null(rownames(inpMF)) && any(duplicated(rownames(tabDF)))) {
+                        rownames(tabDF) <- make.names(rownames(tabDF),
+                                                      unique = TRUE)
+                    } else
+                        rownames(tabDF) <- c(1:borderN,
+                                             "...",
+                                             (nrow(inpMF) - borderN + 1):nrow(inpMF))
+
+                    if(is.null(colnames(inpMF)))
+                        colnames(tabDF) <- c(1:borderN,
+                                             "...",
+                                             (ncol(inpMF) - borderN + 1):ncol(inpMF))
+
+                    tabDF <- as.data.frame(tabDF)
+
+                } else
+                    rownames(tabDF)[borderN + 1] <- "..."
 
             } else if(dimAbbVl[1]) {
 
-                tabClaVc <- sapply(tabDF, data.class)
+                if(is.data.frame(tabDF) && is.null(colnames(tabDF)))
+                    colnames(tabDF) <- 1:ncol(tabDF)
 
-                tabDF <- rbind(tabDF[1:borderN, ],
-                               ifelse(tabClaVc == "factor", NA, "..."),
-                               tabDF[(nrow(tabDF) - borderN + 1):nrow(tabDF), ])
+                tabDF <- rbind(tabDF[1:borderN, , drop = FALSE],
+                               rep("...", ncol(tabDF)),
+                               tabDF[(nrow(tabDF) - borderN + 1):nrow(tabDF), , drop = FALSE])
 
-                rownames(tabDF)[borderN + 1] <- "..."
+                if(is.matrix(inpMF)) {
 
-            } else
-                tabDF <- cbind(tabDF[, 1:borderN],
+                    if(!is.null(rownames(inpMF)) && any(duplicated(rownames(tabDF)))) {
+                        rownames(tabDF) <- make.names(rownames(tabDF),
+                                                      unique = TRUE)
+                    } else
+                        rownames(tabDF) <- c(1:borderN,
+                                             "...",
+                                             (nrow(inpMF) - borderN + 1):nrow(inpMF))
+
+                    if(is.null(colnames(inpMF)))
+                        colnames(tabDF) <- 1:ncol(inpMF)
+
+                    tabDF <- as.data.frame(tabDF)
+
+                } else
+                    rownames(tabDF)[borderN + 1] <- "..."
+
+            } else if(dimAbbVl[2]) {
+
+                tabDF <- cbind(tabDF[, 1:borderN, drop = FALSE],
                                ... = rep("...", times = nrow(tabDF)),
-                               tabDF[, (ncol(tabDF) - borderN + 1):ncol(tabDF)])
+                               tabDF[, (ncol(tabDF) - borderN + 1):ncol(tabDF), drop = FALSE])
+
+                if(is.matrix(inpMF)) {
+
+                    if(!is.null(rownames(inpMF)) && any(duplicated(rownames(tabDF))))
+                        rownames(tabDF) <- make.names(rownames(tabDF),
+                                                      unique = TRUE)
+
+                    if(is.null(colnames(inpMF)))
+                        colnames(tabDF) <- c(1:borderN,
+                                             "...",
+                                             (ncol(inpMF) - borderN + 1):ncol(inpMF))
+
+                    tabDF <- as.data.frame(tabDF)
+
+                }
+
+            }
 
         } ## 'data.frame' and 'matrix'
 
@@ -152,16 +204,18 @@ strF <- function(inpMF,
             if(numL)
                 tabDF <- round(tabDF, 3)
 
-            if(length(tabDF) <= 2) {
-                tabDF <- tabDF
-            } else
+            if(length(tabDF) > 2 * borderN) {
+
                 tabDF <- c(head(tabDF, borderN),
                            "...",
                            tail(tabDF, borderN))
 
-            if(!is.null(names(inpMF))) {
+                if(!is.null(names(inpMF)))
+                    names(tabDF)[borderN + 1] <- "..."
 
-                names(tabDF)[borderN + 1] <- "..."
+            }
+
+            if(!is.null(names(inpMF))) {
 
                 tabDF <- as.data.frame(t(tabDF))
 
@@ -186,22 +240,15 @@ strF <- function(inpMF,
 
     if(any(class(inpMF) %in% c("character", "integer", "logical", "numeric", "double"))) {
         typC <- "vector"
-        borderN <- min(floor(length(inpMF) / 2) - 1, borderN)
-    } else {
+     } else
         typC <- class(inpMF)
-        borderN <- min(floor(nrow(inpMF) / 2) - 1, borderN)
-    }
 
     numL <- mode(inpMF) %in% c("numeric", "integer", "double")
-
 
     if(!(typC %in% c("vector", "matrix", "data.frame"))) {
         str(inpMF)
         return(invisible(NULL))
     }
-
-    borderN <- min(floor(nrow(inpMF) / 2) - 1, borderN)
-
 
     topF()
 
