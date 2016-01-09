@@ -15,6 +15,14 @@ BiocStyle::latex()
 \author{Etienne A. Th\'evenot}
 \maketitle
 
+\vspace{1\baselineskip}
+\vspace{1\baselineskip}
+\vspace{1\baselineskip}
+
+\tableofcontents
+
+\pagebreak
+
 \setkeys{Gin}{width=0.6\textwidth}
 
 
@@ -113,7 +121,7 @@ sacurine.pca <- opls(dataMatrix)
 sacurine.pca <- opls(dataMatrix, plotL = FALSE)
 @
 
-\begin{figure}
+\begin{figure}[!h]
 \begin{center}
 <<label=figPca,fig=TRUE,echo=FALSE,results=hide>>=
 layout(matrix(1:4, nrow = 2, byrow = TRUE))
@@ -141,7 +149,7 @@ plot(sacurine.pca, typeVc = "x-score",
 parAsColFcVn = genderFc, parEllipsesL = TRUE)
 @
 
-\begin{figure}
+\begin{figure}[!h]
 \begin{center}
 <<label=figPcaMah,fig=TRUE,echo=FALSE,results=hide>>=
 genderFc <- sampleMetadata[, "gender"]
@@ -168,7 +176,7 @@ sacurine.plsda <- opls(dataMatrix, genderFc)
 sacurine.plsda <- opls(dataMatrix, genderFc, plotL = FALSE)
 @
 
-\begin{figure}
+\begin{figure}[!h]
 \begin{center}
 <<label=figPls,fig=TRUE,echo=FALSE,results=hide>>=
 layout(matrix(1:4, nrow = 2, byrow = TRUE))
@@ -187,7 +195,7 @@ Note:
 \item $R2Y_h \geq 1\%$, i.e., the percentage of Y dispersion (i.e., sum of squares) explained by component \emph{h} is more than 1\%, and
 \item $Q2Y_h=1-PRESS_h/RSS_{h-1} \geq 0$ (or 5\% when the number of samples is less than 100), i.e., the predicted residual sum of squares ($PRESS_h$) of the model including the new component \emph{h} estimated by 7-fold cross-validation is less than the residual sum of squares ($RSS_{h-1}$) of the model with the previous components only (with $RSS_0$ being the sum of squared Y values).
 \end{enumerate}
-\item The predictive performance of the full model is assessed by the cumulative Q2Y metric: $Q2Y=1-\prod\limits_{h=1}^r (1-Q2Y_h)$. We have $Q2Y \in [0,1]$, and the higher the Q2Y, the better the performance. Models trained on datasets with a larger number of features compared with the number of samples can be prone to overfitting: in that case, high Q2Y values are obtained by chance only. To estimate the significance of Q2Y (and R2Y) for single response models, permutation testing can be used \cite{Szymanska2012}: models are built after random permutation of the Y values, and $Q2Y_{perm}$ are computed. The \textit{p}-value is equal to the proportion of $Q2Y_{perm}$ above $Q2Y$ (the default number of permutations is 10 as a compromise between quality control and computation speed; it can be increased with the \texttt{permI} parameter, e.g. to 1,000, to assess if the model is significant at the 0.05 level),
+\item The predictive performance of the full model is assessed by the cumulative Q2Y metric: $Q2Y=1-\prod\limits_{h=1}^r (1-Q2Y_h)$. We have $Q2Y \in [0,1]$, and the higher the Q2Y, the better the performance. Models trained on datasets with a larger number of features compared with the number of samples can be prone to overfitting: in that case, high Q2Y values are obtained by chance only (see section~\ref{subsubsec:overfit}). To estimate the significance of Q2Y (and R2Y) for single response models, permutation testing can be used \cite{Szymanska2012}: models are built after random permutation of the Y values, and $Q2Y_{perm}$ are computed. The \textit{p}-value is equal to the proportion of $Q2Y_{perm}$ above $Q2Y$ (the default number of permutations is 10 as a compromise between quality control and computation speed; it can be increased with the \texttt{permI} parameter, e.g. to 1,000, to assess if the model is significant at the 0.05 level),
 \item The NIPALS algorithm is used for PLS (and OPLS); \emph{dataMatrix} matrices with (a moderate amount of) missing values can thus be analysed.
 \end{enumerate}
 
@@ -206,7 +214,7 @@ sacurine.oplsda <- opls(dataMatrix, genderFc,
 predI = 1, orthoI = NA, plotL = FALSE)
 @
 
-\begin{figure}
+\begin{figure}[!h]
 \begin{center}
 <<label=figOpl,fig=TRUE,echo=FALSE,results=hide>>=
 layout(matrix(1:4, nrow = 2, byrow = TRUE))
@@ -242,6 +250,151 @@ table(genderFc[-trainVi],
 @
 
 As expected, the predictions on the test subset are (slightly) lower. The classifier however still achieves 91\% of correct predictions.
+
+\subsection{Some words of warning}
+
+\subsubsection{Overfitting}
+\label{subsubsec:overfit}
+
+Overfitting (i.e., building a model with good performances on the training set but poor performances on a new test set) is a major caveat of machine learning techniques applied to data sets with more variables than samples. A simple simulation of a random \textbf{X} data set and a \textbf{y} response shows that perfect PLS-DA classification can be achieved as soon as the number of variables exceeds the number of samples, as detailed in the example below (Figure~\ref{fig:overfit}; \cite{Wehrens2011}). It is therefore essential to check that the $Q2Y$ value of the model is significant by random permutation of the labels.
+
+\begin{figure}[!h]
+\begin{center}
+<<label=figOverfit,echo=FALSE,fig=TRUE,results=hide>>=
+set.seed(123)
+obsI <- 20
+featVi <- c(2, 20, 200)
+featMaxI <- max(featVi)
+xRandMN <- matrix(runif(obsI * featMaxI), nrow = obsI)
+yRandVn <- sample(c(rep(0, obsI / 2), rep(1, obsI / 2)))
+
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+
+for(featI in featVi) {
+    randPlsi <- opls(xRandMN[, 1:featI], yRandVn,
+                  predI = 2,
+                  permI = ifelse(featI == featMaxI, 100, 0),
+                  plotL = FALSE)
+    plot(randPlsi, typeVc = "x-score", parDevNewL = FALSE,
+         parCexN = 1.3, parTitleL = FALSE)
+    mtext(featI/obsI, font = 2, line = 2)
+    if(featI == featMaxI)
+         plot(randPlsi, typeVc = "permutation", parDevNewL = FALSE,
+           parCexN = 1.3)
+    }
+mtext(" obs./feat. ratio:", adj = 0, at = 0, font = 2, line = -2, outer = TRUE)
+@
+\end{center}
+\caption{PLS overfit when the number of features exceeds the number of observations. A random matrix \textbf{X} of 20 observations $\times$ 200 features was generated by sampling from the uniform distribution $U(0, 1)$. A random \textbf{y} response was obtained by sampling (without replacement) from a vector of 10 zeros and 10 ones. Top left, top right, and bottom left: the X-score plots of the PLS modeling of \textbf{y} by the (sub)matrix of \textbf{X} restricted to the first 2, 20, or 200 features, are displayed (i.e., the observation/feature ratios are 0.1, 1, and 10, respectively). Despite the good separation obtained on the bottom left score plot, we see that the $Q2Y$ estimation of predictive performance is low (negative). Bottom right: a significant proportion of the models (in fact here all models) trained after random permutations of the labels have a higher $Q2Y$ value than the model trained with the true labels, confirming that PLS cannot specifically model the \textbf{y} response with the \textbf{X} predictors, as expected.}
+\label{fig:overfit}
+\end{figure}
+
+<<eval=FALSE,results=hide>>=
+set.seed(123)
+obsI <- 20
+featVi <- c(2, 20, 200)
+featMaxI <- max(featVi)
+xRandMN <- matrix(runif(obsI * featMaxI), nrow = obsI)
+yRandVn <- sample(c(rep(0, obsI / 2), rep(1, obsI / 2)))
+
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+
+for(featI in featVi) {
+    randPlsi <- opls(xRandMN[, 1:featI], yRandVn,
+                  predI = 2,
+                  permI = ifelse(featI == featMaxI, 100, 0),
+                  plotL = FALSE)
+    plot(randPlsi, typeVc = "x-score", parDevNewL = FALSE,
+         parCexN = 1.3, parTitleL = FALSE)
+    mtext(featI/obsI, font = 2, line = 2)
+    if(featI == featMaxI)
+         plot(randPlsi, typeVc = "permutation", parDevNewL = FALSE,
+           parCexN = 1.3)
+    }
+mtext(" obs./feat. ratio:", adj = 0, at = 0, font = 2, line = -2, outer = TRUE)
+@
+
+\subsubsection{VIP from OPLS models}
+
+VIP values from OPLS modeling of a single response have the two following properties (\cite{Thevenot2015}):
+\begin{enumerate}
+\item VIP values remain identical whatever the number of orthogonal components selected,
+\item VIP values are univariate (i.e., they do not provide information about interactions between variables).
+\end{enumerate}
+In fact, when features are standardized, we can demonstrate a mathematical relationship between VIP and \textit{p}-values from a Pearson correlation test (\cite{Thevenot2015}), as illustrated by the code below (Figure~\ref{fig:vip}). 
+
+\begin{figure}[!h]
+\begin{center}
+<<label=figVip,echo=FALSE,fig=TRUE,results=hide>>=
+ageVn <- sampleMetadata[, "age"]
+
+pvaVn <- apply(dataMatrix, 2,
+               function(feaVn) cor.test(ageVn, feaVn)[["p.value"]])
+
+vipVn <- opls(dataMatrix, ageVn, predI = 1, orthoI = NA, plot = FALSE)[["vipVn"]]
+
+quantVn <- qnorm(1 - pvaVn / 2)
+rmsQuantN <- sqrt(mean(quantVn^2))
+
+par(font = 2, font.axis = 2, font.lab = 2, las = 1,
+    mar = c(5.1, 4.6, 4.1, 2.1),
+    lwd = 2, pch = 16)
+
+plot(pvaVn, vipVn,
+     col = "red",
+     pch = 16,
+     xlab = "p-value", ylab = "VIP", xaxs = "i", yaxs = "i")
+
+box(lwd = 2)
+
+curve(qnorm(1 - x / 2) / rmsQuantN, 0, 1, add = TRUE, col = "red", lwd = 3)
+
+abline(h = 1, col = "blue")
+abline(v = 0.05, col = "blue")
+@
+\end{center}
+\caption{Relationship between VIP from one-predictive PLS or OPLS models with standardized variables, and \textit{p}-values from Pearson correlation test. The $(p_j, VIP_j)$ pairs corresponding respectively to the VIP values from OPLS modelling of the \emph{age} response with the \emph{sacurine} dataset, and the \textit{p}-values from the Pearson correlation test are shown as \emph{\textcolor{red}{red}} dots. The $y = \Phi^{-1}(1 - x/2) / z_{rms}$ curve is shown in \emph{\textcolor{red}{red}} (where $\Phi^{-1}$ is the inverse of the probability density function of the standard normal distribution, and $z_{rms}$ is the quadratic mean of the $z_j$ quantiles from the standard normal distribution; $z_{rms} = 2.6$ for the \emph{sacurine} dataset and the \emph{age} response). The vertical (resp. horizontal) \emph{\textcolor{blue}{blue}} line corresponds to univariate (resp. multivariate) thresholds of $p=0.05$ and $VIP=1$, respectively (\cite{Thevenot2015}).}
+\label{fig:vip}
+\end{figure}
+
+<<eval=FALSE,results=hide>>=
+ageVn <- sampleMetadata[, "age"]
+
+pvaVn <- apply(dataMatrix, 2,
+               function(feaVn) cor.test(ageVn, feaVn)[["p.value"]])
+
+vipVn <- opls(dataMatrix, ageVn, predI = 1, orthoI = NA, plot = FALSE)[["vipVn"]]
+
+quantVn <- qnorm(1 - pvaVn / 2)
+rmsQuantN <- sqrt(mean(quantVn^2))
+
+par(font = 2, font.axis = 2, font.lab = 2, las = 1,
+    mar = c(5.1, 4.6, 4.1, 2.1),
+    lwd = 2, pch = 16)
+
+plot(pvaVn, vipVn,
+     col = "red",
+     pch = 16,
+     xlab = "p-value", ylab = "VIP", xaxs = "i", yaxs = "i")
+
+box(lwd = 2)
+
+curve(qnorm(1 - x / 2) / rmsQuantN, 0, 1, add = TRUE, col = "red", lwd = 3)
+
+abline(h = 1, col = "blue")
+abline(v = 0.05, col = "blue")
+@
+
+The VIP properties above result from:
+\begin{enumerate}
+\item OPLS models of a single response have a single predictive component,
+\item in the case of one-predictive component (O)PLS models, the general formula for VIPs can be simplified to $VIP_j = \sqrt{m} \times |w_j|$ for each feature $j$, were $m$ is the total number of features and \textbf{w} is the vector of loading weights,
+\item in OPLS, \textbf{w} remains identical whatever the number of extracted orthogonal components,
+\item for a single-response model, \textbf{w} is proportional to $\textbf{X}' \textbf{y}$ (where $'$ denotes the matrix transposition),
+\item if \textbf{X} and \textbf{y} are standardized, $\textbf{X}' \textbf{y}$ is the vector of the correlations between the features and the response.
+\end{enumerate}
+
+\subsection{Closing session}
 
 Before closing this example session, we detach \emph{sacurine} from the search path:
 
