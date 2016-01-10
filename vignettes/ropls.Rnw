@@ -4,6 +4,7 @@
 
 \documentclass[a4paper,11pt]{article}
 \usepackage[table]{xcolor}
+\usepackage[nottoc, notlof, notlot]{tocbibind}
 \setlength{\parindent}{0cm}
 
 <<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
@@ -29,7 +30,7 @@ BiocStyle::latex()
 \section{The \emph{ropls} package}
 
 
-The \emph{ropls} R package implements the PCA, PLS(-DA) and OPLS(-DA) approaches with the original, NIPALS-based, versions of the algorithms \cite{Wold2001}\cite{Trygg2002}. It includes the R2 and Q2 quality metrics \cite{Eriksson2001}\cite{Tenenhaus1998}, the permutation diagnostics \cite{Szymanska2012}, the computation of the VIP values \cite{Mevik2007}, the score and orthogonal distances to detect outliers \cite{Hubert2005}, as well as many graphics (scores, loadings, predictions, diagnostics, outliers, etc).
+The \emph{ropls} R package implements the PCA, PLS(-DA) and OPLS(-DA) approaches with the original, NIPALS-based, versions of the algorithms \cite{Wold2001,Trygg2002}. It includes the R2 and Q2 quality metrics \cite{Eriksson2001,Tenenhaus1998}, the permutation diagnostics \cite{Szymanska2012}, the computation of the VIP values \cite{Mevik2007}, the score and orthogonal distances to detect outliers \cite{Hubert2005}, as well as many graphics (scores, loadings, predictions, diagnostics, outliers, etc).
 
 \vspace{1\baselineskip}
 
@@ -49,7 +50,7 @@ OPLS has a similar predictive capacity compared to PLS and improves the interpre
 
 \vspace{1\baselineskip}
 
-Diagnostics such as the Q2Y metrics and permutation testing are of high importance to avoid overfitting and assess the statistical significance of the model. The variable importance in projection (VIP), which reflects both the loading weights for each component and the variability of the response explained by this component \cite{Pinto2012a}\cite{Mehmood2012} is often used for feature selection \cite{Trygg2002}\cite{Pinto2012a}.
+Diagnostics such as the Q2Y metrics and permutation testing are of high importance to avoid overfitting and assess the statistical significance of the model. The variable importance in projection (VIP), which reflects both the loading weights for each component and the variability of the response explained by this component \cite{Pinto2012a,Mehmood2012} is often used for feature selection \cite{Trygg2002,Pinto2012a}.
 
 
 \subsection{OPLS software}
@@ -316,7 +317,7 @@ mtext(" obs./feat. ratio:", adj = 0, at = 0, font = 2, line = -2, outer = TRUE)
 
 \subsubsection{VIP from OPLS models}
 
-VIP values from OPLS modeling of a single response have the two following properties (\cite{Thevenot2015}):
+The classical VIP metric is not useful for OPLS modeling of a single response since (\cite{Galindo-Prieto2014,Thevenot2015}):
 \begin{enumerate}
 \item VIP values remain identical whatever the number of orthogonal components selected,
 \item VIP values are univariate (i.e., they do not provide information about interactions between variables).
@@ -393,6 +394,8 @@ The VIP properties above result from:
 \item for a single-response model, \textbf{w} is proportional to $\textbf{X}' \textbf{y}$ (where $'$ denotes the matrix transposition),
 \item if \textbf{X} and \textbf{y} are standardized, $\textbf{X}' \textbf{y}$ is the vector of the correlations between the features and the response.
 \end{enumerate}
+
+Galindo-Prieto et al. (2014) have recently suggested new VIP metrics for OPLS, $VIP_{pred}$ and $VIP_{ortho}$, to separately measure the influence of the features in the modeling of the dispersion correlated to, and orthogonal to the response, respectively (\cite{Galindo-Prieto2014}).
 
 \subsection{Closing session}
 
