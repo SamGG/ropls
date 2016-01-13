@@ -257,3 +257,19 @@ test_sacurine_PLS_predict <- function() {
                        tolerance = 1e-5)
 
 }
+
+test_subset <- function() {
+    ## bug fixed following T. Souza remark
+
+    tiagoMN <- c(10, 11, 12, 11, 10, 11, 10, 11, 10, 11, 10, 11, 10, 11, 10, 11, 10, 11, 10, 8, 10, 11, 10, 12, 10, 11, 10, 11, 10, 11, 11, 10, 11, 10, 11, 10, 11, 10, 12, 10, 5, 6, 5, 6, 7, 6, 5, 6, 5, 6, 15, 16, 15, 16, 15, 16, 15, 14, 15, 15, 16, 16, 16, 14, 16, 15, 16, 14, 16, 14, 2, 3, 2, 3, 22, 3, 4, 3, 2, 3, 3, 7, 3, 7, 3, 7, 4, 7, 3, 7, 3, 7, 3, 7, 3, 4, 3, 7, 3, 7, 2, 8, 2, 8, 20, 8, 2, 4, 2, 8, 7, 3, 7, 3, 4, 3, 7, 3, 7, 7, 3, 7, 3, 7, 3, 7, 3, 7, 6, 8, 25, 29, 25, 24, 25, 29, 25, 29, 25, 25, 23, 27, 23, 27, 23, 27, 23, 27, 23, 25, 20, 21, 22, 21, 20, 21, 20, 21, 20, 21)
+    dim(tiagoMN) <- c(20, 8)
+    dimnames(tiagoMN) <- list(1:20, letters[1:8])
+    tiagoFc <- rep(c("P", "F"), each = 10)
+
+    opls(tiagoMN, tiagoFc, predI = 1, orthoI = 1, subset = "odd")
+
+    oplExc <- opls(tiagoMN, tiagoFc, subset = seq(1, 20, by = 2))
+    checkException(plot(oplExc, parLabVc = paste0("s", seq(1, 20, by = 2))),
+                   silent = TRUE)
+
+}

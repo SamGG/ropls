@@ -125,7 +125,7 @@ opls.default <- function(x,
         stop("'scaleC' must be either 'center', 'pareto', or 'standard'", call. = FALSE)
 
     if(!is.null(subset) && (is.null(yMCN) || ncol(yMCN) > 1))
-        stop("train/test partition with 'subset' only available for a single 'y' response", call. = FALSE)
+        stop("train/test partition with 'subset' only available for (O)PLS(-DA) models of a single 'y' response", call. = FALSE)
 
     if(!is.null(subset) &&
        !(mode(subset) == 'character' && subset == 'odd') &&
