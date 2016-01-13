@@ -53,14 +53,18 @@ plot.opls <- function(x,
         stop("For the 'predict-test' graphic to be generated, 'subset' must not be kept to NULL", call. = FALSE)
 
     if(!any(is.na(parLabVc))) {
-        if(length(parLabVc) != nrow(x[["scoreMN"]]))
+        if(!is.null(x[["subset"]]) && length(parLabVc) != nrow(x[["suppLs"]][["yMCN"]])) {
+            stop("When 'subset' is not NULL, 'parLabVc' vector length must be equal to the number of train + test samples (here: ", nrow(x[["suppLs"]][["yMCN"]]), ").", call. = FALSE)
+        } else if(length(parLabVc) != nrow(x[["scoreMN"]]))
             stop("'parLabVc' vector length must be equal to the number of 'x' rows")
         if(mode(parLabVc) != "character")
             stop("'parLabVc' must be of 'character' type")
     }
 
     if(!any(is.na(parAsColFcVn))) {
-        if(length(parAsColFcVn) != nrow(x[["scoreMN"]]))
+        if(!is.null(x[["subset"]]) && length(parAsColFcVn) != nrow(x[["suppLs"]][["yMCN"]])) {
+            stop("When 'subset' is not NULL, 'parAsColFcVn' vector length must be equal to the number of train + test samples (here: ", nrow(x[["suppLs"]][["yMCN"]]), ").", call. = FALSE)
+        } else if(length(parAsColFcVn) != nrow(x[["scoreMN"]]))
             stop("'parAsColFcVn' vector length must be equal to the number of 'x' rows")
         if(!(mode(parAsColFcVn) %in% c("character", "numeric")))
             stop("'parAsColFcVn' must be of 'character' or 'numeric' type")
@@ -188,14 +192,19 @@ plot.opls <- function(x,
 
     if(!any(is.na(parLabVc))) {
         obsLabVc <- parLabVc
-    } else if(!is.null(rownames(tCompMN))) {
-        obsLabVc <- rownames(tCompMN)
-    } else
-        obsLabVc <- as.character(1:nrow(tCompMN))
+    } else if(!is.null(x[["suppLs"]][["yMCN"]]) && ncol(x[["suppLs"]][["yMCN"]]) == 1) { ## (O)PLS of single response
+        obsLabVc <- rownames(x[["suppLs"]][["yMCN"]])
+    } else { ## PCA
+        if(!is.null(rownames(tCompMN))) {
+            obsLabVc <- rownames(tCompMN)
+        } else
+            obsLabVc <- as.character(1:nrow(tCompMN))
+    }
 
     if(!is.null(x[["subset"]])) {
-        obsLabVc <- obsLabVc[x[["subset"]]]
+        ## (O)PLS(-DA) models of a single 'y' response
         tesLabVc <- obsLabVc[-x[["subset"]]]
+        obsLabVc <- obsLabVc[x[["subset"]]]
     } else
         tesLabVc <- ""
 
@@ -204,20 +213,21 @@ plot.opls <- function(x,
     if(!any(is.na(parAsColFcVn))) {
         obsColVc <- .colorF(as.vector(parAsColFcVn))[["colVc"]]
         obsLegVc <- as.vector(parAsColFcVn)
-    } else if(!is.null(x[["suppLs"]][["yMCN"]]) && ncol(x[["suppLs"]][["yMCN"]]) == 1) {
+    } else if(!is.null(x[["suppLs"]][["yMCN"]]) && ncol(x[["suppLs"]][["yMCN"]]) == 1) { ## (O)PLS of single response
         obsColVc <- .colorF(c(x[["suppLs"]][["yMCN"]]))[["colVc"]]
         obsLegVc <- c(x[["suppLs"]][["yMCN"]])
-    } else {
+    } else { ## PCA
         obsColVc <- rep("black", nrow(tCompMN))
         obsLegVc <- NULL
     }
 
     if(!is.null(x[["subset"]])) {
-        obsColVc <- obsColVc[x[["subset"]]]
+        ## (O)PLS(-DA) models of a single 'y' response
         tesColVc <- obsColVc[-x[["subset"]]]
+        obsColVc <- obsColVc[x[["subset"]]]
         if(!is.null(obsLegVc)) {
-            obsLegVc <- obsLegVc[x[["subset"]]]
             tesLegVc <- obsLegVc[-x[["subset"]]]
+            obsLegVc <- obsLegVc[x[["subset"]]]
         }
     }
 

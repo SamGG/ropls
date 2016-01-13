@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.3.10
+------------------------------
+
+BUG FIXED
+
+    o plot.opls: minor bug fixed ('x-score' label and color display of test samples when 'subset' is not NULL)
+
 CHANGES IN VERSION 1.3.9
 ------------------------------
 
