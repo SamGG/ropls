@@ -30,7 +30,7 @@ BiocStyle::latex()
 \section{The \emph{ropls} package}
 
 
-The \emph{ropls} R package implements the PCA, PLS(-DA) and OPLS(-DA) approaches with the original, NIPALS-based, versions of the algorithms \cite{Wold2001,Trygg2002}. It includes the R2 and Q2 quality metrics \cite{Eriksson2001,Tenenhaus1998}, the permutation diagnostics \cite{Szymanska2012}, the computation of the VIP values \cite{Mevik2007}, the score and orthogonal distances to detect outliers \cite{Hubert2005}, as well as many graphics (scores, loadings, predictions, diagnostics, outliers, etc).
+The \emph{ropls} R package implements the PCA, PLS(-DA) and OPLS(-DA) approaches with the original, NIPALS-based, versions of the algorithms \cite{Wold2001,Trygg2002}. It includes the R2 and Q2 quality metrics \cite{Eriksson2001,Tenenhaus1998}, the permutation diagnostics \cite{Szymanska2012}, the computation of the VIP values \cite{Wold2001}, the score and orthogonal distances to detect outliers \cite{Hubert2005}, as well as many graphics (scores, loadings, predictions, diagnostics, outliers, etc).
 
 \vspace{1\baselineskip}
 
@@ -252,7 +252,7 @@ table(genderFc[-trainVi],
 
 As expected, the predictions on the test subset are (slightly) lower. The classifier however still achieves 91\% of correct predictions.
 
-\subsection{Some words of warning}
+\subsection{Comments}
 
 \subsubsection{Overfitting}
 \label{subsubsec:overfit}
@@ -396,6 +396,13 @@ The VIP properties above result from:
 \end{enumerate}
 
 Galindo-Prieto et al. (2014) have recently suggested new VIP metrics for OPLS, $VIP_{pred}$ and $VIP_{ortho}$, to separately measure the influence of the features in the modeling of the dispersion correlated to, and orthogonal to the response, respectively (\cite{Galindo-Prieto2014}).
+
+For OPLS(-DA) models, the output from \emph{opls} method therefore includes:
+\begin{itemize}
+\item the \texttt{vipVn} vector which corresponds to the $VIP_{4,pred}$ metric measuring the variable importance in prediction,
+\item the \texttt{orthoVipVn} vector which is the $VIP_{4,ortho}$ metric measuring the variable importance in orthogonal modeling.
+\end{itemize}
+As for the classical $VIP$, we still have the mean of $VIP_{4,pred}^2$ (and of $VIP_{4,ortho}^2$) which equals 1.
 
 \subsection{Closing session}
 

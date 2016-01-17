@@ -1,3 +1,11 @@
+CHANGES IN VERSION 1.3.11
+------------------------------
+
+NEW FEATURES
+
+    o opls: for OPLS(-DA), vipVn and orthoVipVn are now computed as the VIP4,p and VIP4,o described in Galindo-Prieto et al (2014)
+    o plot.opls: changes in palette: black/grey colors for diagnostics and other colors for scores    
+
 CHANGES IN VERSION 1.3.10
 ------------------------------
 

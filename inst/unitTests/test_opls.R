@@ -178,6 +178,14 @@ test_sacurine_OPLSDA <- function() {
     ##     R2X(cum) R2Y(cum) Q2(cum) RMSEE pre ort
     ## sum    0.185    0.668   0.554 0.289   1   1
 
+    checkEqualsNumeric(sac.oplsda[["vipVn"]][2],
+                       1.551154,
+                       tolerance = 1e-6)
+
+    checkEqualsNumeric(sac.oplsda[["orthoVipVn"]][3],
+                       1.642173,
+                       tolerance = 1e-6)
+
     ## permutation testing
 
     sac.oplsdaPer <- opls(sacurine[["dataMatrix"]],
@@ -270,6 +278,32 @@ test_subset <- function() {
 
     oplExc <- opls(tiagoMN, tiagoFc, subset = seq(1, 20, by = 2))
     checkException(plot(oplExc, parLabVc = paste0("s", seq(1, 20, by = 2))),
+                   silent = TRUE)
+
+}
+
+test_plsda_multiclass <- function() {
+
+    data(sacurine)
+    ageVn <- sacurine[["sampleMetadata"]][, "age"]
+    ageVc <- ifelse(ageVn < 25, "young",
+                    ifelse(ageVn < 40, NA,
+                           ifelse(ageVn < 45, "normal",
+                                  ifelse(ageVn < 57, NA,
+                                         "old"))))
+
+    sacMN <- sacurine[["dataMatrix"]][!is.na(ageVc), ]
+    ageVc <- ageVc[!is.na(ageVc)]
+
+    oplsda.mul <- opls(sacMN, ageVc, predI = 2)
+
+    checkEqualsNumeric(oplsda.mul[["summaryDF"]][, "Q2(cum)"],
+                       0.03939775,
+                       tolerance = 1e-7)
+
+    checkEquals(oplsda.mul[["vipOrthoVn"]], NULL)
+
+    checkException(opls(sacMN, ageVc, orthoI = NA),
                    silent = TRUE)
 
 }

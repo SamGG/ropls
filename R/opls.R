@@ -90,8 +90,12 @@ opls.default <- function(x,
     } else
         yMCN <- NULL
 
-    if(!is.null(yMCN) && ncol(yMCN) == 1 && mode(yMCN) == "character" && length(unique(c(yMCN))) > 2)
-        stop("'opls' currently supports two-class only classification", call. = FALSE)
+    ## NA in Y only possible for multi-response regression (i.e., Y is a numeric matrix)
+
+    if(!is.null(yMCN) &&
+       ncol(yMCN) == 1 &&
+       any(is.na(drop(yMCN))))
+        stop("In case of single response modeling, 'y' must not contain missing values", call. = FALSE)
 
     if(!is.logical(log10L))
         stop("'log10L' must be a logical", call. = FALSE)
@@ -118,8 +122,26 @@ opls.default <- function(x,
     if(!is.null(yMCN) && algoC != "nipals")
         stop("'nipals' algorithm must be used for (O)PLS(-DA)", call. = FALSE)
 
-    if((is.na(orthoI) || orthoI > 0) && ncol(yMCN) > 1)
-        stop("OPLS(-DA) only available for a single 'y' response", call. = FALSE)
+    if((is.na(orthoI) || orthoI > 0) && is.null(yMCN))
+        stop("'y' response cannot be NULL for OPLS(-DA) modeling", call. = FALSE)
+
+    if(!is.null(yMCN)) {
+        if(is.na(orthoI) || orthoI > 0) {
+            if(ncol(yMCN) > 1) {
+                stop("OPLS regression only available for a single 'y' response", call. = FALSE)
+            } else if(mode(yMCN) == "character" && length(unique(drop(yMCN))) > 2)
+                stop("OPLS-DA only available for binary classification (use PLS-DA for multiple classes)", call. = FALSE)
+        }
+    }
+
+    if(is.na(orthoI) || orthoI > 0)
+        if(is.na(predI) || predI > 1) {
+            predI <- 1
+            warning("OPLS: number of predictive components ('predI' argument) set to 1", call. = FALSE)
+        }
+
+    if(!is.na(predI) && !is.na(orthoI) && ((predI + orthoI) > min(dim(xMN))))
+        stop("The sum of 'predI' (", predI, ") and 'orthoI' (", orthoI, ") exceeds the minimum dimension of the 'x' data matrix (", min(dim(xMN)), ")" , call. = FALSE)
 
     if(!(length(scaleC) == 1 && scaleC %in% c('center', 'pareto', 'standard')))
         stop("'scaleC' must be either 'center', 'pareto', or 'standard'", call. = FALSE)
@@ -132,22 +154,9 @@ opls.default <- function(x,
        !all(subset %in% 1:nrow(xMN)))
         stop("'subset' must be either set to 'odd' or an integer vector of 'x' row numbers", call. = FALSE)
 
-    if(!is.null(yMCN) &&
-       (is.na(orthoI) || orthoI > 0) &&
-       any(is.na(yMCN)))
-        stop("'y' response must not contain missing values for OPLS(-DA)", call. = FALSE)
-
     if(crossvalI > nrow(xMN))
         stop("'crossvalI' must be less than the row number of 'x'", call. = FALSE)
 
-    if(is.na(orthoI) || orthoI > 0)
-        if(is.na(predI) || predI > 1) {
-            predI <- 1
-            warning("OPLS: number of predictive components ('predI' argument) set to 1", call. = FALSE)
-        }
-
-    if(!is.na(predI) && !is.na(orthoI) && ((predI + orthoI) > min(dim(xMN))))
-        stop("The sum of 'predI' (", predI, ") and 'orthoI' (", orthoI, ") exceeds the minimum dimension of the 'x' data matrix (", min(dim(xMN)), ")" , call. = FALSE)
 
 
     ## Constants
@@ -162,51 +171,54 @@ opls.default <- function(x,
     if(!is.null(yMCN) && mode(yMCN) == "character") {
 
         if(!is.null(yLevelVc)) {
-            c2nVc <- yLevelVc
-            c2nVn <- as.numeric(factor(c2nVc, levels = c2nVc))
-        } else {
-            c2nVc <- sort(unique(drop(yMCN))) ## NAs are removed
-            c2nVn <- as.numeric(factor(c2nVc))
-        }
-        names(c2nVn) <- c2nVc
+            claVc <- yLevelVc
+        } else
+            claVc <- sort(unique(drop(yMCN)))
 
-        n2cVc <- names(c2nVn)
-        names(n2cVc) <- c2nVn
+        if(length(claVc) == 2) {
+            ## binary response kept as a single vector for OPLS-DA computations
+            .char2numF <- function(inpMCN,
+                                   c2nL = TRUE) {
 
-        .char2numF <- function(inpMCN,
-                               c2nL = TRUE) {
+                if(c2nL) {
 
-            c2nLs <- list(c2nVn = c2nVn,
-                          n2cVc = n2cVc)
+                    outMCN <- inpMCN == claVc[2]
+                    mode(outMCN) <- "numeric"
 
-            ## Discriminant Q2 (Westerhuis et al, 2008)
-            .DQ2F <- function(inpMN) {
+                } else {
 
-                outMN <- matrix(as.numeric(sapply(drop(inpMN),
-                                                  function(inpN)
-                                                  ifelse(is.na(inpN),
-                                                         return(NA),
-                                                         ifelse(inpN < head(c2nLs[["c2nVn"]], 1) - 0.5,
-                                                                return(head(c2nLs[["c2nVn"]], 1) - 0.5 + epsN),
-                                                                ifelse(inpN > tail(c2nLs[["c2nVn"]], 1) + 0.5,
-                                                                       return(tail(c2nLs[["c2nVn"]], 1) + 0.5 - epsN),
-                                                                       inpN))))),
-                                ncol = 1)
-                dimnames(outMN) <- dimnames(inpMN)
-                return(outMN)
+                    outMCN <- matrix(claVc[as.numeric(inpMCN > 0.5) + 1],
+                                     ncol = 1,
+                                     dimnames = dimnames(inpMCN))
+
+                }
+
+                return(outMCN)
 
             }
 
+        } else
+            .char2numF <- function(inpMCN,
+                                   c2nL = TRUE) {
 
-            if(c2nL) {
-                outMCN <- matrix(as.vector(c2nLs[["c2nVn"]][drop(inpMCN)]), ncol = 1)
-            } else
-                outMCN <- matrix(as.vector(c2nLs[["n2cVc"]][as.character(round(drop(.DQ2F(inpMCN))))]), ncol = 1)
+                if(c2nL) {
 
-            dimnames(outMCN) <- dimnames(inpMCN)
-            return(outMCN)
+                    outMCN  <- t(sapply(drop(inpMCN),
+                                        function(claC) as.numeric(claVc == claC)))
+                    colnames(outMCN) <- claVc
 
-        }
+
+                } else {
+
+                    outMCN <- t(t(apply(inpMCN, 1,
+                                        function(rowVn) claVc[which(rowVn == max(rowVn))[1]])))
+                    colnames(outMCN) <- "y1"
+
+                }
+
+                return(outMCN)
+
+            }
 
     } else
         .char2numF <- NULL
@@ -216,7 +228,6 @@ opls.default <- function(x,
     ##   Computations
     ##------------------------------------
 
-    ## cvaOutLs <- split(1:nrow(xMN), rep(1:crossvalI, length = nrow(xMN)))
 
     ## rownames and colnames
 
@@ -612,11 +623,13 @@ opls.default <- function(x,
     rMN <- NULL        ## (O)PLS only
     bMN <- NULL        ## (O)PLS only
     vipVn <- NULL      ## (O)PLS only
-    yPreMN <- NULL   ## (O)PLS only
-    yTesMN <- NULL   ## (O)PLS only
-    toMN <- NULL   ## OPLS only
-    poMN <- NULL   ## OPLS only
-    woMN <- NULL   ## OPLS only
+    yPreMN <- NULL     ## (O)PLS only
+    yTesMN <- NULL     ## (O)PLS only
+    toMN <- NULL       ## OPLS only
+    poMN <- NULL       ## OPLS only
+    woMN <- NULL       ## OPLS only
+    coMN <- NULL       ## OPLS only
+    orthoVipVn <- NULL ## OPLS only
 
 
     ## Missing values
@@ -759,6 +772,7 @@ opls.default <- function(x,
                          dimnames = list(obsNamVc, predIamVc))
 
     ssxTotN <- sum(xMN^2, na.rm = TRUE)
+
 
     if(is.null(yMCN)) {
 
@@ -935,20 +949,21 @@ opls.default <- function(x,
                       dimnames = list(yvaNamVc, predIamVc))
 
 
-
-
         ## Cross-validation variables
 
         cvfNamVc <- paste("cv", 1:crossvalI, sep = "")
         cvfOutLs <- split(1:nrow(xMN), rep(1:crossvalI, length = nrow(xMN)))
-        prkVn <- numeric(crossvalI)
+
+        prkVn <- numeric(crossvalI) ## PRESS for each cv fold
 
         ## rules
 
         ru1ThrN <- ifelse(nrow(xMN) > 100, yes = 0, no = 0.05)
 
-        ## ssyTotN <- rs0N <- sum((yMN - mean(yMN, na.rm = TRUE))^2, na.rm = TRUE)
+        ## SSY total
+
         ssyTotN <- rs0N <- sum(yMN^2, na.rm = TRUE)
+
 
         hN <- 1
 
@@ -1057,13 +1072,14 @@ opls.default <- function(x,
                     modelDF[hN, "R2X"] <- sum((tcrossprod(tMN[, hN], pMN[, hN])[!is.na(xMN)])^2) / ssxTotN
                 else
                     modelDF[hN, "R2X"] <- sum(tcrossprod(tMN[, hN], pMN[, hN])^2) / ssxTotN
+
                 if(nayL)
                     modelDF[hN, "R2Y"] <- sum((tcrossprod(tMN[, hN], cMN[, hN])[!is.na(yMN)])^2) / ssyTotN
                 else
                     modelDF[hN, "R2Y"] <- sum(tcrossprod(tMN[, hN], cMN[, hN])^2) / ssyTotN
                 modelDF[hN, "Iter."] <- iteN
 
-                ## cross-validation
+                ## cross-validation (PRESS computation)
 
                 for(k in 1:crossvalI) {
 
@@ -1176,7 +1192,6 @@ opls.default <- function(x,
             modelDF[, "R2X(cum)"] <- cumsum(modelDF[, "R2X"])
             modelDF[, "R2Y(cum)"] <- cumsum(modelDF[, "R2Y"])
             modelDF[, "Q2(cum)"] <- 1 - cumprod(1 - modelDF[, "Q2"])
-
 
             if(autNcpL) {
 
@@ -1314,33 +1329,52 @@ opls.default <- function(x,
             ## Orthogonal projections to latent structures (O-PLS).
             ## Journal of Chemometrics. 16:119-128.
 
-            orthoIamVc <- paste("o", 1:orthoI, sep = "")
+            orthoNamVc <- paste("o", 1:orthoI, sep = "")
 
             toMN <- matrix(0,
-                            nrow = nrow(xMN),
-                            ncol = orthoI,
-                            dimnames = list(obsNamVc, orthoIamVc))
+                           nrow = nrow(xMN),
+                           ncol = orthoI,
+                           dimnames = list(obsNamVc, orthoNamVc))
             woMN <- poMN <- matrix(0,
-                                     nrow = ncol(xMN),
-                                     ncol = orthoI,
-                                     dimnames = list(xvaNamVc, orthoIamVc))
-            cOrthoMN <- matrix(0,
-                               nrow = ncol(yMN),
-                               ncol = orthoI,
-                               dimnames = list(yvaNamVc, orthoIamVc))
+                                   nrow = ncol(xMN),
+                                   ncol = orthoI,
+                                   dimnames = list(xvaNamVc, orthoNamVc))
+            coMN <- matrix(0,
+                           nrow = ncol(yMN),
+                           ncol = orthoI,
+                           dimnames = list(yvaNamVc, orthoNamVc))
 
             modelDF <- as.data.frame(matrix(NA,
                                             nrow = 3 + orthoI,
                                             ncol = 7,
-                                            dimnames = list(c("h1", "rot", orthoIamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
+                                            dimnames = list(c("h1", "rot", orthoNamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
             for(j in 1:ncol(modelDF))
                 mode(modelDF[, j]) <- ifelse(colnames(modelDF)[j] == "Signif.", "character", "numeric")
 
-            xcvLs <- c(lapply(cvfOutLs, function(Vi) xMN[-Vi, , drop = FALSE]),
-                       list(xMN))
-            xcvTesLs <- c(lapply(cvfOutLs, function(Vi) xMN[Vi, , drop = FALSE]))
-            ycvLs <- c(lapply(cvfOutLs, function(Vi) yMN[-Vi, , drop = FALSE]),
-                       list(yMN))
+            xcvTraLs <- lapply(cvfOutLs,
+                               function(obsVi)
+                               xMN[-obsVi, , drop = FALSE])
+
+            xcvTesLs <- lapply(cvfOutLs,
+                               function(obsVi)
+                               xMN[obsVi, , drop = FALSE])
+
+            ycvTraLs <- lapply(cvfOutLs,
+                               function(obsVi)
+                               yMN[-obsVi, , drop = FALSE])
+
+            ycvTesLs <- lapply(cvfOutLs,
+                               function(obsVi)
+                               yMN[obsVi, , drop = FALSE])
+
+            ## full dataset added as crossvalI + 1 item
+
+            xcvTraLs <- c(xcvTraLs,
+                          list(xMN))
+
+            ycvTraLs <- c(ycvTraLs,
+                          list(yMN))
+
 
             breL <- FALSE
 
@@ -1349,28 +1383,33 @@ opls.default <- function(x,
                 if(breL)
                     break
 
-                for(cvN in 1:length(xcvLs)) {
+                for(cvN in 1:length(xcvTraLs)) {
+                    ## cvN < length(xcvTraLs): cross-validation
+                    ## cvN == length(xcvTraLs): full dataset
 
-                    if(ncol(ycvLs[[cvN]]) > 1) {
+                    xcvTraMN <- xcvTraLs[[cvN]]
+                    ycvTraMN <- ycvTraLs[[cvN]]
+
+                    if(ncol(ycvTraMN) > 1) {
 
                         ## step -|1 [case vector y (p121) | matrix Y (p127)]
 
                         if(naxL || nayL)
-                            wwMN <- apply(ycvLs[[cvN]],
+                            wwMN <- apply(ycvTraMN,
                                           2,
                                           function(colVn) {
-                                              wwjVn <- numeric(ncol(xcvLs[[cvN]]))
-                                              for(j in 1:ncol(xcvLs[[cvN]])) {
-                                                  comVl <- complete.cases(xcvLs[[cvN]][, j]) & complete.cases(colVn)
-                                                  wwjVn[j] <- crossprod(xcvLs[[cvN]][comVl,j], colVn[comVl]) / drop(crossprod(colVn[comVl]))
+                                              wwjVn <- numeric(ncol(xcvTraMN))
+                                              for(j in 1:ncol(xcvTraMN)) {
+                                                  comVl <- complete.cases(xcvTraMN[, j]) & complete.cases(colVn)
+                                                  wwjVn[j] <- crossprod(xcvTraMN[comVl,j], colVn[comVl]) / drop(crossprod(colVn[comVl]))
                                               }
                                               wwjVn
                                           })
                         else
-                            wwMN <- apply(ycvLs[[cvN]],
+                            wwMN <- apply(ycvTraMN,
                                           2,
                                           function(colVn)
-                                          crossprod(xcvLs[[cvN]], colVn) / drop(crossprod(colVn)))
+                                          crossprod(xcvTraMN, colVn) / drop(crossprod(colVn)))
 
                         ## step -|2
 
@@ -1384,21 +1423,21 @@ opls.default <- function(x,
 
                     ## step -|4
 
-                    uOldVn <- ycvLs[[cvN]][, 1, drop = FALSE]
+                    uOldVn <- ycvTraMN[, 1, drop = FALSE]
 
                     repeat {
 
                         ## step 1|5
 
                         if(naxL || nayL) {
-                            wVn <- numeric(ncol(xcvLs[[cvN]]))
-                            for(j in 1:ncol(xcvLs[[cvN]])) {
-                                comVl <- complete.cases(xcvLs[[cvN]][, j]) &
+                            wVn <- numeric(ncol(xcvTraMN))
+                            for(j in 1:ncol(xcvTraMN)) {
+                                comVl <- complete.cases(xcvTraMN[, j]) &
                                     complete.cases(uOldVn)
-                                wVn[j] <- crossprod(xcvLs[[cvN]][comVl, j], uOldVn[comVl]) / drop(crossprod(uOldVn[comVl]))
+                                wVn[j] <- crossprod(xcvTraMN[comVl, j], uOldVn[comVl]) / drop(crossprod(uOldVn[comVl]))
                             }
                         } else
-                            wVn <- crossprod(xcvLs[[cvN]], uOldVn) / drop(crossprod(uOldVn))
+                            wVn <- crossprod(xcvTraMN, uOldVn) / drop(crossprod(uOldVn))
 
                         ## step 2|6
 
@@ -1407,35 +1446,35 @@ opls.default <- function(x,
                         ## step 3|7
 
                         if(naxL) {
-                            tVn <- numeric(nrow(xcvLs[[cvN]]))
-                            for(i in 1:nrow(xcvLs[[cvN]])) {
-                                comVl <- complete.cases(xcvLs[[cvN]][i, ])
-                                tVn[i] <- crossprod(xcvLs[[cvN]][i, comVl], wVn[comVl]) / drop(crossprod(wVn[comVl]))
+                            tVn <- numeric(nrow(xcvTraMN))
+                            for(i in 1:nrow(xcvTraMN)) {
+                                comVl <- complete.cases(xcvTraMN[i, ])
+                                tVn[i] <- crossprod(xcvTraMN[i, comVl], wVn[comVl]) / drop(crossprod(wVn[comVl]))
                             }
                         } else
-                            tVn <- xcvLs[[cvN]] %*% wVn
+                            tVn <- xcvTraMN %*% wVn
 
                         ## step 4|8
 
                         if(nayL) {
-                            cVn <- numeric(ncol(ycvLs[[cvN]]))
-                            for(j in 1:ncol(ycvLs[[cvN]])) {
-                                comVl <- complete.cases(ycvLs[[cvN]][, j])
-                                cVn[j] <- crossprod(ycvLs[[cvN]][comVl, j], tVn[comVl]) / drop(crossprod(tVn[comVl]))
+                            cVn <- numeric(ncol(ycvTraMN))
+                            for(j in 1:ncol(ycvTraMN)) {
+                                comVl <- complete.cases(ycvTraMN[, j])
+                                cVn[j] <- crossprod(ycvTraMN[comVl, j], tVn[comVl]) / drop(crossprod(tVn[comVl]))
                             }
                         } else
-                            cVn <- crossprod(ycvLs[[cvN]], tVn) / drop(crossprod(tVn))
+                            cVn <- crossprod(ycvTraMN, tVn) / drop(crossprod(tVn))
 
                         ## step 5|9
 
                         if(nayL) {
-                            uVn <- numeric(nrow(xcvLs[[cvN]]))
-                            for(i in 1:nrow(xcvLs[[cvN]])) {
-                                comVl <- complete.cases(ycvLs[[cvN]][i, ])
-                                uVn[i] <- crossprod(ycvLs[[cvN]][i, comVl], cVn[comVl]) / drop(crossprod(cVn[comVl]))
+                            uVn <- numeric(nrow(xcvTraMN))
+                            for(i in 1:nrow(xcvTraMN)) {
+                                comVl <- complete.cases(ycvTraMN[i, ])
+                                uVn[i] <- crossprod(ycvTraMN[i, comVl], cVn[comVl]) / drop(crossprod(cVn[comVl]))
                             }
                         } else
-                            uVn <- ycvLs[[cvN]] %*% cVn / drop(crossprod(cVn))
+                            uVn <- ycvTraMN %*% cVn / drop(crossprod(cVn))
 
                         if(nayL) {
                             comVl <- complete.cases(uOldVn)
@@ -1443,7 +1482,7 @@ opls.default <- function(x,
                         } else
                             dscN <- drop(sqrt(crossprod((uVn - uOldVn) / uVn)))
 
-                        if(ncol(ycvLs[[cvN]]) == 1 ||
+                        if(ncol(ycvTraMN) == 1 ||
                            dscN < 1e-10) {
 
                             break
@@ -1459,17 +1498,17 @@ opls.default <- function(x,
                     ## step 6|
 
                     if(naxL) {
-                        pVn <- numeric(ncol(xcvLs[[cvN]]))
-                        for(j in 1:ncol(xcvLs[[cvN]])) {
-                            comVl <- complete.cases(xcvLs[[cvN]][, j])
-                            pVn[j] <- crossprod(xcvLs[[cvN]][comVl, j], tVn[comVl]) / drop(crossprod(tVn[comVl]))
+                        pVn <- numeric(ncol(xcvTraMN))
+                        for(j in 1:ncol(xcvTraMN)) {
+                            comVl <- complete.cases(xcvTraMN[, j])
+                            pVn[j] <- crossprod(xcvTraMN[comVl, j], tVn[comVl]) / drop(crossprod(tVn[comVl]))
                         }
                     } else
-                        pVn <- crossprod(xcvLs[[cvN]], tVn) / drop(crossprod(tVn))
+                        pVn <- crossprod(xcvTraMN, tVn) / drop(crossprod(tVn))
 
                     ## step 7|
 
-                    if(ncol(ycvLs[[cvN]]) > 1)
+                    if(ncol(ycvTraMN) > 1)
                         for(j in 1:ncol(twMN))
                             wOrthoVn <- pVn - drop(crossprod(twMN[, j, drop = FALSE], pVn)) / drop(crossprod(twMN[, j, drop = FALSE])) * twMN[, j, drop = FALSE]
                     else
@@ -1482,33 +1521,33 @@ opls.default <- function(x,
                     ## step 9|
 
                     if(naxL) {
-                        tOrthoVn <- numeric(nrow(xcvLs[[cvN]]))
-                        for(i in 1:nrow(xcvLs[[cvN]])) {
-                            comVl <- complete.cases(xcvLs[[cvN]][i, ])
-                            tOrthoVn[i] <- crossprod(xcvLs[[cvN]][i, comVl], wOrthoVn[comVl]) / drop(crossprod(wOrthoVn[comVl]))
+                        tOrthoVn <- numeric(nrow(xcvTraMN))
+                        for(i in 1:nrow(xcvTraMN)) {
+                            comVl <- complete.cases(xcvTraMN[i, ])
+                            tOrthoVn[i] <- crossprod(xcvTraMN[i, comVl], wOrthoVn[comVl]) / drop(crossprod(wOrthoVn[comVl]))
                         }
                     } else
-                        tOrthoVn <- xcvLs[[cvN]] %*% wOrthoVn
+                        tOrthoVn <- xcvTraMN %*% wOrthoVn
 
-                    ## if(nayL) {
-                    ##     cOrthoVn <- numeric(ncol(ynMN))
-                    ##     for(j in 1:ncol(ynMN)) {
-                    ##         comVl <- complete.cases(ynMN[, j])
-                    ##         cOrthoVn[j] <- crossprod(ynMN[comVl, j], tOrthoVn[comVl]) / drop(crossprod(tOrthoVn[comVl]))
-                    ##     }
-                    ## } else
-                    ##     cOrthoVn <- crossprod(ynMN, tOrthoVn) / drop(crossprod(tOrthoVn))
+                    if(nayL) {
+                        cOrthoVn <- numeric(ncol(ycvTraMN))
+                        for(j in 1:ncol(ycvTraMN)) {
+                            comVl <- complete.cases(ycvTraMN[, j])
+                            cOrthoVn[j] <- crossprod(ycvTraMN[comVl, j], tOrthoVn[comVl]) / drop(crossprod(tOrthoVn[comVl]))
+                        }
+                    } else
+                        cOrthoVn <- crossprod(ycvTraMN, tOrthoVn) / drop(crossprod(tOrthoVn))
 
                     ## step 10|
 
                     if(naxL) {
-                        pOrthoVn <- numeric(ncol(xcvLs[[cvN]]))
-                        for(j in 1:ncol(xcvLs[[cvN]])) {
-                            comVl <- complete.cases(xcvLs[[cvN]][, j])
-                            pOrthoVn[j] <- crossprod(xcvLs[[cvN]][comVl, j], tOrthoVn[comVl]) / drop(crossprod(tOrthoVn[comVl]))
+                        pOrthoVn <- numeric(ncol(xcvTraMN))
+                        for(j in 1:ncol(xcvTraMN)) {
+                            comVl <- complete.cases(xcvTraMN[, j])
+                            pOrthoVn[j] <- crossprod(xcvTraMN[comVl, j], tOrthoVn[comVl]) / drop(crossprod(tOrthoVn[comVl]))
                         }
                     } else
-                        pOrthoVn <- crossprod(xcvLs[[cvN]], tOrthoVn) / drop(crossprod(tOrthoVn))
+                        pOrthoVn <- crossprod(xcvTraMN, tOrthoVn) / drop(crossprod(tOrthoVn))
 
                     ## step 12|
 
@@ -1519,26 +1558,29 @@ opls.default <- function(x,
 
                     if(cvN <= crossvalI) { ## cross-validation
 
-                        if(any(is.na(xcvTesLs[[cvN]]))) {
-                            prxVn <- numeric(nrow(xcvTesLs[[cvN]]))
+                        xcvTesMN <- xcvTesLs[[cvN]]
+                        ycvTesMN <- ycvTesLs[[cvN]]
+
+                        if(any(is.na(xcvTesMN))) {
+                            prxVn <- numeric(nrow(xcvTesMN))
                             for(r in 1:length(prxVn)) {
-                                comVl <- complete.cases(xcvTesLs[[cvN]][r, ])
-                                prxVn[r] <- crossprod(xcvTesLs[[cvN]][r, comVl], wVn[comVl]) / drop(crossprod(wVn[comVl]))
+                                comVl <- complete.cases(xcvTesMN[r, ])
+                                prxVn[r] <- crossprod(xcvTesMN[r, comVl], wVn[comVl]) / drop(crossprod(wVn[comVl]))
                             }
-                            prkVn[cvN] <- sum((yMN[cvfOutLs[[cvN]], , drop = FALSE] - prxVn %*% t(cVn))^2, na.rm = TRUE)
+                            prkVn[cvN] <- sum((ycvTesMN - prxVn %*% t(cVn))^2, na.rm = TRUE)
                         } else
-                            prkVn[cvN] <- sum((yMN[cvfOutLs[[cvN]], , drop = FALSE] - xcvTesLs[[cvN]] %*% wVn %*% t(cVn))^2, na.rm = TRUE)
+                            prkVn[cvN] <- sum((ycvTesMN - xcvTesMN %*% wVn %*% t(cVn))^2, na.rm = TRUE)
 
                         if(naxL) {
-                            tOrthoTesVn <- numeric(nrow(xcvTesLs[[cvN]]))
-                            for(i in 1:nrow(xcvTesLs[[cvN]])) {
-                                comVl <- complete.cases(xcvTesLs[[cvN]][i, ])
-                                tOrthoTesVn[i] <- crossprod(xcvTesLs[[cvN]][i, comVl], wOrthoVn[comVl]) / drop(crossprod(wOrthoVn[comVl]))
+                            tOrthoTesVn <- numeric(nrow(xcvTesMN))
+                            for(i in 1:nrow(xcvTesMN)) {
+                                comVl <- complete.cases(xcvTesMN[i, ])
+                                tOrthoTesVn[i] <- crossprod(xcvTesMN[i, comVl], wOrthoVn[comVl]) / drop(crossprod(wOrthoVn[comVl]))
                             }
                         } else
-                            tOrthoTesVn <- xcvTesLs[[cvN]] %*% wOrthoVn
+                            tOrthoTesVn <- xcvTesMN %*% wOrthoVn
 
-                        xcvTesLs[[cvN]] <- xcvTesLs[[cvN]] - tcrossprod(tOrthoTesVn, pOrthoVn)
+                        xcvTesLs[[cvN]] <- xcvTesMN - tcrossprod(tOrthoTesVn, pOrthoVn)
 
                         if(cvN == crossvalI) {
                             q2N <- 1 - sum(prkVn) / rs0N
@@ -1572,11 +1614,11 @@ opls.default <- function(x,
                                 modelDF[rowI, "R2Y"] <- modelDF[rowI, "R2Y(cum)"] - modelDF[3, "R2Y(cum)"]
                         }
 
-                        ## cOrthoMN[, noN] <- cOrthoVn
                         if(noN <= orthoI) {
                             poMN[, noN] <- pOrthoVn
                             toMN[, noN] <- tOrthoVn
                             woMN[, noN] <- wOrthoVn
+                            coMN[, noN] <- cOrthoVn
                             if(naxL)
                                 modelDF[2 + noN, "R2X"] <- sum((tcrossprod(tOrthoVn, pOrthoVn)[!is.na(xMN)])^2) / ssxTotN
                             else
@@ -1609,15 +1651,15 @@ opls.default <- function(x,
                     ## step 11|
 
                     if(noN < orthoI + 1)
-                        xcvLs[[cvN]] <- xcvLs[[cvN]] - tcrossprod(tOrthoVn, pOrthoVn)
+                        xcvTraLs[[cvN]] <- xcvTraMN - tcrossprod(tOrthoVn, pOrthoVn)
 
-                } ## for(cvN in 1:length(xcvLs)) {
+                } ## for(cvN in 1:length(xcvTraLs)) {
 
             } ## for(noN in 1:(orthoI + 1)) {
 
-            rm(xcvLs)
+            rm(xcvTraLs)
             rm(xcvTesLs)
-            rm(ycvLs)
+            rm(ycvTraLs)
 
             if(naxL) {
                 modelDF["rot", "R2X(cum)"] <- sum((tcrossprod(tMN, pMN)[!is.na(xMN)])^2) / ssxTotN
@@ -1649,8 +1691,9 @@ opls.default <- function(x,
                 poMN <- poMN[, 1:orthoI, drop = FALSE]
                 toMN <- toMN[, 1:orthoI, drop = FALSE]
                 woMN <- woMN[, 1:orthoI, drop = FALSE]
+                coMN <- coMN[, 1:orthoI, drop = FALSE]
 
-                orthoIamVc <- orthoIamVc[1:orthoI]
+                orthoNamVc <- orthoNamVc[1:orthoI]
                 modelDF <- modelDF[c(1:(orthoI + 2), nrow(modelDF)), ]
 
                 if(naxL) {
@@ -1763,24 +1806,58 @@ opls.default <- function(x,
         } ## end of OPLS
 
 
-        ## VIP (identical for both PLS and O-PLS)
-        ## from the VIP.R script by Wehrens and Mevik
-        ## http://mevik.net/work/software/VIP.R
-        ## Chong I.-G. and Jun C.-H. (2005)
-        ## Wold S., Sjostrom M. and Eriksson L. (2001)
+        ## VIP (specific implementation required for OPLS(-DA))
 
-        if(orthoI == 0 && (nrow(cMN) == 1)) { ## PLS with single quantitative yMCN
-            ## VIP computation only implemented for single-response models
+        if(orthoI == 0) { ## sum(vipVn^2) == nrow(wMN) [number of features]
 
-            ssqVn <- c(cMN)^2 * colSums(tMN^2)
-            wn2Vn <- colSums(wMN^2)
-            vipVn <- sqrt(rowSums(sweep(wMN^2,
-                                        2,
-                                        ssqVn / wn2Vn,
-                                        "*")) * nrow(wMN) / sum(ssqVn))
+            ssyVn <-  sapply(1:ncol(tMN),
+                             function(j) sum(drop(tcrossprod(tMN[, j], cMN[, j])^2)))
 
-        } else if(orthoI > 0) ## OPLS and OPLS-DA (single quant. or qual. yMCN)
-            vipVn <- sqrt(ncol(xMN)) * abs(wMN[, 1])
+            vipVn <- sqrt(nrow(wMN) * rowSums(sweep(wMN^2,
+                                                    2,
+                                                    ssyVn,
+                                                    "*")) / sum(ssyVn))
+
+        } else {
+
+            sxpVn <- sapply(1:ncol(tMN),
+                            function(h)
+                            sum(drop(tcrossprod(tMN[, h], pMN[, h])^2)))
+            sxpCumN <- sum(sxpVn)
+            sxoVn <- sapply(1:ncol(toMN),
+                            function(h)
+                            sum(drop(tcrossprod(toMN[, h], poMN[, h])^2)))
+            sxoCumN <- sum(sxoVn)
+            ssxCumN <- sxpCumN + sxoCumN
+
+            sypVn <- sapply(1:ncol(tMN),
+                            function(h)
+                            sum(drop(tcrossprod(tMN[, h], cMN[, h])^2)))
+            sypCumN <- sum(sypVn)
+            syoVn <- sapply(1:ncol(toMN),
+                            function(h)
+                            sum(drop(tcrossprod(toMN[, h], coMN[, h])^2)))
+            syoCumN <- sum(syoVn)
+            ssyCumN <- sypCumN + syoCumN
+
+            ## VIP4,p [sum(vipVn^2) == nrow(wMN) instead of nrow(wMN) / 2 in the formula (but not in the figure) of the paper]
+
+            kpN <- nrow(wMN) / (sxpCumN / ssxCumN + sypCumN / ssyCumN)
+
+            pNorMN <- sweep(pMN, 2, sqrt(colSums(pMN^2)), "/") ## normalized loadings
+
+            vipVn <- sqrt(kpN * (rowSums(sweep(pNorMN^2, 2, sxpVn, "*")) / ssxCumN + rowSums(sweep(pNorMN^2, 2, sypVn, "*")) / ssyCumN))
+
+            ## VIP4,o [sum(orthoVipVn^2) == nrow(wMN) instead of nrow(wMN) / 2 in the formula (but not in the figure) of the paper]
+
+            koN <- nrow(wMN) / (sxoCumN / ssxCumN + syoCumN / ssyCumN)
+
+            poNorMN <- sweep(poMN, 2, sqrt(colSums(poMN^2)), "/")
+
+            orthoVipVn <- sqrt(koN * (rowSums(sweep(poNorMN^2, 2, sxoVn, "*")) / ssxCumN + rowSums(sweep(poNorMN^2, 2, syoVn, "*")) / ssyCumN))
+
+
+        }
 
     }
 
@@ -1801,6 +1878,7 @@ opls.default <- function(x,
 
                   pcaVarVn = varVn,
                   vipVn = vipVn,
+                  orthoVipVn = orthoVipVn,
                   fitted = NULL,
                   tested = NULL,
                   coefficients = bMN,
@@ -1821,6 +1899,7 @@ opls.default <- function(x,
                   cMN = cMN,
                   uMN = uMN,
                   weightStarMN = rMN,
+                  coMN = coMN,
 
                   suppLs = list(.char2numF = .char2numF,
                       yLevelVc = NULL,

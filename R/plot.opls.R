@@ -84,9 +84,13 @@ plot.opls <- function(x,
        ## (is.null(yMCN) || is.na(x[["summaryDF"]][, "ort"]) || x[["summaryDF"]][, "ort"] > 0))
         stop("'xy-weight graphic can be displayed only for PLS(-DA) models", call. = FALSE)
 
-    if(any(grepl('predict', typeVc)) && is.matrix(x[["fitted"]]) && ncol(x[["fitted"]]) > 1)
+    if(any(grepl('predict', typeVc)))
+       if(is.null(x[["suppLs"]][["yMCN"]]) ||
+          ncol(x[["suppLs"]][["yMCN"]]) > 1 ||
+          (mode(x[["suppLs"]][["yMCN"]]) == "character" && length(unique(drop(x[["suppLs"]][["yMCN"]]))) > 2))
+    ## if(any(grepl('predict', typeVc)) && is.matrix(x[["fitted"]]) && ncol(x[["fitted"]]) > 1)
         ## if(any(grepl('predict', typeVc)) && (is.null(yMCN) || ncol(yMCN) != 1))
-        stop("'predict' graphics available for single response models only", call. = FALSE)
+           stop("'predict' graphics available for single response regression or binary classification only", call. = FALSE)
 
     if(is.na(parEllipsesL)) {
         if((x[["typeC"]] == "PCA" && !all(is.na(parAsColFcVn)) && is.factor(parAsColFcVn)) || ## PCA case
@@ -380,17 +384,18 @@ plot.opls <- function(x,
 
             ypMN <- eval(parse(text = paste("opLs[['suppLs']][['y", switch(unlist(strsplit(ploC, "-"))[2], train = "Pre", test = "Tes"), "MN']]", sep = ""))) ## predicted
 
-            if(is.null(opLs[["subset"]]))
+            if(is.null(opLs[["subset"]])) {
                 yaMCN <- opLs[["suppLs"]][["yMCN"]] ## actual
-            else {
+            } else {
                 if(grepl("train", ploC))
                     yaMCN <- opLs[["suppLs"]][["yMCN"]][opLs[["subset"]], , drop = FALSE]
                 else
                     yaMCN <- opLs[["suppLs"]][["yMCN"]][-opLs[["subset"]], , drop = FALSE]
             }
 
-            if(mode(opLs[["suppLs"]][["yMCN"]]) == "character") {
-                yaMN <- opLs[["suppLs"]][[".char2numF"]](yaMCN)
+            if(mode(opLs[["suppLs"]][["yMCN"]]) == "character") { ## binary only
+                ypMN <- ypMN[, 1, drop = FALSE]
+                yaMN <- opLs[["suppLs"]][[".char2numF"]](yaMCN)[, 1, drop = FALSE]
             } else
                 yaMN <- yaMCN
 
@@ -469,10 +474,10 @@ plot.opls <- function(x,
                            opLs[["cMN"]][, parCompVi])
 
             pchVn <- rep(17, times = nrow(ploMN))
-            ploColVc <- rep("black", times = nrow(ploMN))
+            ploColVc <- rep("grey", times = nrow(ploMN))
 
             pchVn[(nrow(opLs[["weightStarMN"]]) + 1):nrow(ploMN)] <- 15
-            ploColVc[(nrow(opLs[["weightStarMN"]]) + 1):nrow(ploMN)] <- "red"
+            ploColVc[(nrow(opLs[["weightStarMN"]]) + 1):nrow(ploMN)] <- "black"
 
         }
 
@@ -556,11 +561,12 @@ plot.opls <- function(x,
         } else if(ploC == "x-loading") {
 
             points(ploMN,
+                   col = "grey",
                    pch = 18)
 
             points(ploMN[pexVi, ],
                    pch = 18,
-                   col = "red")
+                   col = "black")
 
             ## pexLabVc <- colnames(opLs[["suppLs"]][["xModelMN"]])[pexVi]
             pexLabVc <- rownames(opLs[["loadingMN"]])[pexVi]
@@ -568,7 +574,7 @@ plot.opls <- function(x,
 
             text(ploMN[pexVi, ],
                  cex = parCexN,
-                 col = "red",
+                 col = "black",
                  labels = pexLabVc,
                  pos = rep(c(4, 2, 3, 1), each = opLs[["topLoadI"]]))
 
@@ -781,7 +787,7 @@ plot.opls <- function(x,
                           modBarDF[, "Q2(cum)"]),
                     add = TRUE,
                     beside = TRUE,
-                    col = .colorF(c("R2Y(cum)", "Q2(cum)"))[["colVc"]])
+                    col = c("grey", "black"))
 
             text(1.5,
                  0,
@@ -813,7 +819,7 @@ plot.opls <- function(x,
                  ", pQ2 = ",
                  opLs[["summaryDF"]][, "pQ2"]),
              type = "n",
-             xlab=expression(Similarity(bold(y), bold(y[perm]))),
+             xlab = expression(Similarity(bold(y), bold(y[perm]))),
              ylab = "")
 
         points(opLs[["suppLs"]][["permMN"]][, "sim"], opLs[["suppLs"]][["permMN"]][, "Q2(cum)"],
@@ -822,12 +828,13 @@ plot.opls <- function(x,
         abline(h = opLs[["suppLs"]][["permMN"]][1, "Q2(cum)"],
                col = "black")
         points(opLs[["suppLs"]][["permMN"]][, "sim"], opLs[["suppLs"]][["permMN"]][, "R2Y(cum)"],
-               col = "red",
+               col = "grey",
                pch = 18)
         abline(h = opLs[["suppLs"]][["permMN"]][1, "R2Y(cum)"],
-               col = "red")
+               col = "grey")
         .legendF(c("R2Y", "Q2Y"),
-                 "bottomright")
+                 "bottomright",
+                 colVc = c("grey", "black"))
 
     } ## permutation
 
@@ -873,7 +880,7 @@ plot.opls <- function(x,
 .colorF <- function(namVcn) {
 
     ## 16 color palette without 'gray'
-    palVc <- c("black", "red", "green3", "blue", "cyan", "magenta", "#FF7F00", "#6A3D9A", "#B15928", "aquamarine4", "yellow4", "#A6CEE3", "#B2DF8A", "#FB9A99", "#FDBF6F", "#FFFF99")
+    palVc <- c("blue", "red", "green3", "cyan", "magenta", "#FF7F00", "#6A3D9A", "#B15928", "aquamarine4", "yellow4", "#A6CEE3", "#B2DF8A", "#FB9A99", "#FDBF6F", "#FFFF99")
 
     if(is.null(namVcn) || all(is.na(namVcn))) {
 
@@ -996,7 +1003,8 @@ plot.opls <- function(x,
 ## Plots the figure legend
 .legendF <- function(namOrLegVcn,
                      locCMN = "topright",
-                     txtCexN = 0.7) {
+                     txtCexN = 0.7,
+                     colVc = NULL) {
     ## Note:
     ##  locCMN: either a character indicating the corner of the plot where the legend is to be plotted or the numeric matrix of point coordinates for the legLocF function below to find the corner where there is most space
 
@@ -1043,9 +1051,13 @@ plot.opls <- function(x,
 
     ## Determining the color scale
 
-    scaVc <- .colorF(namOrLegVcn)[["scaVc"]]
-    legTypC <- ifelse(is.character(namOrLegVcn), "cha", "num")
+    if(!is.null(colVc)) {
+        scaVc <- colVc
+        names(scaVc) <- namOrLegVcn
+    } else
+        scaVc <- .colorF(namOrLegVcn)[["scaVc"]]
 
+    legTypC <- ifelse(is.character(namOrLegVcn), "cha", "num")
 
     ## Plotting the legend
 
@@ -1129,11 +1141,9 @@ plot.opls <- function(x,
                          charL = FALSE) {
 
     if(charL) {
-        x <- .char2numF(x)
-        y <- .char2numF(y)
-    }
-
-    return(cor(x, y, use = "pairwise.complete.obs"))
+        return(sum(x == y) / length(x))
+    } else
+        return(cor(x, y, use = "pairwise.complete.obs"))
 
 } ## .similarityF
 
