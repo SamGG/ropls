@@ -19,7 +19,7 @@ orthoI = 0,
 algoC = c("default", "nipals", "svd")[1],
 crossvalI = 7,
 log10L = FALSE,
-permI = 10,
+permI = 20,
 scaleC = c("center", "pareto", "standard")[3],
 subset = NULL,
 printL = TRUE,
@@ -74,7 +74,7 @@ plotL = TRUE,
   \item{permI}{
     Integer: number of random permutations of response labels to
     estimate R2Y and Q2Y significance by permutation testing [default is
-    10 for single response models (without train/test partition), and 0 otherwise]
+    20 for single response models (without train/test partition), and 0 otherwise]
   }
   \item{scaleC}{
     Character: either mean-centering ('center'),
@@ -129,8 +129,13 @@ plotL = TRUE,
     PCA: Numerical vector of variances of length: predI
   }
   \item{vipVn}{
-    (O)PLS: Numerical vector of Variable Importance in Projection
-    (computed with all components)
+    PLS(-DA): Numerical vector of Variable Importance in Projection;
+    OPLS(-DA): Numerical vector of Variable Importance for Prediction
+    (VIP4,p from Galindo-Prieto et al, 2014)
+  }
+  \item{orthoVipVn}{
+    OPLS(-DA): Numerical vector of Variable Importance for Orthogonal
+    Modeling (VIP4,o from Galindo-Prieto et al, 2014)
   }
   \item{fitted}{
     (O)PLS: Predicted reponse based on the reference

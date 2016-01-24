@@ -130,7 +130,7 @@ strF <- function(inpMF,
                     if(!is.null(rownames(inpMF)) && any(duplicated(rownames(tabDF)))) {
                         rownames(tabDF) <- make.names(rownames(tabDF),
                                                       unique = TRUE)
-                    } else
+                    } else if(is.null(rownames(inpMF)))
                         rownames(tabDF) <- c(1:borderN,
                                              "...",
                                              (nrow(inpMF) - borderN + 1):nrow(inpMF))
@@ -142,8 +142,9 @@ strF <- function(inpMF,
 
                     tabDF <- as.data.frame(tabDF)
 
-                } else
-                    rownames(tabDF)[borderN + 1] <- "..."
+                }
+
+                rownames(tabDF)[borderN + 1] <- "..."
 
             } else if(dimAbbVl[1]) {
 
@@ -159,7 +160,7 @@ strF <- function(inpMF,
                     if(!is.null(rownames(inpMF)) && any(duplicated(rownames(tabDF)))) {
                         rownames(tabDF) <- make.names(rownames(tabDF),
                                                       unique = TRUE)
-                    } else
+                    } else if(is.null(rownames(inpMF)))
                         rownames(tabDF) <- c(1:borderN,
                                              "...",
                                              (nrow(inpMF) - borderN + 1):nrow(inpMF))
@@ -169,8 +170,9 @@ strF <- function(inpMF,
 
                     tabDF <- as.data.frame(tabDF)
 
-                } else
-                    rownames(tabDF)[borderN + 1] <- "..."
+                }
+
+                rownames(tabDF)[borderN + 1] <- "..."
 
             } else if(dimAbbVl[2]) {
 

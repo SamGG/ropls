@@ -21,15 +21,31 @@ predict.opls <- function(object, newdata, ...) {
         } else
             stop("'newdata' must be either a data.frame or a matrix", call. = FALSE)
 
-        if(ncol(newdata) != as.numeric(object[["descriptionMC"]]["X_variables", ]))
-            stop("'newdata' number of variables is ",
-                 ncol(newdata),
-                 " whereas the number of variables used for model training was ", as.numeric(object[["descriptionMC"]]["X_variables", ]),
-                 ".",
-                 call. = FALSE)
-
-        if(length(object[["xZeroVarVi"]]))
-            newdata <- newdata[, -object[["xZeroVarVi"]]]
+        if(ncol(newdata) != as.numeric(object[["descriptionMC"]]["X_variables", ])) {
+            if(length(object[["xZeroVarVi"]]) == 0) {
+                stop("'newdata' number of variables is ",
+                     ncol(newdata),
+                     " whereas the number of variables used for model training was ",
+                     as.numeric(object[["descriptionMC"]]["X_variables", ]),
+                     ".",
+                     call. = FALSE)
+            } else if(ncol(newdata) - as.numeric(object[["descriptionMC"]]["X_variables", ]) ==
+               as.numeric(object[["descriptionMC"]]["near_zero_excluded_X_variables", ])) {
+                warning(as.numeric(object[["descriptionMC"]]["near_zero_excluded_X_variables", ]),
+                        " near zero variance variables excluded during the model training will be removed from 'newdata'.",
+                        call. = FALSE)
+                newdata <- newdata[, -object[["xZeroVarVi"]], drop = FALSE]
+            } else {
+                stop("'newdata' number of variables (",
+                     ncol(newdata),
+                     ") does not correspond to the number of initial variables (",
+                     as.numeric(object[["descriptionMC"]]["X_variables", ]),
+                     ") minus the number of near zero variance variables excluded during the training (",
+                     as.numeric(object[["descriptionMC"]]["near_zero_excluded_X_variables", ]),
+                     ").",
+                     call. = FALSE)
+            }
+        }
 
         xteMN <- scale(newdata, object[["xMeanVn"]], object[["xSdVn"]])
 

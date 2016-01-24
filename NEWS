@@ -1,3 +1,20 @@
+CHANGES IN VERSION 1.2.12
+------------------------------
+
+NEW FEATURES
+
+    o opls: OPLS(-DA): vipVn and orthoVipVn are now computed as the VIP4,p and VIP4,o described in Galindo-Prieto et al (2014)
+            multiclass PLS-DA implemented (PLS2 approach; comments added in the vignette)
+            default number of permutations set to 20 (instead of 10)
+            predictive components denoted in the tables by 'p' (instead of 'h' previously)
+            OPLS(-DA): simplified "modelDF" data frame ('rotation' row has been suppressed)
+            
+    o plot.opls: changes in palette: black/grey colors for diagnostics and other colors for scores                
+            
+BUG FIXED
+
+    o opls: PCA model with 'svd' and a single component
+
 CHANGES IN VERSION 1.2.10
 ------------------------------
 
