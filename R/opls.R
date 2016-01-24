@@ -10,7 +10,7 @@ opls.default <- function(x,
                          algoC = c("default", "nipals", "svd")[1],
                          crossvalI = 7,
                          log10L = FALSE,
-                         permI = 10,
+                         permI = 20,
                          scaleC = c("center",
                              "pareto",
                              "standard")[3],
@@ -156,7 +156,6 @@ opls.default <- function(x,
 
     if(crossvalI > nrow(xMN))
         stop("'crossvalI' must be less than the row number of 'x'", call. = FALSE)
-
 
 
     ## Constants
@@ -324,6 +323,7 @@ opls.default <- function(x,
                    crossvalI = crossvalI,
                    subset = subset,
                    .char2numF = .char2numF)
+
 
     if(is.null(opLs[["suppLs"]][["yMCN"]])) {
         opLs[["typeC"]] <- "PCA"
@@ -560,7 +560,6 @@ opls.default <- function(x,
 
     }
 
-
     ## Defining the 'opls' class
     ##--------------------------
 
@@ -593,7 +592,6 @@ opls.default <- function(x,
 
 
 } ## end of opls.default
-
 
 
 
@@ -654,7 +652,7 @@ opls.default <- function(x,
             stop("Current implementation does not handle missing values in single response models") ## TO DO
     }
 
-    ## yMCN 'character' to 'numeric' conversion + .errorF function
+    ## yMCN 'character' to 'numeric' conversion
 
     yMN <- yMCN
 
@@ -733,43 +731,38 @@ opls.default <- function(x,
     ## X-Scaling
     ##---------------
 
-    if(scaleC != "none") {
+    xMeanVn <- apply(xMN, 2, function(colVn) mean(colVn, na.rm = TRUE))
 
-        xMeanVn <- apply(xMN, 2, function(colVn) mean(colVn, na.rm = TRUE))
+    switch(scaleC,
+           center = {
+               xSdVn <- rep(1, times = ncol(xMN))
+           },
+           pareto = {
+               xSdVn <- apply(xMN, 2, function(colVn) sqrt(sd(colVn, na.rm = TRUE)))
+           },
+           standard = {
+               xSdVn <- apply(xMN, 2, function(colVn) sd(colVn, na.rm = TRUE))
+           })
 
-        if(scaleC == "center")
-            xSdVn <- rep(1, times = ncol(xMN))
-        else if(scaleC == "pareto")
-            xSdVn <- apply(xMN, 2, function(colVn) sqrt(sd(colVn, na.rm = TRUE)))
-        else if(scaleC == "standard")
-            xSdVn <- apply(xMN, 2, function(colVn) sd(colVn, na.rm = TRUE))
+    xMN <- scale(xMN, center = xMeanVn, scale = xSdVn)
 
-        xMN <- scale(xMN, center = xMeanVn, scale = xSdVn)
-
-
-    } else {
-
-        xMeanVn <- rep(0, times = ncol(xMN))
-        xSdVn <- rep(1, times = ncol(xMN))
-
-    }
 
     if(!is.null(colnames(xMN))) {
         xvaNamVc <- colnames(xMN)
     } else
         xvaNamVc <- paste("x", 1:ncol(xMN), sep = "")
 
-    predIamVc <- paste("h", 1:predI, sep = "")
+    preNamVc <- paste("p", 1:predI, sep = "")
 
     pMN <- matrix(0,
                   nrow = ncol(xMN),
                   ncol = predI,
-                  dimnames = list(xvaNamVc, predIamVc))
+                  dimnames = list(xvaNamVc, preNamVc))
 
     tMN <- uMN <- matrix(0,
                          nrow = nrow(xMN),
                          ncol = predI,
-                         dimnames = list(obsNamVc, predIamVc))
+                         dimnames = list(obsNamVc, preNamVc))
 
     ssxTotN <- sum(xMN^2, na.rm = TRUE)
 
@@ -783,13 +776,13 @@ opls.default <- function(x,
 
 
         varVn <- numeric(predI)
-        names(varVn) <- predIamVc
+        names(varVn) <- preNamVc
         vSumVn <- sum(apply(xMN, 2, function(y) var(y, na.rm = TRUE))) ## xMN is centered
 
         modelDF <- as.data.frame(matrix(0,
                                       nrow = predI,
                                       ncol = 3,
-                                      dimnames = list(predIamVc, c("R2X", "R2X(cum)", "Iter."))))
+                                      dimnames = list(preNamVc, c("R2X", "R2X(cum)", "Iter."))))
 
         switch(algoC,
 
@@ -878,12 +871,12 @@ opls.default <- function(x,
 
                    rm(pcaSvdLs)
 
-                   tMN <- tMN[, 1:predI]
-                   pMN <- pMN[, 1:predI]
+                   tMN <- tMN[, 1:predI, drop = FALSE]
+                   pMN <- pMN[, 1:predI, drop = FALSE]
                    varVn <- varVn[1:predI]
                    rownames(tMN) <- obsNamVc
                    rownames(pMN) <- xvaNamVc
-                   names(varVn) <- colnames(pMN) <- colnames(tMN) <- predIamVc
+                   names(varVn) <- colnames(pMN) <- colnames(tMN) <- preNamVc
 
                    modelDF[, "R2X"] <- round(varVn / vSumVn, 3)
 
@@ -907,32 +900,35 @@ opls.default <- function(x,
 
         summaryDF <- modelDF[predI, c("R2X(cum)"), drop = FALSE]
 
-
     } else { ## if(is.null(yMCN))
 
 
         ## Y-Scaling
         ##---------------
 
-        if(scaleC != "none") {
+        yMeanVn <- apply(yMN, 2, function(colVn) mean(colVn, na.rm = TRUE))
 
-            yMeanVn <- apply(yMN, 2, function(colVn) mean(colVn, na.rm = TRUE))
+        if(mode(yMCN) == "character") {
 
-            if(scaleC == "center")
-                ySdVn <- rep(1, times = ncol(yMN))
-            else if(scaleC == "pareto")
-                ySdVn <- apply(yMN, 2, function(colVn) sqrt(sd(colVn, na.rm = TRUE)))
-            else if(scaleC == "standard")
-                ySdVn <- apply(yMN, 2, function(colVn) sd(colVn, na.rm = TRUE))
-
-            yMN <- scale(yMN, center = yMeanVn, scale = ySdVn)
+            ySdVn <- apply(yMN, 2, function(colVn) sd(colVn, na.rm = TRUE))
 
         } else {
 
-            yMeanVn <- rep(0, times = ncol(yMN))
-            ySdVn <- rep(1, times = ncol(yMN))
+            switch(scaleC,
+                   center = {
+                       ySdVn <- rep(1, times = ncol(yMN))
+                   },
+                   pareto = {
+                       ySdVn <- apply(yMN, 2, function(colVn) sqrt(sd(colVn, na.rm = TRUE)))
+                   },
+                   standard = {
+                       ySdVn <- apply(yMN, 2, function(colVn) sd(colVn, na.rm = TRUE))
+                   })
 
         }
+
+        yMN <- scale(yMN, center = yMeanVn, scale = ySdVn)
+
 
         if(!is.null(colnames(yMN))) {
             yvaNamVc <- colnames(yMN)
@@ -946,7 +942,7 @@ opls.default <- function(x,
         cMN <- matrix(0,
                       nrow = ncol(yMN),
                       ncol = predI,
-                      dimnames = list(yvaNamVc, predIamVc))
+                      dimnames = list(yvaNamVc, preNamVc))
 
 
         ## Cross-validation variables
@@ -958,7 +954,9 @@ opls.default <- function(x,
 
         ## rules
 
-        ru1ThrN <- ifelse(nrow(xMN) > 100, yes = 0, no = 0.05)
+        ru1ThrN <- ifelse(orthoI == 0,
+                          ifelse(nrow(xMN) > 100, yes = 0, no = 0.05), ## PLS
+                          0.01) ## OPLS
 
         ## SSY total
 
@@ -982,7 +980,7 @@ opls.default <- function(x,
             modelDF <- as.data.frame(matrix(NA,
                                           nrow = predI,
                                           ncol = 8,
-                                          dimnames = list(predIamVc, c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif.", "Iter."))))
+                                          dimnames = list(preNamVc, c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif.", "Iter."))))
             for(j in 1:ncol(modelDF))
                 mode(modelDF[, j]) <- ifelse(colnames(modelDF)[j] == "Signif.", "character", "numeric")
 
@@ -1198,7 +1196,7 @@ opls.default <- function(x,
                 hN <- hN - 1
 
                 if(hN == 0)
-                    stop("No model was built because the first predictive component was already not significant", call. = FALSE)
+                    stop("No model was built because the first predictive component was already not significant;\nSelect a number of predictive components of 1 if you want the algorithm to compute a model despite this.", call. = FALSE)
 
                 if(hN == autMaxN)
                     warning("The maximum number of components in the automated mode (", autMaxN, ") has been reached whereas R2Y (", round(modelDF[hN, 'R2Y'] * 100), "%) is still above 1% and Q2Y (", round(modelDF[hN, 'Q2'] * 100), "%) is still above ", round(ru1ThrN * 100), "%.", call. = FALSE)
@@ -1209,7 +1207,7 @@ opls.default <- function(x,
                 cMN <- cMN[, 1:hN, drop = FALSE]
                 uMN <- uMN[, 1:hN, drop = FALSE]
 
-                predIamVc <- predIamVc[1:hN]
+                preNamVc <- preNamVc[1:hN]
 
                 predI <- hN
 
@@ -1230,7 +1228,7 @@ opls.default <- function(x,
 
                 pwMN <- crossprod(pMN, wMN)
                 rMN <- wMN %*% solve(pwMN)
-                colnames(rMN) <- predIamVc
+                colnames(rMN) <- preNamVc
 
             }
 
@@ -1345,9 +1343,9 @@ opls.default <- function(x,
                            dimnames = list(yvaNamVc, orthoNamVc))
 
             modelDF <- as.data.frame(matrix(NA,
-                                            nrow = 3 + orthoI,
+                                            nrow = 1 + orthoI + 1,
                                             ncol = 7,
-                                            dimnames = list(c("h1", "rot", orthoNamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
+                                            dimnames = list(c("p1", orthoNamVc, "sum"), c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "Signif."))))
             for(j in 1:ncol(modelDF))
                 mode(modelDF[, j]) <- ifelse(colnames(modelDF)[j] == "Signif.", "character", "numeric")
 
@@ -1510,51 +1508,46 @@ opls.default <- function(x,
 
                     if(ncol(ycvTraMN) > 1)
                         for(j in 1:ncol(twMN))
-                            wOrthoVn <- pVn - drop(crossprod(twMN[, j, drop = FALSE], pVn)) / drop(crossprod(twMN[, j, drop = FALSE])) * twMN[, j, drop = FALSE]
+                            woVn <- pVn - drop(crossprod(twMN[, j, drop = FALSE], pVn)) / drop(crossprod(twMN[, j, drop = FALSE])) * twMN[, j, drop = FALSE]
                     else
-                        wOrthoVn <- pVn - drop(crossprod(wVn, pVn)) / drop(crossprod(wVn)) * wVn
+                        woVn <- pVn - drop(crossprod(wVn, pVn)) / drop(crossprod(wVn)) * wVn
 
                     ## step 8|
 
-                    wOrthoVn <- wOrthoVn / sqrt(drop(crossprod(wOrthoVn)))
+                    woVn <- woVn / sqrt(drop(crossprod(woVn)))
 
                     ## step 9|
 
                     if(naxL) {
-                        tOrthoVn <- numeric(nrow(xcvTraMN))
+                        toVn <- numeric(nrow(xcvTraMN))
                         for(i in 1:nrow(xcvTraMN)) {
                             comVl <- complete.cases(xcvTraMN[i, ])
-                            tOrthoVn[i] <- crossprod(xcvTraMN[i, comVl], wOrthoVn[comVl]) / drop(crossprod(wOrthoVn[comVl]))
+                            toVn[i] <- crossprod(xcvTraMN[i, comVl], woVn[comVl]) / drop(crossprod(woVn[comVl]))
                         }
                     } else
-                        tOrthoVn <- xcvTraMN %*% wOrthoVn
+                        toVn <- xcvTraMN %*% woVn
 
                     if(nayL) {
-                        cOrthoVn <- numeric(ncol(ycvTraMN))
+                        coVn <- numeric(ncol(ycvTraMN))
                         for(j in 1:ncol(ycvTraMN)) {
                             comVl <- complete.cases(ycvTraMN[, j])
-                            cOrthoVn[j] <- crossprod(ycvTraMN[comVl, j], tOrthoVn[comVl]) / drop(crossprod(tOrthoVn[comVl]))
+                            coVn[j] <- crossprod(ycvTraMN[comVl, j], toVn[comVl]) / drop(crossprod(toVn[comVl]))
                         }
                     } else
-                        cOrthoVn <- crossprod(ycvTraMN, tOrthoVn) / drop(crossprod(tOrthoVn))
+                        coVn <- crossprod(ycvTraMN, toVn) / drop(crossprod(toVn))
 
                     ## step 10|
 
                     if(naxL) {
-                        pOrthoVn <- numeric(ncol(xcvTraMN))
+                        poVn <- numeric(ncol(xcvTraMN))
                         for(j in 1:ncol(xcvTraMN)) {
                             comVl <- complete.cases(xcvTraMN[, j])
-                            pOrthoVn[j] <- crossprod(xcvTraMN[comVl, j], tOrthoVn[comVl]) / drop(crossprod(tOrthoVn[comVl]))
+                            poVn[j] <- crossprod(xcvTraMN[comVl, j], toVn[comVl]) / drop(crossprod(toVn[comVl]))
                         }
                     } else
-                        pOrthoVn <- crossprod(xcvTraMN, tOrthoVn) / drop(crossprod(tOrthoVn))
+                        poVn <- crossprod(xcvTraMN, toVn) / drop(crossprod(toVn))
 
                     ## step 12|
-
-                    if(noN == 1)
-                        rowI <- 1
-                    else
-                        rowI <- 1 + noN
 
                     if(cvN <= crossvalI) { ## cross-validation
 
@@ -1572,68 +1565,68 @@ opls.default <- function(x,
                             prkVn[cvN] <- sum((ycvTesMN - xcvTesMN %*% wVn %*% t(cVn))^2, na.rm = TRUE)
 
                         if(naxL) {
-                            tOrthoTesVn <- numeric(nrow(xcvTesMN))
+                            toTesVn <- numeric(nrow(xcvTesMN))
                             for(i in 1:nrow(xcvTesMN)) {
                                 comVl <- complete.cases(xcvTesMN[i, ])
-                                tOrthoTesVn[i] <- crossprod(xcvTesMN[i, comVl], wOrthoVn[comVl]) / drop(crossprod(wOrthoVn[comVl]))
+                                toTesVn[i] <- crossprod(xcvTesMN[i, comVl], woVn[comVl]) / drop(crossprod(woVn[comVl]))
                             }
                         } else
-                            tOrthoTesVn <- xcvTesMN %*% wOrthoVn
+                            toTesVn <- xcvTesMN %*% woVn
 
-                        xcvTesLs[[cvN]] <- xcvTesMN - tcrossprod(tOrthoTesVn, pOrthoVn)
+                        xcvTesLs[[cvN]] <- xcvTesMN - tcrossprod(toTesVn, poVn)
 
                         if(cvN == crossvalI) {
                             q2N <- 1 - sum(prkVn) / rs0N
-                            if(noN == 1)
-                                modelDF["h1", "Q2(cum)"] <- modelDF["h1", "Q2"] <- q2N
-                            else {
-                                modelDF[rowI, "Q2(cum)"] <- q2N - modelDF["h1", "Q2"]
-                                modelDF[rowI, "Q2"] <- q2N - sum(modelDF[1:(rowI - 1), "Q2"], na.rm = TRUE)
+                            if(noN == 1) {
+                                modelDF["p1", "Q2(cum)"] <- modelDF["p1", "Q2"] <- q2N
+                            } else {
+                                modelDF[noN, "Q2(cum)"] <- q2N - modelDF["p1", "Q2"]
+                                modelDF[noN, "Q2"] <- q2N - sum(modelDF[1:(noN - 1), "Q2"], na.rm = TRUE)
                             }
                         }
 
                     } else { ## cvN == crossvalI + 1 (full matrix)
 
+                        ## R2Xp computed later on (since they are updated)
+
+                        ## R2Yp
+
+                        if(nayL) {
+                            r2yN <- sum((tcrossprod(tVn, cVn)[!is.na(yMN)])^2) / ssyTotN
+                        } else
+                            r2yN <- sum(tcrossprod(tVn, cVn)^2) / ssyTotN
+
                         if(noN == 1) {
-                            if(naxL)
-                                modelDF[rowI, "R2X(cum)"] <- modelDF[rowI, "R2X"] <- sum((tcrossprod(tVn, pVn)[!is.na(xMN)])^2) / ssxTotN
-                            else
-                                modelDF[rowI, "R2X(cum)"] <- modelDF[rowI, "R2X"] <- sum(tcrossprod(tVn, pVn)^2) / ssxTotN
-                            if(nayL)
-                                modelDF[rowI, "R2Y(cum)"] <- modelDF[rowI, "R2Y"] <- sum((tcrossprod(tVn, cVn)[!is.na(yMN)])^2) / ssyTotN
-                            else
-                                modelDF[rowI, "R2Y(cum)"] <- modelDF[rowI, "R2Y"] <- sum(tcrossprod(tVn, cVn)^2) / ssyTotN
+                            modelDF["p1", "R2Y(cum)"] <- modelDF["p1", "R2Y"] <- r2yN
                         } else {
-                            if(nayL)
-                                modelDF[rowI, "R2Y(cum)"] <- modelDF[rowI, "R2Y"] <- sum((tcrossprod(tVn, cVn)[!is.na(yMN)])^2) / ssyTotN
-                            else
-                                modelDF[rowI, "R2Y(cum)"] <- sum(tcrossprod(tVn, cVn)^2) / ssyTotN - modelDF["h1", "R2Y(cum)"]
-                            if(noN == 2)
-                                modelDF[rowI, "R2Y"] <- modelDF[rowI, "R2Y(cum)"]
-                            else
-                                modelDF[rowI, "R2Y"] <- modelDF[rowI, "R2Y(cum)"] - modelDF[3, "R2Y(cum)"]
+                            modelDF[noN, "R2Y(cum)"] <- r2yN - modelDF["p1", "R2Y"]
+                            modelDF[noN, "R2Y"] <- r2yN - sum(modelDF[1:(noN - 1), "R2Y"], na.rm = TRUE)
                         }
 
                         if(noN <= orthoI) {
-                            poMN[, noN] <- pOrthoVn
-                            toMN[, noN] <- tOrthoVn
-                            woMN[, noN] <- wOrthoVn
-                            coMN[, noN] <- cOrthoVn
-                            if(naxL)
-                                modelDF[2 + noN, "R2X"] <- sum((tcrossprod(tOrthoVn, pOrthoVn)[!is.na(xMN)])^2) / ssxTotN
-                            else
-                                modelDF[2 + noN, "R2X"] <- sum(tcrossprod(tOrthoVn, pOrthoVn)^2) / ssxTotN
+
+                            ## R2Xoi (R2Yoi is 0)
+
+                            if(naxL) {
+                                modelDF[paste0("o", noN), "R2X"] <- sum((tcrossprod(toVn, poVn)[!is.na(xMN)])^2) / ssxTotN
+                            } else
+                                modelDF[paste0("o", noN), "R2X"] <- sum(tcrossprod(toVn, poVn)^2) / ssxTotN
+
+                            poMN[, noN] <- poVn
+                            toMN[, noN] <- toVn
+                            woMN[, noN] <- woVn
+                            coMN[, noN] <- coVn
+
                         }
 
-                        if(modelDF[rowI, "R2Y"] < 0.01) {
-                            modelDF[rowI, "Signif."] <- "N4"
-                        } else if(modelDF[rowI, "Q2"] < ru1ThrN) {
-                            modelDF[rowI, "Signif."] <- "NS"
+                        if(modelDF[noN, "R2Y"] < 0.01) {
+                            modelDF[noN, "Signif."] <- "N4"
+                        } else if(modelDF[noN, "Q2"] < ru1ThrN) {
+                            modelDF[noN, "Signif."] <- "NS"
                         } else
-                            modelDF[rowI, "Signif."] <- "R1"
+                            modelDF[noN, "Signif."] <- "R1"
 
-
-                        if(autNcoL && modelDF[rowI, "Signif."] != "R1" && rowI > 2) {
+                        if(autNcoL && modelDF[noN, "Signif."] != "R1" && noN > 2) {
                             breL <- TRUE
                             break
                         } else {
@@ -1651,7 +1644,7 @@ opls.default <- function(x,
                     ## step 11|
 
                     if(noN < orthoI + 1)
-                        xcvTraLs[[cvN]] <- xcvTraMN - tcrossprod(tOrthoVn, pOrthoVn)
+                        xcvTraLs[[cvN]] <- xcvTraMN - tcrossprod(toVn, poVn)
 
                 } ## for(cvN in 1:length(xcvTraLs)) {
 
@@ -1661,19 +1654,14 @@ opls.default <- function(x,
             rm(xcvTesLs)
             rm(ycvTraLs)
 
-            if(naxL) {
-                modelDF["rot", "R2X(cum)"] <- sum((tcrossprod(tMN, pMN)[!is.na(xMN)])^2) / ssxTotN
-            } else
-                modelDF["rot", "R2X(cum)"] <- sum(tcrossprod(tMN, pMN)^2) / ssxTotN
-            if(nayL) {
-                modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum((tcrossprod(tMN, cMN)[!is.na(yMN)])^2) / ssyTotN
-            } else
-                modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum(tcrossprod(tMN, cMN)^2) / ssyTotN
+            ## R2X
 
-            modelDF["rot", "R2X"] <- modelDF["rot", "R2X(cum)"] - modelDF["h1", "R2X(cum)"]
-            modelDF[2 + 1:orthoI, "R2X(cum)"] <- cumsum(modelDF[2 + 1:orthoI, "R2X"])
-            modelDF["sum", "R2X(cum)"] <- modelDF["rot", "R2X(cum)"] + modelDF[2 + orthoI, "R2X(cum)"]
-            modelDF["sum", "Q2(cum)"] <- modelDF["rot", "Q2(cum)"] <- sum(modelDF[, "Q2"], na.rm = TRUE)
+            if(naxL) {
+                modelDF["p1", "R2X(cum)"] <- modelDF["p1", "R2X"] <- sum((tcrossprod(tMN, pMN)[!is.na(xMN)])^2) / ssxTotN
+            } else
+                modelDF["p1", "R2X(cum)"] <- modelDF["p1", "R2X"] <- sum(tcrossprod(tMN, pMN)^2) / ssxTotN
+
+            modelDF[1:(1 + orthoI), "R2X(cum)"] <- cumsum(modelDF[1:(1 + orthoI), "R2X"])
 
             if(autNcoL) {
 
@@ -1686,7 +1674,7 @@ opls.default <- function(x,
                     stop("No model was built because the first orthogonal component was already not significant;\nSelect a number of orthogonal components of 1 if you want the algorithm to compute a model despite this.", call. = FALSE)
 
                 if(orthoI == autMaxN - 1)
-                    warning("The maximum number of orthogonal components in the automated mode (", autMaxN - 1, ") has been reached whereas R2Y (", round(modelDF[2 + orthoI, 'R2Y'] * 100), "%) is still above 1% and Q2Y (", round(modelDF[2 + orthoI, 'Q2'] * 100), "%) is still above ", round(ru1ThrN * 100), "%.", call. = FALSE)
+                    warning("The maximum number of orthogonal components in the automated mode (", autMaxN - 1, ") has been reached whereas R2Y (", round(modelDF[1 + orthoI, 'R2Y'] * 100), "%) is above 1% and Q2Y (", round(modelDF[1 + orthoI, 'Q2'] * 100), "%) is still above ", round(ru1ThrN * 100), "%.", call. = FALSE)
 
                 poMN <- poMN[, 1:orthoI, drop = FALSE]
                 toMN <- toMN[, 1:orthoI, drop = FALSE]
@@ -1694,21 +1682,21 @@ opls.default <- function(x,
                 coMN <- coMN[, 1:orthoI, drop = FALSE]
 
                 orthoNamVc <- orthoNamVc[1:orthoI]
-                modelDF <- modelDF[c(1:(orthoI + 2), nrow(modelDF)), ]
-
-                if(naxL) {
-                    modelDF["rot", "R2X(cum)"] <- sum((tcrossprod(tMN, pMN)[!is.na(xMN)])^2) / ssxTotN
-                } else
-                    modelDF["rot", "R2X(cum)"] <- sum(tcrossprod(tMN, pMN)^2) / ssxTotN
-                if(nayL) {
-                    modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum((tcrossprod(tMN, cMN)[!is.na(yMN)])^2) / ssyTotN
-                } else
-                    modelDF["sum", "R2Y(cum)"] <- modelDF["rot", "R2Y(cum)"] <- sum(tcrossprod(tMN, cMN)^2) / ssyTotN
-                modelDF["rot", "R2X"] <- modelDF["rot", "R2X(cum)"] - modelDF["h1", "R2X(cum)"]
-                modelDF["sum", "R2X(cum)"] <- modelDF["rot", "R2X(cum)"] + modelDF[2 + orthoI, "R2X(cum)"]
-                modelDF["sum", "Q2(cum)"] <- modelDF["rot", "Q2(cum)"] <- sum(modelDF[, "Q2"], na.rm = TRUE)
+                modelDF <- modelDF[c(1:(orthoI + 1), nrow(modelDF)), ]
 
             }
+
+            ## R2X
+
+            modelDF["sum", "R2X(cum)"] <- modelDF[1 + orthoI, "R2X(cum)"]
+
+            ## R2Y
+
+            modelDF["sum", "R2Y(cum)"] <- sum(modelDF[, "R2Y"], na.rm = TRUE)
+
+            ## Q2
+
+            modelDF["sum", "Q2(cum)"] <- sum(modelDF[, "Q2"], na.rm = TRUE)
 
             summaryDF <- modelDF["sum", c("R2X(cum)", "R2Y(cum)", "Q2(cum)")]
 
@@ -1863,7 +1851,13 @@ opls.default <- function(x,
 
     summaryDF[, "pre"] <- predI
     summaryDF[, "ort"] <- orthoI
+    rownames(summaryDF) <- "Total"
 
+    sigNamVc <- c("R2X", "R2X(cum)", "R2Y", "R2Y(cum)", "Q2", "Q2(cum)", "RMSEE", "RMSEP")
+    for(namC in intersect(colnames(modelDF), sigNamVc))
+        modelDF[, namC] <- signif(modelDF[, namC], 3)
+    for(namC in intersect(colnames(summaryDF), sigNamVc))
+        summaryDF[, namC] <- signif(summaryDF[, namC], 3)
 
     ##------------------------------------
     ##   Returning

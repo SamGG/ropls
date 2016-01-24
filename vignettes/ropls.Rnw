@@ -194,9 +194,9 @@ Note:
 \item When set to NA (as in the default), the number of components \texttt{predI} is determined automatically as follows (\cite{Eriksson2001}): A new component \emph{h} is added to the model if :
 \begin{enumerate}
 \item $R2Y_h \geq 1\%$, i.e., the percentage of Y dispersion (i.e., sum of squares) explained by component \emph{h} is more than 1\%, and
-\item $Q2Y_h=1-PRESS_h/RSS_{h-1} \geq 0$ (or 5\% when the number of samples is less than 100), i.e., the predicted residual sum of squares ($PRESS_h$) of the model including the new component \emph{h} estimated by 7-fold cross-validation is less than the residual sum of squares ($RSS_{h-1}$) of the model with the previous components only (with $RSS_0$ being the sum of squared Y values).
+\item $Q2Y_h=1-PRESS_h/RSS_{h-1} \geq 0$ for PLS (or 5\% when the number of samples is less than 100) or 1\% for OPLS: $Q2Y_h \geq 0$ means that the predicted residual sum of squares ($PRESS_h$) of the model including the new component \emph{h} estimated by 7-fold cross-validation is less than the residual sum of squares ($RSS_{h-1}$) of the model with the previous components only (with $RSS_0$ being the sum of squared Y values).
 \end{enumerate}
-\item The predictive performance of the full model is assessed by the cumulative Q2Y metric: $Q2Y=1-\prod\limits_{h=1}^r (1-Q2Y_h)$. We have $Q2Y \in [0,1]$, and the higher the Q2Y, the better the performance. Models trained on datasets with a larger number of features compared with the number of samples can be prone to overfitting: in that case, high Q2Y values are obtained by chance only (see section~\ref{subsubsec:overfit}). To estimate the significance of Q2Y (and R2Y) for single response models, permutation testing can be used \cite{Szymanska2012}: models are built after random permutation of the Y values, and $Q2Y_{perm}$ are computed. The \textit{p}-value is equal to the proportion of $Q2Y_{perm}$ above $Q2Y$ (the default number of permutations is 10 as a compromise between quality control and computation speed; it can be increased with the \texttt{permI} parameter, e.g. to 1,000, to assess if the model is significant at the 0.05 level),
+\item The predictive performance of the full model is assessed by the cumulative Q2Y metric: $Q2Y=1-\prod\limits_{h=1}^r (1-Q2Y_h)$. We have $Q2Y \in [0,1]$, and the higher the Q2Y, the better the performance. Models trained on datasets with a larger number of features compared with the number of samples can be prone to overfitting: in that case, high Q2Y values are obtained by chance only (see section~\ref{subsubsec:overfit}). To estimate the significance of Q2Y (and R2Y) for single response models, permutation testing can be used \cite{Szymanska2012}: models are built after random permutation of the Y values, and $Q2Y_{perm}$ are computed. The \textit{p}-value is equal to the proportion of $Q2Y_{perm}$ above $Q2Y$ (the default number of permutations is 20 as a compromise between quality control and computation speed; it can be increased with the \texttt{permI} parameter, e.g. to 1,000, to assess if the model is significant at the 0.05 level),
 \item The NIPALS algorithm is used for PLS (and OPLS); \emph{dataMatrix} matrices with (a moderate amount of) missing values can thus be analysed.
 \end{enumerate}
 
@@ -397,12 +397,26 @@ The VIP properties above result from:
 
 Galindo-Prieto et al. (2014) have recently suggested new VIP metrics for OPLS, $VIP_{pred}$ and $VIP_{ortho}$, to separately measure the influence of the features in the modeling of the dispersion correlated to, and orthogonal to the response, respectively (\cite{Galindo-Prieto2014}).
 
-For OPLS(-DA) models, the output from \emph{opls} method therefore includes:
+For OPLS(-DA) models, the output from the \emph{opls} method therefore includes:
 \begin{itemize}
 \item the \texttt{vipVn} vector which corresponds to the $VIP_{4,pred}$ metric measuring the variable importance in prediction,
 \item the \texttt{orthoVipVn} vector which is the $VIP_{4,ortho}$ metric measuring the variable importance in orthogonal modeling.
 \end{itemize}
-As for the classical $VIP$, we still have the mean of $VIP_{4,pred}^2$ (and of $VIP_{4,ortho}^2$) which equals 1.
+As for the classical $VIP$, we still have the mean of $VIP_{pred}^2$ (and of $VIP_{ortho}^2$) which, each, equals 1.
+
+\subsubsection{(Orthogonal) Partial Least Squares Discriminant Analysis: (O)PLS-DA}
+
+\paragraph{Two classes}
+
+When the \textbf{y} response is a factor of 2 levels (character vectors are also allowed), it is internally transformed into a vector of values $\in \{0,1\}$ encoding the classes. The vector is centered and unit-variance scaled, and the (O)PLS analysis is performed.
+
+Brereton and Lloyd (2014) have demonstrated that when the sizes of the 2 classes are unbalanced, a bias is introduced in the computation of the decision rule, which penalizes the class with the highest size (\cite{Brereton2014}). In this case, an external procedure using resampling (to balance the classes) and taking into account the class sizes should be used for optimal results.
+
+\paragraph{Multiclass}
+
+In the case of more than 2 levels, the \textbf{y} response is internally transformed into a matrix (each class is encoded by one column of values $\in \{0,1\}$). The matrix is centered and unit-variance scaled, and the PLS analysis is performed.
+
+In this so-called `PLS2' implementation, the proportions of 0 and 1 in the columns is usually unbalanced (even in the case of balanced size of the classes) and the bias described previously occurs (\cite{Brereton2014}). The multiclass PLS-DA results from \emph{ropls} are therefore indicative only, and we recommend to set an external procedure where each column of the matrix is modeled separately (as described above) and the resulting probabilities are aggregated (see for instance \cite{Bylesjo2006}).
 
 \subsection{Closing session}
 

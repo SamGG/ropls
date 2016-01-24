@@ -1,3 +1,18 @@
+CHANGES IN VERSION 1.3.12
+------------------------------
+
+NEW FEATURES
+
+    o opls: multiclass PLS-DA implemented (PLS2 approach; comments added in the vignette)
+            default number of permutations set to 20 (instead of 10)
+            predictive components denoted in the tables by 'p' (instead of 'h' previously)
+            OPLS(-DA): simplified "modelDF" data frame ('rotation' row has been suppressed)
+            
+BUG FIXED
+
+    o opls: PCA model with 'svd' and a single component
+            
+
 CHANGES IN VERSION 1.3.11
 ------------------------------
 

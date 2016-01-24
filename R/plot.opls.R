@@ -675,9 +675,9 @@ plot.opls <- function(x,
 
             if(!layL)
                 legend("topleft",
-                       col = c("black", "red"),
+                       col = c("grey", "black"),
                        legend = c("X", "Y"),
-                       text.col = c("black", "red"))
+                       text.col = c("grey", "black"))
 
         }
 
