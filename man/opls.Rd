@@ -20,7 +20,7 @@ algoC = c("default", "nipals", "svd")[1],
 crossvalI = 7,
 log10L = FALSE,
 permI = 20,
-scaleC = c("center", "pareto", "standard")[3],
+scaleC = c("none", "center", "pareto", "standard")[4],
 subset = NULL,
 printL = TRUE,
 plotL = TRUE,
@@ -77,9 +77,9 @@ plotL = TRUE,
     20 for single response models (without train/test partition), and 0 otherwise]
   }
   \item{scaleC}{
-    Character: either mean-centering ('center'),
-    mean-centering and pareto scaling ('pareto'), or mean-centering and unit
-    variance scaling ('standard') [default]
+    Character: either no centering nor scaling ('none'), mean-centering
+    only ('center'), mean-centering and pareto scaling ('pareto'), or
+    mean-centering and unit variance scaling ('standard') [default]
   }
   \item{subset}{
     Integer vector: indices of the observations to be used for training (in a
