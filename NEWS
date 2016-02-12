@@ -1,3 +1,14 @@
+CHANGES IN VERSION 1.3.14
+------------------------------
+
+NEW FEATURES
+
+    o plot.opls: when 'parAsColFcVn' is a character vector, it is converted to a factor (thus drawing ellipses by default)
+            
+BUG FIXED
+
+    o plot.opls: handling of ellipse display when parEllipseL parameter set to NA (default)
+
 CHANGES IN VERSION 1.3.13
 ------------------------------
 
