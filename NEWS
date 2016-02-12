@@ -1,19 +1,38 @@
+CHANGES IN VERSION 1.2.14
+------------------------------
+
+NEW FEATURES
+
+    o opls: no scaling option now available
+    o plot.opls: when 'parAsColFcVn' is a character vector, it is converted to a factor (thus drawing ellipses by default)
+            
+BUG FIXED
+
+    o opls: computation of the matrix of correlations (when the number of features is <= 100)
+    o plot.opls: handling of ellipse display when parEllipseL parameter set to NA (default)    
+
 CHANGES IN VERSION 1.2.12
 ------------------------------
 
 NEW FEATURES
 
-    o opls: OPLS(-DA): vipVn and orthoVipVn are now computed as the VIP4,p and VIP4,o described in Galindo-Prieto et al (2014)
-            multiclass PLS-DA implemented (PLS2 approach; comments added in the vignette)
+    o opls: multiclass PLS-DA implemented (PLS2 approach; comments added in the vignette)
             default number of permutations set to 20 (instead of 10)
             predictive components denoted in the tables by 'p' (instead of 'h' previously)
             OPLS(-DA): simplified "modelDF" data frame ('rotation' row has been suppressed)
             
-    o plot.opls: changes in palette: black/grey colors for diagnostics and other colors for scores                
-            
 BUG FIXED
 
     o opls: PCA model with 'svd' and a single component
+            
+
+CHANGES IN VERSION 1.2.11
+------------------------------
+
+NEW FEATURES
+
+    o opls: for OPLS(-DA), vipVn and orthoVipVn are now computed as the VIP4,p and VIP4,o described in Galindo-Prieto et al (2014)
+    o plot.opls: changes in palette: black/grey colors for diagnostics and other colors for scores    
 
 CHANGES IN VERSION 1.2.10
 ------------------------------

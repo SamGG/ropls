@@ -45,6 +45,14 @@ test_plot <- function() {
 
     }
 
+    ## (O)PLS-DA: Turning display of ellipses off in case parAsColFcVn is numeric
+    plot(opLs,
+         parAsColFcVn = sacurine[["sampleMetadata"]][, "age"])
+
+    ## Converting 'parAsColFcVn' character into a factor (with warning)
+    plot(opLs,
+         parAsColFcVn = as.character(sacurine[["sampleMetadata"]][, "gender"]))
+
 }
 
 test_print <- function() {

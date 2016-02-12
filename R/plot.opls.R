@@ -68,6 +68,10 @@ plot.opls <- function(x,
             stop("'parAsColFcVn' vector length must be equal to the number of 'x' rows")
         if(!(mode(parAsColFcVn) %in% c("character", "numeric")))
             stop("'parAsColFcVn' must be of 'character' or 'numeric' type")
+        if(is.character(parAsColFcVn)) {
+            parAsColFcVn <- factor(parAsColFcVn)
+            warning("Character 'parAsColFcVn' set to a factor", call. = FALSE)
+        }
     }
 
     if(is.null(x[["suppLs"]][["permMN"]]) && 'permutation' %in% typeVc)
@@ -93,11 +97,16 @@ plot.opls <- function(x,
            stop("'predict' graphics available for single response regression or binary classification only", call. = FALSE)
 
     if(is.na(parEllipsesL)) {
-        if((x[["typeC"]] == "PCA" && !all(is.na(parAsColFcVn)) && is.factor(parAsColFcVn)) || ## PCA case
-           grepl("-DA$", x[["typeC"]])) { ## (O)PLS-DA cases
+        if((all(is.na(parAsColFcVn)) && grepl("-DA$", x[["typeC"]])) ||
+           (!all(is.na(parAsColFcVn)) && is.factor(parAsColFcVn))) {
             parEllipsesL <- TRUE
         } else
             parEllipsesL <- FALSE
+        ## if((x[["typeC"]] == "PCA" && !all(is.na(parAsColFcVn)) && is.factor(parAsColFcVn)) || ## PCA case
+        ##    grepl("-DA$", x[["typeC"]])) { ## (O)PLS-DA cases
+        ##     parEllipsesL <- TRUE
+        ## } else
+        ##     parEllipsesL <- FALSE
     } else if(parEllipsesL && !grepl("-DA$", x[["typeC"]]) && (all(is.na(parAsColFcVn)) || !is.factor(parAsColFcVn)))
         stop("Ellipses can be plotted for PCA (or PLS regression) only if the 'parAsColFcVn' is a factor",
              call. = FALSE)

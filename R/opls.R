@@ -11,9 +11,7 @@ opls.default <- function(x,
                          crossvalI = 7,
                          log10L = FALSE,
                          permI = 20,
-                         scaleC = c("center",
-                             "pareto",
-                             "standard")[3],
+                         scaleC = c("none", "center", "pareto", "standard")[4],
                          subset = NULL,
 
                          printL = TRUE,
@@ -143,8 +141,8 @@ opls.default <- function(x,
     if(!is.na(predI) && !is.na(orthoI) && ((predI + orthoI) > min(dim(xMN))))
         stop("The sum of 'predI' (", predI, ") and 'orthoI' (", orthoI, ") exceeds the minimum dimension of the 'x' data matrix (", min(dim(xMN)), ")" , call. = FALSE)
 
-    if(!(length(scaleC) == 1 && scaleC %in% c('center', 'pareto', 'standard')))
-        stop("'scaleC' must be either 'center', 'pareto', or 'standard'", call. = FALSE)
+    if(!(length(scaleC) == 1 && scaleC %in% c('none', 'center', 'pareto', 'standard')))
+        stop("'scaleC' must be either 'none', 'center', 'pareto', or 'standard'", call. = FALSE)
 
     if(!is.null(subset) && (is.null(yMCN) || ncol(yMCN) > 1))
         stop("train/test partition with 'subset' only available for (O)PLS(-DA) models of a single 'y' response", call. = FALSE)
@@ -439,14 +437,14 @@ opls.default <- function(x,
     } else
         opLs[["suppLs"]][["xSubIncVarMN"]] <- xMN
 
-    if(ncol(xMN) < 100) {
+    if(ncol(xMN) <= 100) {
 
         xCorMN <- cor(xMN, use = "pairwise.complete.obs")
         xCorMN[lower.tri(xCorMN, diag = TRUE)] <- 0
 
         if(ncol(xMN) > opLs[["topLoadI"]]) {
 
-            xCorNexDF <- which(abs(xCorMN) > sort(abs(xCorMN), decreasing = TRUE)[opLs[["topLoadI"]] + 1],
+            xCorNexDF <- which(abs(xCorMN) >= sort(abs(xCorMN), decreasing = TRUE)[opLs[["topLoadI"]] + 1],
                                arr.ind = TRUE)
 
             xCorDisMN <- matrix(0,
@@ -734,6 +732,10 @@ opls.default <- function(x,
     xMeanVn <- apply(xMN, 2, function(colVn) mean(colVn, na.rm = TRUE))
 
     switch(scaleC,
+           none = {
+               xMeanVn <- rep(0, ncol(xMN))
+               xSdVn <- rep(1, times = ncol(xMN))
+           },
            center = {
                xSdVn <- rep(1, times = ncol(xMN))
            },
@@ -915,6 +917,10 @@ opls.default <- function(x,
         } else {
 
             switch(scaleC,
+                   none = {
+                       yMeanVn <- rep(0, times = ncol(yMN))
+                       ySdVn <- rep(1, times = ncol(yMN))
+                   },
                    center = {
                        ySdVn <- rep(1, times = ncol(yMN))
                    },

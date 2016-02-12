@@ -10,7 +10,14 @@ print.opls <- function(x, .sinkC = NULL, ...) {
                    paste0(" and ", ncol(x[["yPredMCN"]]), " response", ifelse(ncol(x[["yPredMCN"]]) > 1, "s", "")),
                    ""))
 
-    message(x[["suppLs"]][["scaleC"]], " scaling of predictors", ifelse(x[["typeC"]] != "PCA", " and response(s)", ""))
+    message(x[["suppLs"]][["scaleC"]], " scaling of predictors",
+            ifelse(x[["typeC"]] == "PCA",
+                   "",
+                   paste0(" and ",
+                          ifelse(mode(x[["suppLs"]][["yMCN"]]) == "character" && x[["suppLs"]][["scaleC"]] != "standard",
+                                 "standard scaling of ",
+                                 ""),
+                          "response(s)")))
 
     if(substr(x[["descriptionMC"]]["missing_values", ], 1, 1) != "0")
         message(x[["descriptionMC"]]["missing_values", ], " NAs")
