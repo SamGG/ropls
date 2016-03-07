@@ -1,6 +1,7 @@
 \name{plot.opls}
 
 \alias{plot.opls}
+\alias{plot,opls-method}
 
 \title{
     Plot Method for (O)PLS(-DA)
@@ -11,7 +12,7 @@
 }
 
 \usage{
-\method{plot}{opls}(x,
+\S4method{plot}{opls}(x,
 y,
 typeVc = c("correlation",
 "outlier",
@@ -39,7 +40,7 @@ file.pdfC = NULL,
 
 \arguments{
   \item{x}{
-    Object of class \code{"opls"}, created by \code{opls}.
+    An S4 object of class \code{opls}, created by the \code{opls} function.
   }
   \item{y}{
     Currently not used.

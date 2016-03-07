@@ -1,22 +1,23 @@
 \name{predict.opls}
 
 \alias{predict.opls}
+\alias{predict,opls-method}
 
 \title{
-    Predict Method for (O)PLS
+    Predict method for (O)PLS models
 }
 
 \description{
-   This function predicts values based upon a model trained by \code{opls}.
+  Returns predictions of the (O)PLS(-DA) model on a new dataset
 }
 
 \usage{
-\method{predict}{opls}(object, newdata, ...)
+\S4method{predict}{opls}(object, newdata, ...)
 }
 
 \arguments{
   \item{object}{
-    Object of class \code{"opls"}, created by \code{opls}.
+    An S4 object of class \code{opls}, created by \code{opls} function.
   }
   \item{newdata}{
     Either a data frame or a matrix, containing numeric columns only,
@@ -26,6 +27,11 @@
   \item{\dots}{
     Currently not used.
   }
+}
+
+\value{
+  Predictions (either a vector, factor, or matrix depending on the y
+  response used for training the model)
 }
 
 \author{
@@ -44,7 +50,7 @@ sacurine.plsda <- opls(predictorMN,
                        responseFc,
                        subset = "odd")
 
-trainVi <- sacurine.plsda[["subset"]]
+trainVi <- getSubsetVi(sacurine.plsda)
 
 table(responseFc[trainVi], fitted(sacurine.plsda))
 

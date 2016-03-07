@@ -239,7 +239,7 @@ sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA, permI = 0,
 We compute the performances on the training subset:
 
 <<>>=
-trainVi <- sacurine.oplsda[["subset"]]
+trainVi <- getSubsetVi(sacurine.oplsda)
 table(genderFc[trainVi], fitted(sacurine.oplsda))
 @
 
@@ -332,7 +332,7 @@ ageVn <- sampleMetadata[, "age"]
 pvaVn <- apply(dataMatrix, 2,
                function(feaVn) cor.test(ageVn, feaVn)[["p.value"]])
 
-vipVn <- opls(dataMatrix, ageVn, predI = 1, orthoI = NA, plot = FALSE)[["vipVn"]]
+vipVn <- getVipVn(opls(dataMatrix, ageVn, predI = 1, orthoI = NA, plot = FALSE))
 
 quantVn <- qnorm(1 - pvaVn / 2)
 rmsQuantN <- sqrt(mean(quantVn^2))
@@ -364,7 +364,7 @@ ageVn <- sampleMetadata[, "age"]
 pvaVn <- apply(dataMatrix, 2,
                function(feaVn) cor.test(ageVn, feaVn)[["p.value"]])
 
-vipVn <- opls(dataMatrix, ageVn, predI = 1, orthoI = NA, plot = FALSE)[["vipVn"]]
+vipVn <- getVipVn(opls(dataMatrix, ageVn, predI = 1, orthoI = NA, plot = FALSE))
 
 quantVn <- qnorm(1 - pvaVn / 2)
 rmsQuantN <- sqrt(mean(quantVn^2))
@@ -397,10 +397,10 @@ The VIP properties above result from:
 
 Galindo-Prieto et al. (2014) have recently suggested new VIP metrics for OPLS, $VIP_{pred}$ and $VIP_{ortho}$, to separately measure the influence of the features in the modeling of the dispersion correlated to, and orthogonal to the response, respectively (\cite{Galindo-Prieto2014}).
 
-For OPLS(-DA) models, the output from the \emph{opls} method therefore includes:
+For OPLS(-DA) models, you can therefore get from the model generated with \emph{opls}:
 \begin{itemize}
-\item the \texttt{vipVn} vector which corresponds to the $VIP_{4,pred}$ metric measuring the variable importance in prediction,
-\item the \texttt{orthoVipVn} vector which is the $VIP_{4,ortho}$ metric measuring the variable importance in orthogonal modeling.
+\item the predictive VIP vector (which corresponds to the $VIP_{4,pred}$ metric measuring the variable importance in prediction) with \texttt{getVipVn(model)},
+\item the orthogonal VIP vector which is the $VIP_{4,ortho}$ metric measuring the variable importance in orthogonal modeling with \texttt{getVipVn(model, orthoL = TRUE)}.
 \end{itemize}
 As for the classical $VIP$, we still have the mean of $VIP_{pred}^2$ (and of $VIP_{ortho}^2$) which, each, equals 1.
 
@@ -443,7 +443,7 @@ To illustrate how \emph{dataMatrix}, \emph{sampleMetadata} and \emph{variableMet
 
 Let us start by getting the paths to the 12 raw files (6 KO and 6 WT mice) in the ".cdf" open format. The files are grouped in two sub-directories ("KO" and "WT") since \emph{xcms} can use sample class information when grouping the peaks and correcting retention times.
 
-<<eval=FALSE,results=hide>>=
+<<>>=
 library(faahKO)
 cdfpath <- system.file("cdf", package = "faahKO")
 cdffiles <- list.files(cdfpath, recursive = TRUE, full.names = TRUE)
@@ -452,19 +452,32 @@ basename(cdffiles)
 
 Next, \emph{xcms} is used to pre-process the individual raw files, as described in the vignette.
 
-<<eval=FALSE,fig=FALSE,results=hide>>=
+<<>>=
 library(xcms)
+@
+<<results=hide>>=
 xset <- xcmsSet(cdffiles)
+@
+<<>>=
 xset
 xset <- group(xset)
+@
+<<eval=FALSE>>=
 xset2 <- retcor(xset, family = "symmetric", plottype = "mdevden")
+@
+<<echo=FALSE>>=
+xset2 <- retcor(xset, family = "symmetric", plottype = "none")
+@
+<<>>=
 xset2 <- group(xset2, bw = 10)
+@
+<<results=hide>>=
 xset3 <- fillPeaks(xset2)
 @
 
 Finally, the \emph{annotateDiffreport} from \emph{CAMERA} annotates isotopes and adducts and builds a peak table containing the peak intensities and the variable metadata.
 
-<<eval=FALSE,results=hide>>=
+<<>>=
 library(CAMERA)
 diffreport <- annotateDiffreport(xset3, quick=TRUE)
 diffreport[1:4, ]
@@ -472,7 +485,7 @@ diffreport[1:4, ]
 
 We then build the dataMatrix, sampleMetadata and variableMetadata matrix and dataframes as follows:
 
-<<eval=FALSE,results=hide>>=
+<<>>=
 sampleVc <- grep("^ko|^wt", colnames(diffreport), value = TRUE)
 dataMatrix <- t(as.matrix(diffreport[, sampleVc]))
 dimnames(dataMatrix) <- list(sampleVc, diffreport[, "name"])
@@ -482,15 +495,15 @@ variableMetadata <- diffreport[, !(colnames(diffreport) %in% c("name", sampleVc)
 rownames(variableMetadata) <- diffreport[, "name"]
 @
 
-The data can now be analysed with the \emph{ropls} package as described in the previous section (i.e. by performing a PCA and a PLS-DA):
+The data can now be analysed with the \emph{ropls} package as described in the previous section (i.e. by performing a PCA and an OPLS-DA):
 
-<<eval=FALSE,fig=FALSE,results=hide>>=
+<<>>=
 library(ropls)
 opls(dataMatrix)
-opls(dataMatrix, sampleMetadata[, "genotypeFc"])
+opls(dataMatrix, sampleMetadata[, "genotypeFc"], orthoI = NA)
 @
 
-<<eval=FALSE,echo=FALSE>>=
+<<echo=FALSE>>=
 rm(list = ls())
 @
 

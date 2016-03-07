@@ -76,10 +76,10 @@ test_PCA <- function() {
     rownames(fooMN) <- foods[, "Country"]
 
     foo.pca <- opls(fooMN, permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(foo.pca[["pcaVarVn"]][1],
+    checkEqualsNumeric(getPcaVarVn(foo.pca)[1],
                        6.19,
                        tolerance = 1e-3)
-    checkEqualsNumeric(foo.pca[["scoreMN"]][1, 1],
+    checkEqualsNumeric(getScoreMN(foo.pca)[1, 1],
                        1.309494,
                        tolerance = 1e-5)
 
@@ -92,13 +92,13 @@ test_PLS_single <- function() {
     corPlsLs <- opls(as.matrix(cornell[, grep("x", colnames(cornell))]),
                      matrix(cornell[, "y"], ncol = 1),
                      permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(corPlsLs[["scoreMN"]][1, 1],
+    checkEqualsNumeric(getScoreMN(corPlsLs)[1, 1],
                        2.0513,
                        tolerance = 1e-3)
     cornell.pls <- opls(as.matrix(cornell[, grep("x", colnames(cornell))]),
-                     cornell[, "y"],
-                     permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(cornell.pls[["vipVn"]][1],
+                        cornell[, "y"],
+                        permI = 0, printL = FALSE, plotL = FALSE)
+    checkEqualsNumeric(getVipVn(cornell.pls)[1],
                        1.125,
                        tolerance = 1e-3)
 
@@ -112,10 +112,10 @@ test_PLS_multiple <- function() {
                        as.matrix(lowarp[, grepl("^wrp", colnames(lowarp)) |
                                         grepl("^st", colnames(lowarp))]),
                        permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(lowarp.pls[["weightStarMN"]][2, 1],
+    checkEqualsNumeric(lowarp.pls@weightStarMN[2, 1],
                        -0.0861,
                        tolerance = 1e-3)
-    checkEqualsNumeric(lowarp.pls[["uMN"]]["s5", "p2"],
+    checkEqualsNumeric(lowarp.pls@uMN["s5", "p2"],
                        0.596598855,
                        tolerance = 1e-8)
 
@@ -127,13 +127,13 @@ test_sacurine_PCA <- function() {
 
     sac.pca <- opls(sacurine[["dataMatrix"]],
                     printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.pca[["summaryDF"]]["Total", "R2X(cum)"],
+    checkEqualsNumeric(getSummaryDF(sac.pca)["Total", "R2X(cum)"],
                        0.501,
                        tolerance = 1e-3)
     sac.pcaSvd <- opls(sacurine[["dataMatrix"]],
                        algoC = "svd",
                        printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.pcaSvd[["scoreMN"]][1, 1],
+    checkEqualsNumeric(getScoreMN(sac.pcaSvd)[1, 1],
                        -8.744009,
                        tolerance = 1e-5)
 
@@ -146,13 +146,13 @@ test_sacurine_PLSDA <- function() {
     sac.plsda <- opls(sacurine[["dataMatrix"]],
                       matrix(sacurine[["sampleMetadata"]][, "gender"], ncol = 1),
                       permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.plsda[["summaryDF"]]["Total", "Q2(cum)"],
+    checkEqualsNumeric(getSummaryDF(sac.plsda)["Total", "Q2(cum)"],
                        0.584,
                        tolerance = 1e-3)
     sac.plsda <- opls(sacurine[["dataMatrix"]],
                       sacurine[["sampleMetadata"]][, "gender"],
                       permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.plsda[["vipVn"]][5],
+    checkEqualsNumeric(getVipVn(sac.plsda)[5],
                        0.7034828,
                        tolerance = 1e-7)
 
@@ -162,7 +162,7 @@ test_sacurine_PLSDA <- function() {
                          sacurine[["sampleMetadata"]][, "gender"],
                          subset = setdiff(1:nrow(sacurine[["dataMatrix"]]), 1:10),
                          permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.plsdaCrv[["summaryDF"]]["Total", "RMSEP"],
+    checkEqualsNumeric(getSummaryDF(sac.plsdaCrv)["Total", "RMSEP"],
                        0.275,
                        tolerance = 1e-3)
     ## for subset = "odd"
@@ -181,17 +181,17 @@ test_sacurine_OPLSDA <- function() {
                        predI = 1,
                        orthoI = 1,
                        permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.oplsda[["orthoScoreMN"]][1, 1],
+    checkEqualsNumeric(getScoreMN(sac.oplsda, orthoL = TRUE)[1, 1],
                        4.980604,
                        tolerance = 1e-7)
     ##     R2X(cum) R2Y(cum) Q2(cum) RMSEE pre ort
     ## sum    0.185    0.668   0.554 0.289   1   1
 
-    checkEqualsNumeric(sac.oplsda[["vipVn"]][2],
+    checkEqualsNumeric(getVipVn(sac.oplsda)[2],
                        1.551154,
                        tolerance = 1e-6)
 
-    checkEqualsNumeric(sac.oplsda[["orthoVipVn"]][3],
+    checkEqualsNumeric(getVipVn(sac.oplsda, orthoL = TRUE)[3],
                        1.642173,
                        tolerance = 1e-6)
 
@@ -203,7 +203,7 @@ test_sacurine_OPLSDA <- function() {
                           orthoI = 1,
                           permI = 10,
                           printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.oplsdaPer[["suppLs"]][["permMN"]][1, 1],
+    checkEqualsNumeric(sac.oplsdaPer@suppLs[["permMN"]][1, 1],
                        0.185,
                        tolerance = 1e-3)
 
@@ -218,14 +218,14 @@ test_sacurine_PLSDA_pareto <- function() {
                          matrix(sacurine[["sampleMetadata"]][, "gender"], ncol = 1),
                          scaleC = "pareto",
                          permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.plsdaPar[["summaryDF"]]["Total", "Q2(cum)"],
+    checkEqualsNumeric(getSummaryDF(sac.plsdaPar)["Total", "Q2(cum)"],
                        0.521,
                        tolerance = 1e-3)
     sac.plsdaPar <- opls(sacurine[["dataMatrix"]],
                          sacurine[["sampleMetadata"]][, "gender"],
                          scaleC = "pareto",
                          permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(sac.plsdaPar[["vipVn"]][5],
+    checkEqualsNumeric(getVipVn(sac.plsdaPar)[5],
                        0.7710519,
                        tolerance = 1e-7)
 
@@ -261,7 +261,7 @@ test_sacurine_PLS_predict <- function() {
                        sacurine[["sampleMetadata"]][, "age"],
                        subset = trainVi,
                        permI = 0, printL = FALSE, plotL = FALSE)
-    checkEqualsNumeric(as.numeric(sac.pls.tr[["descriptionMC"]]["samples", 1]),
+    checkEqualsNumeric(as.numeric(sac.pls.tr@descriptionMC["samples", 1]),
                        length(trainVi),
                        tolerance = 0)
     checkEqualsNumeric(predict(sac.pls.tr)[90],
@@ -306,11 +306,13 @@ test_plsda_multiclass <- function() {
 
     oplsda.mul <- opls(sacMN, ageVc, predI = 2)
 
-    checkEqualsNumeric(oplsda.mul[["summaryDF"]][, "Q2(cum)"],
+    checkEqualsNumeric(getSummaryDF(oplsda.mul)[, "Q2(cum)"],
                        0.0394,
                        tolerance = 1e-3)
 
-    checkEquals(oplsda.mul[["vipOrthoVn"]], NULL)
+    checkEqualsNumeric(length(getVipVn(oplsda.mul, orthoL = TRUE)),
+                       0,
+                       tolerance = 1e-10)
 
     checkException(opls(sacMN, ageVc, orthoI = NA),
                    silent = TRUE)
@@ -319,11 +321,11 @@ test_plsda_multiclass <- function() {
                            predI = 2,
                            scaleC = "pareto")
 
-    checkEqualsNumeric(oplsda.mul.par[["modelDF"]]["p2", "R2Y(cum)"],
+    checkEqualsNumeric(oplsda.mul.par@modelDF["p2", "R2Y(cum)"],
                        0.442,
                        tolerance = 1e-3)
 
-    checkEqualsNumeric(oplsda.mul.par[["summaryDF"]][, "Q2(cum)"],
+    checkEqualsNumeric(getSummaryDF(oplsda.mul.par)[, "Q2(cum)"],
                        0.0531,
                        tolerance = 1e-3)
 

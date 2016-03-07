@@ -1,7 +1,10 @@
 \name{opls}
 
+\docType{methods}
+
 \alias{opls}
-\alias{opls.default}
+\alias{opls,data.frame-method}
+\alias{opls,matrix-method}
 
 \title{
     PCA, PLS(-DA), and OPLS(-DA)
@@ -12,7 +15,8 @@
 }
 
 \usage{
-\method{opls}{default}(x,
+\S4method{opls}{data.frame}(x, ...)
+\S4method{opls}{matrix}(x,
 y = NULL,
 predI = NA,
 orthoI = 0,
@@ -106,6 +110,7 @@ plotL = TRUE,
 
 
 \value{
+  An S4 object of class 'opls' containing the following slots:
   \item{typeC}{
     Character: model type (PCA, PLS, PLS-DA, OPLS, or OPLS-DA)
   }

@@ -1,10 +1,6 @@
+import(methods)
+
 export(opls)
+exportMethods(coefficients, fitted, plot, predict, print, residuals, show, tested, getSummaryDF, getPcaVarVn, getScoreMN, getLoadingMN, getWeightMN, getVipVn, getSubsetVi)
 export(strF)
-
-S3method(opls, default)
-S3method(plot, opls)
-S3method(print, opls)
-S3method(predict, opls)
-
-S3method(summary, opls)
-S3method(print, summary.opls)
+exportClasses(opls)
