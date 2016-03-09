@@ -124,7 +124,7 @@
       (O)PLS(-DA) models}
     \item{predict}{\code{signature(object = "opls")}: plot method for
       (O)PLS(-DA) models}
-    \item{coefficients}{\code{signature(object = "opls")}: }
+    \item{coef}{\code{signature(object = "opls")}: }
     \item{fitted}{\code{signature(object = "opls")}: returns predictions
       of the (O)PLS(-DA) model}
     \item{residuals}{\code{signature(object = "opls")}: returns the

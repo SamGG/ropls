@@ -1,6 +1,24 @@
-import(methods)
+import("methods")
 
-export(opls)
-exportMethods(coefficients, fitted, plot, predict, print, residuals, show, tested, getSummaryDF, getPcaVarVn, getScoreMN, getLoadingMN, getWeightMN, getVipVn, getSubsetVi)
-export(strF)
-exportClasses(opls)
+exportClasses("opls")
+
+export("opls",
+       "strF")
+
+exportMethods("coef",
+              "fitted",
+              "plot",
+              "predict",
+              "print",
+              "residuals",
+              "show",
+              "tested",
+              "getSummaryDF",
+              "getPcaVarVn",
+              "getScoreMN",
+              "getLoadingMN",
+              "getWeightMN",
+              "getVipVn",
+              "getSubsetVi")
+
+

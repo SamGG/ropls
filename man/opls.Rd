@@ -127,7 +127,7 @@ plotL = TRUE,
     is the square root of the mean error between the actual and the
     predicted responses
   }
-  \item{subset}{
+  \item{subsetVi}{
     Integer vector: Indices of observations in the training data set
   }
   \item{pcaVarVn}{
@@ -141,22 +141,6 @@ plotL = TRUE,
   \item{orthoVipVn}{
     OPLS(-DA): Numerical vector of Variable Importance for Orthogonal
     Modeling (VIP4,o from Galindo-Prieto et al, 2014)
-  }
-  \item{fitted}{
-    (O)PLS: Predicted reponse based on the reference
-    subset (which is the whole 'x' matrix in case of no partition: subset = NULL)
-  }
-  \item{tested}{
-    (O)PLS: In case of training/test partition indicated via the subset
-    argument, predicted response based on the test subset
-  }
-  \item{coefficients}{
-    (O)PLS(-DA): Numerical matrix of regression coefficients (B; dimensions:
-  ncol(x) x number of responses; B = W*C' and Y = XB + F
-  }
-  \item{residuals}{
-    (O)PLS: Numerical vector equal to the difference between the true
-  and the predicted responses
   }
   \item{xMeanVn}{
      Numerical vector: variable means of the 'x' matrix
@@ -200,8 +184,13 @@ plotL = TRUE,
   }
   \item{cMN}{
     (O)PLS: Numerical matrix of Y weights (C; dimensions: number of
-  responses or number of classes in case of qualitative response) x
-  number of predictive components; Y = TC' + F
+    responses or number of classes in case of qualitative response) x
+    number of predictive components; Y = TC' + F
+  }
+  \item{\code{coMN}:}{
+    (O)PLS: Numerical matrix of Y orthogonal weights; dimensions: number of
+    responses or number of classes in case of qualitative response
+    with more than 2 classes x number of orthogonal components
   }
   \item{uMN}{
     (O)PLS: Numerical matrix of Y scores (U; same dimensions as scoreMN); Y = UC' + G

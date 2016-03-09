@@ -1,3 +1,21 @@
+CHANGES IN VERSION 1.3.18
+------------------------------
+
+NEW FEATURE
+
+    o 'coefficients' method renamed as 'coef'
+    
+BUG FIXED
+
+    o 'methods-opls_class.R' file renamed as 'opls-methods.R' to ensure 'opls' class is defined before the methods
+
+CHANGES IN VERSION 1.3.17
+------------------------------
+
+BUG FIXED
+
+    o Committing the new files
+
 CHANGES IN VERSION 1.3.16
 ------------------------------
 
