@@ -1,7 +1,7 @@
-\name{coefficients.opls}
+\name{coef.opls}
 
-\alias{coefficients.opls}
-\alias{coefficients,opls-method}
+\alias{coef.opls}
+\alias{coef,opls-method}
 
 \title{
     Coefficients method for (O)PLS models
@@ -12,7 +12,7 @@
 }
 
 \usage{
-\S4method{coefficients}{opls}(object, ...)
+\S4method{coef}{opls}(object, ...)
 }
 
 \arguments{
@@ -41,7 +41,7 @@ attach(sacurine)
 sacurine.plsda <- opls(dataMatrix,
                        sampleMetadata[, "gender"])
 
-head(coefficients(sacurine.plsda))
+head(coef(sacurine.plsda))
 
 detach(sacurine)
 

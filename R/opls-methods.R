@@ -1,8 +1,6 @@
-setGeneric(name = "opls",
-           def = function(x, ...) standardGeneric("opls"))
+setGeneric("opls", function(x, ...) standardGeneric("opls"))
 
-setMethod(f = "opls",
-          signature = signature(x = "data.frame"),
+setMethod("opls", signature(x = "data.frame"),
           function(x, ...) {
               if(!all(sapply(x, data.class) == "numeric")) {
                   stop("'x' data frame must contain columns of 'numeric' vectors only", call. = FALSE)
@@ -12,8 +10,7 @@ setMethod(f = "opls",
               opl
           })
 
-setMethod(f = "opls",
-          signature = signature(x = "matrix"),
+setMethod("opls", signature(x = "matrix"),
           function(x,
                    y = NULL,
                    predI = NA,
@@ -3255,10 +3252,10 @@ setMethod("tested", "opls",
           })
 
 
-setMethod("coefficients", "opls",
+setMethod("coef", "opls",
           function(object, ...) {
               return(object@coefficientMN)
-          }) ## coefficients
+          }) ## coef
 
 
 setMethod("residuals", "opls",
