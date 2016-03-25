@@ -1,3 +1,13 @@
+CHANGES IN VERSION 1.3.20
+------------------------------
+
+NEW FEATURES
+
+    o 'opls' is now an S4 class: please use the accessors e.g. 'getScoreMN(oplsModel)' instead of 'oplsModel$scoreMN', or 'getScoreMN(oplsModel, orthoL = TRUE)' instead of 'oplsModel$orthoScoreMN'
+    o The full list of accessors is: getLoadingMN, getScoreMN, getVipVn, getWeightMN (all with the orthoL argument), in addition to getSummaryDF, getPcaVarVn, getSubsetVi
+    o Please see the vignette and documentation for examples    
+    
+
 CHANGES IN VERSION 1.3.19
 ------------------------------
 
