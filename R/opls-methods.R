@@ -1306,9 +1306,6 @@ setMethod("opls", signature(x = "matrix"),
 
             for(noN in 1:(orthoI + 1)) {
 
-                if(breL)
-                    break
-
                 for(cvN in 1:length(xcvTraLs)) {
                     ## cvN < length(xcvTraLs): cross-validation
                     ## cvN == length(xcvTraLs): full dataset
@@ -1554,7 +1551,7 @@ setMethod("opls", signature(x = "matrix"),
                         } else
                             modelDF[noN, "Signif."] <- "R1"
 
-                        if(autNcoL && modelDF[noN, "Signif."] != "R1" && noN > 2) {
+                        if(autNcoL && modelDF[noN, "Signif."] != "R1") {
                             breL <- TRUE
                             break
                         } else {
@@ -1576,6 +1573,9 @@ setMethod("opls", signature(x = "matrix"),
 
                 } ## for(cvN in 1:length(xcvTraLs)) {
 
+                if(breL)
+                    break
+
             } ## for(noN in 1:(orthoI + 1)) {
 
             rm(xcvTraLs)
@@ -1593,16 +1593,25 @@ setMethod("opls", signature(x = "matrix"),
 
             if(autNcoL) {
 
-                if(all(modelDF[, "Signif."] == "R1", na.rm = TRUE)) {
-                    orthoI <- noN - 1
-                } else
-                    orthoI <- noN - 3
+                if(modelDF["p1", "Signif."] != "R1") {
 
-                if(orthoI == 0)
+                    stop("No model was built because the predictive component was not significant", call. = FALSE)
+
+                } else if(modelDF["o1", "Signif."] != "R1") {
+
                     stop("No model was built because the first orthogonal component was already not significant;\nSelect a number of orthogonal components of 1 if you want the algorithm to compute a model despite this.", call. = FALSE)
 
-                if(orthoI == autMaxN - 1)
-                    warning("The maximum number of orthogonal components in the automated mode (", autMaxN - 1, ") has been reached whereas R2Y (", round(modelDF[1 + orthoI, 'R2Y'] * 100), "%) is above 1% and Q2Y (", round(modelDF[1 + orthoI, 'Q2'] * 100), "%) is still above ", round(ru1ThrN * 100), "%.", call. = FALSE)
+                } else if(all(modelDF[, "Signif."] == "R1", na.rm = TRUE)) {
+
+                    orthoI <- noN - 1
+
+                    warning("The maximum number of orthogonal components in the automated mode (", autMaxN - 1, ") has been reached whereas R2Y (", round(modelDF[autMaxN, 'R2Y'] * 100), "%) is above 1% and Q2Y (", round(modelDF[autMaxN, 'Q2'] * 100), "%) is still above ", round(ru1ThrN * 100), "%.", call. = FALSE)
+
+                } else {
+
+                    orthoI <- noN - 2
+
+                }
 
                 poMN <- poMN[, 1:orthoI, drop = FALSE]
                 toMN <- toMN[, 1:orthoI, drop = FALSE]

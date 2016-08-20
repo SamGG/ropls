@@ -1,24 +1,32 @@
-import("methods")
+import(methods)
 
-exportClasses("opls")
+importFrom(grDevices,
+           dev.new, dev.off, pdf, rainbow)
+importFrom(graphics,
+           abline, axTicks, axis, barplot, boxplot, layout, legend, lines, mtext, par, pie, points, rect, text)
+importFrom(stats,
+           complete.cases, cor, cov, median, qchisq, qf, qnorm, sd, var)
+importFrom(utils,
+           head, object.size, str, tail)
+           
+exportClasses(opls)
 
-export("opls",
-       "strF")
+exportMethods(coef,
+              fitted,
+              plot,
+              predict,
+              print,
+              residuals,
+              show,
+              tested,
+              getSummaryDF,
+              getPcaVarVn,
+              getScoreMN,
+              getLoadingMN,
+              getWeightMN,
+              getVipVn,
+              getSubsetVi)
 
-exportMethods("coef",
-              "fitted",
-              "plot",
-              "predict",
-              "print",
-              "residuals",
-              "show",
-              "tested",
-              "getSummaryDF",
-              "getPcaVarVn",
-              "getScoreMN",
-              "getLoadingMN",
-              "getWeightMN",
-              "getVipVn",
-              "getSubsetVi")
-
+export(opls,
+       strF)
 

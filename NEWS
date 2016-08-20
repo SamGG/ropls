@@ -1,4 +1,18 @@
-CHANGES IN VERSION 1.3.20
+CHANGES IN VERSION 1.5.4
+------------------------------
+
+NEW FEATURE
+
+    o package documentation now available with ?ropls, help("ropls"), or help("ropls-package")
+
+CHANGES IN VERSION 1.5.2
+------------------------------
+
+BUG FIXED
+
+    o stop messages generated when non-significant predictive or first orthogonal components are obtained
+
+CHANGES IN VERSION 1.5.0
 ------------------------------
 
 NEW FEATURES
