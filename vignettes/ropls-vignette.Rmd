@@ -1,0 +1,682 @@
+---
+title: "*ropls*: PCA, PLS(-DA) and OPLS(-DA) for multivariate analysis and
+feature selection of omics data"
+author: "Etienne A. Thevenot"
+date: "`r doc_date()`"
+package: "`r pkg_ver('ropls')`"
+
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: "ropls-vignette.bib"
+output:
+  BiocStyle::html_document
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.height=6, fig.path='figures/')
+```
+
+# The *ropls* package
+
+The *ropls* R package implements the PCA, PLS(-DA) and OPLS(-DA) approaches with
+the original, NIPALS-based, versions of the algorithms
+[@Wold2001, @Trygg2002]. It includes the R2 and Q2 quality metrics
+[@Eriksson2001, @Tenenhaus1998], the permutation diagnostics [@Szymanska2012],
+the computation of the VIP values [@Wold2001], the score and orthogonal
+distances to detect outliers [@Hubert2005], as well as many graphics (scores,
+loadings, predictions, diagnostics, outliers, etc).
+
+The functionalities from *ropls* can also be accessed via a graphical user
+interface in the *Multivariate* module from the
+[Workflow4Metabolomics.org](http://workflow4metabolomics.org) online resource
+for computational metabolomics which provides a user-friendly, web-based
+environment for data pre-processing, statistical analysis, and annotation
+[@Giacomoni2015].
+
+# Context
+
+## Orthogonal Partial Least-Squares
+
+Partial least-squares, which is a latent variable regression method based on
+covariance between the predictors and the response, has been shown to
+efficiently handle datasets with multi-collinear predictors, as in the case of
+spectrometry measurements [@Wold2001]. More recently, Trygg and Wold
+introduced the orthogonal projection to latent structures (OPLS) algorithm to
+model separately the variations of the predictors correlated and orthogonal to
+the response [@Trygg2002].
+
+OPLS has a similar predictive capacity compared to PLS and improves the
+interpretation of the predictive components and of the systematic variation
+[@Pinto2012a]. In particular, OPLS modeling of single responses only
+requires one predictive component.
+
+Diagnostics such as the Q2Y metrics and permutation testing are of high
+importance to avoid overfitting and assess the statistical significance of the
+model. The variable importance in projection (VIP), which reflects both the
+loading weights for each component and the variability of the response explained
+by this component [@Pinto2012a, @Mehmood2012] is often used for feature
+selection [@Trygg2002, @Pinto2012a].
+
+## OPLS software
+
+OPLS is available in the SIMCA-P commercial software (Umetrics, Umea, Sweden;
+@Eriksson2001). In addition, the kernel-based version of OPLS [@Bylesjo2008a] is
+available in the open-source R statistical environment [@RCoreTeam2016], and a
+single implementation of the linear algorithm in R has been described recently
+[@Gaude2013].
+
+# The *sacurine* metabolomics dataset
+
+## Study objective
+
+The objective was to study the influence of age, body mass index and gender on
+metabolite concentrations in urine, by analysing 183 samples from a cohort of
+adults with liquid chromatography coupled to high-resolution mass spectrometry
+[@Thevenot2015].
+
+## Pre-processing and annotation
+
+Urine samples were analyzed by using an LTQ Orbitrap in the negative ionization
+mode. A total of 109 metabolites were identified or annotated at the MSI level 1
+or 2. After retention time alignment with XCMS, peaks were integrated with Quan
+Browser. Signal drift and batch effect were corrected, and each urine profile
+was normalized to the osmolality of the sample. Finally, the data were log10
+transformed.
+
+## Covariates
+
+The volunteers' *age*, *body mass index*, and *gender* were recorded.
+
+# Hands-on
+
+## Loading
+
+We first load the *ropls* package:
+
+```{r load}
+library(ropls)
+```
+
+We then load the *sacurine* dataset which contains:
+
+1. The *dataMatrix* matrix of numeric type containing the intensity profiles
+   (log10 transformed)
+2. The *sampleMetadata* data frame containg sample metadata
+3. The *variableMetadata* data frame containg variable metadata
+
+```{r sacurine}
+data(sacurine)
+names(sacurine)
+```
+
+We attach *sacurine* to the search path and display a summary of the content of
+the *dataMatrix*, *sampleMetadata* and *variableMetadata* with the `strF`
+*F*unction of the *ropls* package (see also `str`):
+
+```{r attach_code, message = FALSE}
+attach(sacurine)
+```
+```{r strF}
+strF(dataMatrix)
+strF(sampleMetadata)
+strF(variableMetadata)
+```
+
+## Principal Component Analysis (PCA)
+
+We perform a PCA on the *dataMatrix* matrix (samples as rows, variables as
+columns), with the `opls` method:
+
+```{r pca_code, eval = FALSE}
+sacurine.pca <- opls(dataMatrix)
+```
+
+A summary of the model (8 components were selected) is printed:
+
+```{r pca_result, echo = FALSE}
+sacurine.pca <- opls(dataMatrix, plotL = FALSE)
+```
+
+In addition the default *summary* figure is displayed:
+
+```{r pca_figure, echo = FALSE, fig.show = 'hold'}
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("overview", "outlier", "x-score", "x-loading"))
+plot(sacurine.pca, typeVc = typeC, parDevNewL = FALSE)
+```
+
+**Top left** `overview`: the *scree* plot (i.e., inertia barplot) suggests that 3
+components may be sufficient to capture most of the inertia;
+**Top right** `outlier`: this graphics shows the distances within and orthogonal to the
+projection plane;
+[@Hubert2005]: the name of the samples with a high value for at least one of the
+distances are indicated;
+**Bottom left** `x-score`: the variance along each axis equals the variance
+captured by each component: it therefore depends on the total variance of the
+dataMatrix *X* and of the percentage of this variance captured by the component
+(indicated in the labels); it decreases when going from one component to a
+component with higher indice;
+**Bottom right** `x-loading`: the 3 variables with most extreme values (positive
+and negative) for each loading are black colored and labeled.
+
+Note:
+
+1. Since *dataMatrix* does not contain missing value, the singular value
+   decomposition was used by default; NIPALS can be selected with the
+   `algoC` argument specifying the *algo*rithm (*C*haracter),
+   
+2. The `predI = NA` default number of *pred*ictive components (*I*nteger) means
+   that only components with a variance superior to the mean variance of all
+   components are kept (note that this rule requires all components to be
+   computed and can be quite time-consuming for large datasets with the NIPALS
+   algorithm; in such cases, one may specify a limited number of components with
+   the `predI` parameter).
+
+Let us see if we notice any partition according to gender, by labeling/coloring
+the samples according to *gender* (`parAsColFcVn`) and drawing the Mahalanobis
+ellipses for the male and female subgroups (`parEllipseL`).
+
+```{r pca-col, eval = FALSE}
+genderFc <- sampleMetadata[, "gender"]
+plot(sacurine.pca, typeVc = "x-score",
+parAsColFcVn = genderFc, parEllipsesL = TRUE)
+```
+
+```{r pca-col_figure, echo = FALSE}
+genderFc <- sampleMetadata[, "gender"]
+plot(sacurine.pca, typeVc = "x-score",
+parAsColFcVn = genderFc, parEllipsesL = TRUE, parDevNewL = FALSE)
+```
+
+Note:
+
+1. The plotting *par*ameter to be used *As* *Col*ors
+(*F*actor of *c*haracter type or *V*ector of
+*n*umeric type) has a length equal to the number of rows of the
+*dataMatrix* (ie of samples) and that this qualitative or quantitative
+variable is converted into colors (by using an internal palette or color scale,
+respectively). We could have visualized the *age* of the individuals by
+specifying `parAsColFcVn = sampleMetadata[, "age"]`.
+
+2. The displayed components can be specified with `parCompVi` (plotting
+*par*ameter specifying the *Comp*onents: *V*ector of 2 *i*ntegers)
+
+## Partial least-squares: PLS and PLS-DA
+
+For PLS (and OPLS), the *Y* response(s) must be provided to the `opls`
+method. *Y* can be either a numeric vector (respectively matrix) for single
+(respectively multiple) (O)PLS regression, or a character factor for (O)PLS-DA
+classification as in the following example with the *gender* qualitative
+response:
+
+```{r plsda, eval = FALSE}
+sacurine.plsda <- opls(dataMatrix, genderFc)
+```
+```{r plsda_figure, echo = FALSE}
+sacurine.plsda <- opls(dataMatrix, genderFc, plotL = FALSE)
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("permutation", "overview", "outlier", "x-score"))
+plot(sacurine.plsda, typeVc = typeC, parDevNewL = FALSE)
+```
+
+**Top left**: `significance` diagnostic: the $R2Y$ and $Q2Y$ of the model are
+compared with the corresponding values obtained after random permutation of the
+*y* response; **Top right**: `inertia` barplot: the graphic here suggests that 3
+orthogonal components may be sufficient to capture most of the inertia; **Bottom
+left**: `outlier` diagnostics; **Bottom right**: `x-score` plot: the number of
+components and the cumulative $R2X$, $R2Y$ and $Q2Y$ are indicated below the
+plot.
+
+Note:
+
+1. When set to NA (as in the default), the number of components `predI` is
+   determined automatically as follows [@Eriksson2001]: A new component *h* is
+   added to the model if:
+   
+  + $R2Y_h \geq 0.01$, i.e., the percentage of *Y* dispersion (i.e., sum of
+    squares) explained by component *h* is more than 1 percent, and
+	
+  + $Q2Y_h=1-PRESS_h/RSS_{h-1} \geq 0$ for PLS (or 5 percent when the number of
+    samples is less than 100) or 1 percent for OPLS: $Q2Y_h \geq 0$ means that the
+    predicted residual sum of squares ($PRESS_h$) of the model including the new
+    component *h} estimated by 7-fold cross-validation is less than the residual
+    sum of squares ($RSS_{h-1}$) of the model with the previous components only
+    (with $RSS_0$ being the sum of squared *Y* values).
+	
+2. The predictive performance of the full model is assessed by the cumulative
+   Q2Y metric: $Q2Y=1-\prod\limits_{h=1}^r (1-Q2Y_h)$. We have $Q2Y \in [0,1]$,
+   and the higher the Q2Y, the better the performance. Models trained on
+   datasets with a larger number of features compared with the number of samples
+   can be prone to overfitting: in that case, high Q2Y values are obtained by
+   chance only. To estimate the significance of Q2Y (and R2Y) for single
+   response models, permutation testing can be used
+   [@Szymanska2012]: models are built after random permutation of the Y values,
+   and $Q2Y_{perm}$ are computed. The *p*-value is equal to the
+   proportion of $Q2Y_{perm}$ above $Q2Y$ (the default number of permutations is
+   20 as a compromise between quality control and computation speed; it can be
+   increased with the \texttt{permI} parameter, e.g. to 1,000, to assess if the
+   model is significant at the 0.05 level),
+   
+3. The NIPALS algorithm is used for PLS (and OPLS); *dataMatrix* matrices with
+(a moderate amount of) missing values can thus be analysed.
+
+We see that our model with 3 predictive (*pre*) components has significant and
+quite high R2Y and Q2Y values.
+
+## Orthogonal partial least squares: OPLS and OPLS-DA
+
+To perform OPLS(-DA), we set `orthoI` (number of components which are
+*ortho*gonal; *I*nteger) to either a specific number of orthogonal components,
+or to NA. Let us build an OPLS-DA model of the *gender* response.
+
+```{r oplsda, eval = FALSE}
+sacurine.oplsda <- opls(dataMatrix, genderFc,
+predI = 1, orthoI = NA)
+```
+```{r oplsda_figure, echo = FALSE}
+sacurine.oplsda <- opls(dataMatrix, genderFc,
+predI = 1, orthoI = NA, plotL = FALSE)
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("permutation", "overview", "outlier", "x-score"))
+plot(sacurine.oplsda, typeVc = typeC, parDevNewL = FALSE)
+```
+
+Note:
+
+1. For OPLS modeling of a single response, the number of predictive component is
+1,
+
+2. In the (`x-score` plot), the predictive component is displayed as abscissa
+and the (selected; default = 1) orthogonal component as ordinate.
+
+
+Let us assess the predictive performance of our model. We first train the model
+on a subset of the samples (here we use the `odd` subset value which
+splits the data set into two halves with similar proportions of samples for each
+class; alternatively, we could have used a specific subset of indices for
+training):
+```{r oplsda_subset, eval = FALSE}
+sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA,
+subset = "odd")
+```
+```{r oplsda_subset_code, echo = FALSE}
+sacurine.oplsda <- opls(dataMatrix, genderFc, predI = 1, orthoI = NA, permI = 0,
+subset = "odd", plotL = FALSE)
+```
+
+We compute the performances on the training subset:
+
+```{r train}
+trainVi <- getSubsetVi(sacurine.oplsda)
+table(genderFc[trainVi], fitted(sacurine.oplsda))
+```
+
+We then compute the performances on the test subset:
+
+```{r test}
+table(genderFc[-trainVi],
+      predict(sacurine.oplsda, dataMatrix[-trainVi, ]))
+```
+
+As expected, the predictions on the test subset are (slightly) lower. The
+classifier however still achieves 91% of correct predictions.
+
+## Comments
+
+### Overfitting
+
+Overfitting (i.e., building a model with good performances on the training set
+but poor performances on a new test set) is a major caveat of machine learning
+techniques applied to data sets with more variables than samples. A simple
+simulation of a random *X* data set and a *y* response shows that perfect PLS-DA
+classification can be achieved as soon as the number of variables exceeds the
+number of samples, as detailed in the example below, adapted from @Wehrens2011:
+
+```{r overfit, echo = FALSE}
+set.seed(123)
+obsI <- 20
+featVi <- c(2, 20, 200)
+featMaxI <- max(featVi)
+xRandMN <- matrix(runif(obsI * featMaxI), nrow = obsI)
+yRandVn <- sample(c(rep(0, obsI / 2), rep(1, obsI / 2)))
+
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(featI in featVi) {
+    randPlsi <- opls(xRandMN[, 1:featI], yRandVn,
+                  predI = 2,
+                  permI = ifelse(featI == featMaxI, 100, 0),
+                  printL = FALSE, plotL = FALSE)
+    plot(randPlsi, typeVc = "x-score", parDevNewL = FALSE,
+         parCexN = 1.3, parTitleL = FALSE)
+    mtext(featI/obsI, font = 2, line = 2)
+    if(featI == featMaxI)
+         plot(randPlsi, typeVc = "permutation", parDevNewL = FALSE,
+           parCexN = 1.3)
+    }
+mtext(" obs./feat. ratio:", adj = 0, at = 0, font = 2, line = -2, outer = TRUE)
+```
+
+In the simulation above, a random matrix *X* of 20 observations x 200 features
+was generated by sampling from the uniform distribution $U(0, 1)$. A random *y*
+response was obtained by sampling (without replacement) from a vector of 10
+zeros and 10 ones. **Top left**, **top right**, and **bottom left**: the X-score
+plots of the PLS modeling of *y* by the (sub)matrix of *X* restricted to the
+first 2, 20, or 200 features, are displayed (i.e., the observation/feature
+ratios are 0.1, 1, and 10, respectively). Despite the good separation obtained
+on the bottom left score plot, we see that the $Q2Y$ estimation of predictive
+performance is low (negative); **Bottom right**: a significant proportion of the
+models (in fact here all models) trained after random permutations of the labels
+have a higher $Q2Y$ value than the model trained with the true labels,
+confirming that PLS cannot specifically model the *y* response with the *X*
+predictors, as expected.
+
+This simple simulation illustrates that PLS overfit can occur, in particular
+when the number of features exceeds the number of observations. **It is
+therefore essential to check that the $Q2Y$ value of the model is significant by
+random permutation of the labels**.
+
+### VIP from OPLS models
+
+The classical *VIP* metric is not useful for OPLS modeling of a single response
+since [@Galindo-Prieto2014, @Thevenot2015]:
+1. *VIP* values remain identical whatever the number of orthogonal components
+selected,
+2. *VIP* values are univariate (i.e., they do not provide information about
+interactions between variables). In fact, when features are standardized, we
+can demonstrate a mathematical relationship between VIP and *p*-values from a
+Pearson correlation test [@Thevenot2015], as illustrated by the figure below:
+
+```{r vip, echo = FALSE}
+ageVn <- sampleMetadata[, "age"]
+
+pvaVn <- apply(dataMatrix, 2,
+               function(feaVn) cor.test(ageVn, feaVn)[["p.value"]])
+
+vipVn <- getVipVn(opls(dataMatrix, ageVn, predI = 1, orthoI = NA, plot = FALSE))
+
+quantVn <- qnorm(1 - pvaVn / 2)
+rmsQuantN <- sqrt(mean(quantVn^2))
+
+par(font = 2, font.axis = 2, font.lab = 2, las = 1,
+    mar = c(5.1, 4.6, 4.1, 2.1),
+    lwd = 2, pch = 16)
+
+plot(pvaVn, vipVn,
+     col = "red",
+     pch = 16,
+     xlab = "p-value", ylab = "VIP", xaxs = "i", yaxs = "i")
+
+box(lwd = 2)
+
+curve(qnorm(1 - x / 2) / rmsQuantN, 0, 1, add = TRUE, col = "red", lwd = 3)
+
+abline(h = 1, col = "blue")
+abline(v = 0.05, col = "blue")
+```
+
+The graphic illustrates the relationship between VIP from one-predictive PLS or
+OPLS models with standardized variables, and *p*-values from Pearson correlation
+test. The $(p_j, VIP_j)$ pairs corresponding respectively to the VIP values from
+OPLS modelling of the *age* response with the *sacurine* dataset, and the
+*p*-values from the Pearson correlation test are shown as red dots. The $y =
+\Phi^{-1}(1 - x/2) / z_{rms}$ curve is shown in red (where $\Phi^{-1}$ is the
+inverse of the probability density function of the standard normal distribution,
+and $z_{rms}$ is the quadratic mean of the $z_j$ quantiles from the standard
+normal distribution; $z_{rms} = 2.6$ for the *sacurine* dataset and the *age*
+response). The vertical (resp. horizontal) blue line corresponds to univariate
+(resp. multivariate) thresholds of $p=0.05$ and $VIP=1$, respectively
+[@Thevenot2015].
+
+The VIP properties above result from:
+
+1. OPLS models of a single response have a single predictive component,
+
+2. in the case of one-predictive component (O)PLS models, the general formula
+   for VIPs can be simplified to $VIP_j = \sqrt{m} \times |w_j|$ for each
+   feature $j$, were $m$ is the total number of features and *w* is the vector
+   of loading weights,
+   
+3. in OPLS, *w* remains identical whatever the number of extracted orthogonal
+   components,
+   
+4. for a single-response model, *w* is proportional to
+   $\textbf{X}'\textbf{y}$ (where $'$ denotes the matrix
+   transposition),
+   
+5. if *X* and *y* are standardized, $\textbf{X}'\textbf{y}$ is the
+   vector of the correlations between the features and the response.
+
+@Galindo-Prieto2014 have recently suggested new VIP metrics for OPLS,
+$VIP_{pred}$ and $VIP_{ortho}$, to separately measure the influence of the
+features in the modeling of the dispersion correlated to, and orthogonal to the
+response, respectively [@Galindo-Prieto2014].
+
+For OPLS(-DA) models, you can therefore get from the model generated with
+*opls*:
+
+1. the predictive VIP vector (which corresponds to the $VIP_{4,pred}$ metric
+measuring the variable importance in prediction) with `getVipVn(model)`,
+
+2. the orthogonal VIP vector which is the $VIP_{4,ortho}$ metric measuring the
+variable importance in orthogonal modeling with `getVipVn(model, orthoL =
+TRUE)`.  As for the classical $VIP$, we still have the mean of $VIP_{pred}^2$
+(and of $VIP_{ortho}^2$) which, each, equals 1.
+
+### (Orthogonal) Partial Least Squares Discriminant Analysis: (O)PLS-DA
+
+#### Two classes
+
+When the *y* response is a factor of 2 levels (character vectors are also
+allowed), it is internally transformed into a vector of values $\in \{0,1\}$
+encoding the classes. The vector is centered and unit-variance scaled, and the
+(O)PLS analysis is performed.
+
+@Brereton2014 have demonstrated that when the sizes of the 2 classes are
+unbalanced, a bias is introduced in the computation of the decision rule, which
+penalizes the class with the highest size [@Brereton2014]. In this case, an
+external procedure using resampling (to balance the classes) and taking into
+account the class sizes should be used for optimal results.
+
+#### Multiclass
+
+In the case of more than 2 levels, the *y* response is internally transformed
+into a matrix (each class is encoded by one column of values $\in \{0,1\}$). The
+matrix is centered and unit-variance scaled, and the PLS analysis is performed.
+
+In this so-called `PLS2' implementation, the proportions of 0 and 1 in the
+columns is usually unbalanced (even in the case of balanced size of the classes)
+and the bias described previously occurs
+[@Brereton2014}. The multiclass PLS-DA results from *ropls* are therefore
+indicative only, and we recommend to set an external procedure where each column
+of the matrix is modeled separately (as described above) and the resulting
+probabilities are aggregated (see for instance @Bylesjo2006).
+
+## Working on *ExpressionSet* omics objects from bioconductor
+
+The *ExpressionSet* class from the
+[Biobase](http://bioconductor.org/packages/release/bioc/html/Biobase.html)
+bioconductor package has been developed to conveniently handle preprocessed
+omics objects, including the variables x samples matrix of intensities, and data
+frames containing the sample and variable metadata @Hubert2015. The matrix and
+the two data frames can be accessed by the `exprs`, `pData` and `fData`
+respectively (note that the data matrix is stored in the object with samples in
+columns).
+
+The `opls` method can be applied to an *ExpressionSet* object, by using the
+object as the `x` argument, and, for (O)PLS(-DA), by indicating as the `y`
+argument the name of the sampleMetadata to be used as the response.
+
+In the example below, we will first build a minimal *ExpressionSet* object from
+the *sacurine* data set, and we subsequently perform an OPLS-DA.
+
+```{r expressionset_code, eval = FALSE}
+library(Biobase)
+sacSet <- ExpressionSet(assayData = t(dataMatrix),
+phenoData = new("AnnotatedDataFrame", data = sampleMetadata)
+opls(sacSet, "gender", orthoI = NA)
+```
+
+```{r expressionset_figure, echo = FALSE, message = FALSE, warning = FALSE}
+library(Biobase)
+sacSet <- ExpressionSet(assayData = t(dataMatrix),
+phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
+eset.oplsda <- opls(sacSet, "gender", orthoI = NA, plotL = FALSE)
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("overview", "outlier", "x-score", "x-loading"))
+plot(eset.oplsda, typeVc = typeC, parDevNewL = FALSE)
+```
+
+## Closing session
+
+Before closing this example session, we detach *sacurine* from the search
+path:
+
+```{r closing}
+detach(sacurine)
+```
+
+# Session info
+
+Here is the output of `sessionInfo()` on the system on which this document was
+compiled:
+
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
+
+# Pre-processing and annotation of mass spectrometry data
+
+To illustrate how *dataMatrix*, *sampleMetadata* and *variableMetadata* can be
+obtained from raw mass spectra file, we use the LC-MS data from the *faahKO*
+package [@Saghatelian2004]. We will pre-process the raw files with the *xcms*
+package [@Smith2006] and annotate isotopes and adducts with the *CAMERA* package
+[@Kuhl2012], as described in the corresponding vignettes (all these packages are
+from *bioconductor*).
+
+Let us start by getting the paths to the 12 raw files (6 KO and 6 WT mice) in
+the *.cdf* open format. The files are grouped in two sub-directories (*KO* and
+*WT*) since *xcms* can use sample class information when grouping the peaks and
+correcting retention times.
+
+```{r faahko_load}
+library(faahKO)
+cdfpath <- system.file("cdf", package = "faahKO")
+cdffiles <- list.files(cdfpath, recursive = TRUE, full.names = TRUE)
+basename(cdffiles)
+```
+
+Next, *xcms* is used to pre-process the individual raw files, as described in
+the vignette.
+
+```{r xcms_require}
+library(xcms)
+```
+```{r faahko_xcmsset, results = 'hide', warning = FALSE}
+xset <- xcmsSet(cdffiles)
+```
+```{r faahko_group}
+xset
+xset <- group(xset)
+```
+```{r faahko_retcor_see, eval = FALSE}
+xset2 <- retcor(xset, family = "symmetric", plottype = "mdevden")
+```
+```{r faahko_retcore_run, echo = FALSE}
+xset2 <- retcor(xset, family = "symmetric", plottype = "none")
+```
+```{r faahko_group2}
+xset2 <- group(xset2, bw = 10)
+```
+```{r faahko_fillpeaks, results = 'hide', warning = FALSE}
+xset3 <- fillPeaks(xset2)
+```
+
+Finally, the `annotateDiffreport` from *CAMERA* annotates isotopes and adducts
+and builds a peak table containing the peak intensities and the variable
+metadata.
+
+```{r faahko_camera}
+library(CAMERA)
+diffreport <- annotateDiffreport(xset3, quick=TRUE)
+diffreport[1:4, ]
+```
+
+We then build the dataMatrix, sampleMetadata and variableMetadata matrix and
+dataframes as follows:
+
+```{r faahko_tables}
+sampleVc <- grep("^ko|^wt", colnames(diffreport), value = TRUE)
+dataMatrix <- t(as.matrix(diffreport[, sampleVc]))
+dimnames(dataMatrix) <- list(sampleVc, diffreport[, "name"])
+sampleMetadata <- data.frame(row.names = sampleVc,
+genotypeFc = substr(sampleVc, 1, 2))
+variableMetadata <- diffreport[, !(colnames(diffreport) %in% c("name", sampleVc))]
+rownames(variableMetadata) <- diffreport[, "name"]
+```
+
+The data can now be analysed with the *ropls* package as described in the
+previous section (i.e. by performing a PCA and an OPLS-DA):
+
+```{r faahko, eval = FALSE}
+library(ropls)
+opls(dataMatrix)
+```
+```{r faahko_pca, echo = FALSE}
+library(ropls)
+faahko.pca <- opls(dataMatrix, plotL = FALSE)
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in c("overview", "outlier", "x-score", "x-loading"))
+plot(faahko.pca, typeVc = typeC, parDevNewL = FALSE)
+```
+```{r faahko_plsda_code, eval = FALSE}
+opls(dataMatrix, sampleMetadata[, "genotypeFc"], orthoI = NA)
+```
+```{r faahko_plsda_figure, echo = FALSE}
+faahko.oplsda <- opls(dataMatrix, sampleMetadata[, "genotypeFc"], orthoI = NA,
+plotL = FALSE)
+layout(matrix(1:4, nrow = 2, byrow = TRUE))
+for(typeC in
+c("overview", "outlier", "x-score", "x-loading")) plot(faahko.oplsda,
+typeVc = typeC, parDevNewL = FALSE)
+```
+
+Note that the warning message is just a reminder that OPLS(-DA) models of a
+single response have only 1 predictive component, and could have been avoided
+by specifying `predI = 1` in the `opls` call.
+
+```{r empty, echo=FALSE}
+rm(list = ls())
+```
+
+# Other datasets
+
+In addition to the *sacurine* dataset presented above, the package contains
+the following datasets to illustrate the functionalities of PCA, PLS and OPLS
+(see the examples in the documentation of the opls function):
+
+- **aminoacids** Amino-Acids Dataset. Quantitative structure property
+relationship (QSPR) [@Wold2001].
+
+- **cellulose** NIR-Viscosity example data set to illustrate multivariate
+calibration using PLS, spectral filtering and OPLS (Multivariate calibration
+using spectral data. Simca tutorial. Umetrics, Sweden).
+
+- **cornell** Octane of various blends of gasoline: Twelve mixture
+component proportions of the blend are analysed [@Tenenhaus1998].
+
+- **foods** Food consumption patterns accross European countries (FOODS). The
+  relative consumption of 20 food items was compiled for 16 countries. The
+  values range between 0 and 100 percent and a high value corresponds to a high
+  consumption. The dataset contains 3 missing data [@Eriksson2001].
+
+- **linnerud** Three physiological and three exercise variables are measured on
+twenty middle-aged men in a fitness club [@Tenenhaus1998].
+
+- **lowarp** A multi response optimization data set (LOWARP) [@Eriksson2001].
+
+- **mark** Marks obtained by french students in mathematics, physics, french and
+  english. Toy example to illustrate the potentialities of PCA [@Baccini2010].
+
+# Reference

@@ -1,3 +1,15 @@
+CHANGES IN VERSION 1.5.6
+------------------------------
+
+NEW FEATURE
+
+    o opls can now be applied to ExpressionSet instances
+    o vignette is now in html format
+    
+NEW FEATURE
+
+    o automated documentation with the 'roxygen2' package; vignette now in the markdown format
+
 CHANGES IN VERSION 1.5.4
 ------------------------------
 
