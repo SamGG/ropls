@@ -514,11 +514,12 @@ the *sacurine* data set, and we subsequently perform an OPLS-DA.
 ```{r expressionset_code, eval = FALSE}
 library(Biobase)
 sacSet <- ExpressionSet(assayData = t(dataMatrix),
-phenoData = new("AnnotatedDataFrame", data = sampleMetadata)
+phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
 opls(sacSet, "gender", orthoI = NA)
 ```
 
-```{r expressionset_figure, echo = FALSE, message = FALSE, warning = FALSE}
+```{r expressionset_figure, echo = FALSE, message = FALSE, warning = FALSE, eval
+= FALSE}
 library(Biobase)
 sacSet <- ExpressionSet(assayData = t(dataMatrix),
 phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
