@@ -126,7 +126,7 @@ abline(v = 0.05, col = "blue")
 ## ----expressionset_code, eval = FALSE------------------------------------
 #  library(Biobase)
 #  sacSet <- ExpressionSet(assayData = t(dataMatrix),
-#  phenoData = new("AnnotatedDataFrame", data = sampleMetadata)
+#  phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
 #  opls(sacSet, "gender", orthoI = NA)
 
 ## ----expressionset_figure, echo = FALSE, message = FALSE, warning = FALSE----
@@ -140,9 +140,6 @@ plot(eset.oplsda, typeVc = typeC, parDevNewL = FALSE)
 
 ## ----closing-------------------------------------------------------------
 detach(sacurine)
-
-## ----sessionInfo, echo=FALSE---------------------------------------------
-sessionInfo()
 
 ## ----faahko_load---------------------------------------------------------
 library(faahKO)
@@ -210,4 +207,7 @@ typeVc = typeC, parDevNewL = FALSE)
 
 ## ----empty, echo=FALSE---------------------------------------------------
 rm(list = ls())
+
+## ----sessionInfo, echo=FALSE---------------------------------------------
+sessionInfo()
 

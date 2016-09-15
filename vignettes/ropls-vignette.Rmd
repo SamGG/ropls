@@ -518,8 +518,7 @@ phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
 opls(sacSet, "gender", orthoI = NA)
 ```
 
-```{r expressionset_figure, echo = FALSE, message = FALSE, warning = FALSE, eval
-= FALSE}
+```{r expressionset_figure, echo = FALSE, message = FALSE, warning = FALSE}
 library(Biobase)
 sacSet <- ExpressionSet(assayData = t(dataMatrix),
 phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
@@ -536,15 +535,6 @@ path:
 
 ```{r closing}
 detach(sacurine)
-```
-
-# Session info
-
-Here is the output of `sessionInfo()` on the system on which this document was
-compiled:
-
-```{r sessionInfo, echo=FALSE}
-sessionInfo()
 ```
 
 # Pre-processing and annotation of mass spectrometry data
@@ -679,5 +669,14 @@ twenty middle-aged men in a fitness club [@Tenenhaus1998].
 
 - **mark** Marks obtained by french students in mathematics, physics, french and
   english. Toy example to illustrate the potentialities of PCA [@Baccini2010].
+
+# Session info
+
+Here is the output of `sessionInfo()` on the system on which this document was
+compiled:
+
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
 
 # Reference
