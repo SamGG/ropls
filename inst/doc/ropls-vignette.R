@@ -138,7 +138,14 @@ layout(matrix(1:4, nrow = 2, byrow = TRUE))
 for(typeC in c("overview", "outlier", "x-score", "x-loading"))
 plot(eset.oplsda, typeVc = typeC, parDevNewL = FALSE)
 
-## ----closing-------------------------------------------------------------
+## ----fromW4M-------------------------------------------------------------
+sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+sacSet
+
+## ----toW4M, eval = FALSE-------------------------------------------------
+#  toW4M(sacSet, paste0(getwd(), "/out_"))
+
+## ----detach--------------------------------------------------------------
 detach(sacurine)
 
 ## ----faahko_load---------------------------------------------------------

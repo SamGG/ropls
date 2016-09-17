@@ -1566,3 +1566,72 @@ setMethod("getSubsetVi", "opls",
           function(object) {
                   return(object@subsetVi)
           })
+
+
+#' @rdname checkW4M
+setMethod("checkW4M", "ExpressionSet",
+         function(eset, ...) {
+
+             datMN <- t(exprs(eset))
+             samDF <- pData(eset)
+             varDF <- fData(eset)
+
+             chkL <- .checkW4mFormatF(datMN, samDF, varDF)
+
+             if(!chkL) {
+                 stop("Problem with the sample or variable names in the tables to be imported from (exported to) W4M", call. = FALSE)
+             } else
+                 return(TRUE)
+         })
+
+
+#' @rdname toW4M
+setMethod("toW4M", "ExpressionSet",
+          function(eset, filePrefixC = paste0(getwd(), "/out_"), verboseL = TRUE, ...){
+
+              if(checkW4M(eset)) {
+
+                  datMN <- exprs(eset)
+                  datDF <- cbind.data.frame(dataMatrix = rownames(datMN),
+                                            as.data.frame(datMN))
+
+                  filDatC <- paste0(filePrefixC, "dataMatrix.tsv")
+                  filSamC <- paste0(filePrefixC, "sampleMetadata.tsv")
+                  filVarC <- paste0(filePrefixC, "variableMetadata.tsv")
+
+                  write.table(datDF,
+                              file = filDatC,
+                              quote = FALSE,
+                              row.names = FALSE,
+                              sep = "\t")
+
+                  samDF <- pData(eset)
+                  samDF <- cbind.data.frame(sampleMetadata = rownames(samDF),
+                                            samDF)
+                  write.table(samDF,
+                              file = filSamC,
+                              quote = FALSE,
+                              row.names = FALSE,
+                              sep = "\t")
+
+                  varDF <- fData(eset)
+                  varDF <- cbind.data.frame(variableMetadata = rownames(varDF),
+                                            varDF)
+                  write.table(varDF,
+                              file = filVarC,
+                              quote = FALSE,
+                              row.names = FALSE,
+                              sep = "\t")
+
+                  if(verboseL) {
+                      cat("The following 3 files:\n")
+                      print(basename(filDatC))
+                      print(basename(filSamC))
+                      print(basename(filVarC))
+                      cat("have been written in the following directory:\n")
+                      print(dirname(filDatC))
+                  }
+
+              }
+
+          })

@@ -1,8 +1,8 @@
 #' Printed summary of an R object
-#' 
+#'
 #' Displays the class, mode, size and first...last values of the object
-#' 
-#' 
+#'
+#'
 #' @param inpMF Input matrix, dataframe or vector
 #' @param borderN Number of border (first and last) rows and columns to display
 #' @param bigMarkC Big mark separator for summary results
@@ -10,11 +10,11 @@
 #' @author Etienne Thevenot (CEA)
 #' @seealso \code{\link{str}}
 #' @examples
-#' 
+#'
 #' data(sacurine)
 #' strF(sacurine[['dataMatrix']])
 #' strF(sacurine[['sampleMetadata']])
-#' 
+#'
 #' @export strF
 strF <- function(inpMF,
                  borderN = 2,
@@ -275,3 +275,114 @@ strF <- function(inpMF,
     tabF()
 
 } ## strF
+
+
+#' fromW4M
+#'
+#' Creating a ExpressionSet object from the 3 'dataMatrix.tsv',
+#' 'sampleMetadata.tsv' and 'variableMetadata.tsv' tabulated files
+#'
+#' @param dirC Character: directory containing the 3 .tsv files
+#' @param namePatternC Character: optional file name pattern common to all three
+#' file names (e.g., when you want to distinguish between two sets of files
+#' within the same directory)
+#' @param fileTableNamesVc Vector of characters: if your file names do not
+#' contain the standard 'dataMatrix', 'sampleMetadata', and 'variableMetadata'
+#' patterns (e.g. if you use 'profile', 'observation', and 'feature' instead),
+#' please indicate them here
+#' @param verboseL Logical: should comments be printed?
+#' @return ExpressionSet instance
+#' @author Etienne Thevenot, \email{etienne.thevenot@@cea.fr}
+#' @examples sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+#' @rdname fromW4M
+#' @export
+fromW4M <- function(dirC,
+                    namePatternC = "",
+                    fileTableNamesVc = c("dataMatrix",
+                                         "sampleMetadata",
+                                         "variableMetadata"),
+                    verboseL = TRUE) {
+
+    tabVc <- c("dataMatrix",
+               "sampleMetadata",
+               "variableMetadata")
+
+    if(!file.exists(dirC))
+        stop("Directory '", dirC, "' was not found.",
+             call.=FALSE)
+
+    filVc <- character(length(tabVc))
+    names(filVc) <- tabVc
+
+    filAllVc <- list.files(dirC,
+                           pattern = "^.*\\.tsv$")
+
+    ## restricting to files with pattern
+    if(namePatternC != "")
+        filAllVc <- grep(namePatternC, filAllVc, value = TRUE)
+
+    ## restricting to one file for each table
+    for(tabC in tabVc) {
+        namC <- fileTableNamesVc[tabVc == tabC]
+        filC <- grep(namC, filAllVc, value = TRUE)
+        if(length(filC) == 0) {
+            stop("No file found for the ", tabC, " with ",
+                 ifelse(namePatternC != "",
+                        paste0("'", namC, "' pattern and "), ""),
+                 "a name including '", namC, "' in the '", dirC,
+                 "' directory.", call. = FALSE)
+        } else if(length(filC) > 1) {
+            stop("Several files found for the ", tabC, " with ",
+                 ifelse(namePatternC != "", paste0("'", namC, "' pattern and "),
+                        ""), "a name including '", namC, "' in the '",
+                 dirC, "' directory.", call. = FALSE)
+        } else {
+            filVc[tabC] <- filC
+            ## R standards for row and column names in matrices and data frames
+            .checkRformatF(dirC, filC, verboseL)
+        }
+    }
+
+    ## Loading data
+
+    for(tabC in tabVc) {
+
+        tabDF <- read.table(file.path(dirC, filVc[tabC]),
+                            check.names = FALSE,
+                            header = TRUE,
+                            row.names = 1,
+                            sep = "\t",
+                            stringsAsFactors = FALSE)
+        switch(tabC,
+               dataMatrix = {
+                   datMN <- as.matrix(tabDF)
+               },
+               sampleMetadata = {
+                   samDF <- tabDF
+               },
+               variableMetadata = {
+                   varDF <- tabDF
+               })
+
+    }
+
+    chkL <- .checkW4mFormatF(t(datMN), samDF, varDF)
+
+    if(chkL) {
+        TRUE
+    } else
+        "Problem with the sample or variable names in the tables (see above)"
+
+    eset <- ExpressionSet(assayData = datMN,
+                          phenoData = new("AnnotatedDataFrame",
+                              data = samDF),
+                          featureData = new("AnnotatedDataFrame",
+                              data = varDF),
+                          experimentData = new("MIAME",
+                              title = namePatternC))
+
+    validObject(eset)
+
+    return(eset)
+
+}

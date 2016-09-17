@@ -24,7 +24,7 @@
 #' @importFrom grDevices dev.new dev.off pdf rainbow
 #' @importFrom graphics abline axTicks axis barplot boxplot layout legend lines mtext par pie plot points rect text
 #' @importFrom stats complete.cases cor cov median qchisq qf qnorm sd var
-#' @importFrom utils head object.size str tail
+#' @importFrom utils head object.size read.table str tail write.table
 #' @name ropls-package
 #' @aliases ropls ropls-package
 #' @docType package

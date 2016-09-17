@@ -528,12 +528,54 @@ for(typeC in c("overview", "outlier", "x-score", "x-loading"))
 plot(eset.oplsda, typeVc = typeC, parDevNewL = FALSE)
 ```
 
-## Closing session
+## Importing/exporting data from/to the Workflow4metabolomics infrastructure
 
-Before closing this example session, we detach *sacurine* from the search
-path:
+Galaxy is a web-based environment providing powerful graphical user interface
+and workflow management functionalities for omics data analysis (@Goecks2010;
+@Boekel2015). Wrapping an R code into a Galaxy module is quite straight-forward:
+examples can be found on the [toolshed](https://toolshed.g2.bx.psu.edu) central
+repository and in the
+[RGalaxy](https://www.bioconductor.org/packages/release/bioc/html/RGalaxy.html)
+bioconductor package.
 
-```{r closing}
+[Workflow4metabolomics](http://workflow4metabolomics.org) (W4M) is the online
+infrastructure for computational metabolomics based on the Galaxy environment
+[@Giacomoni2015]. W4M enables to build, run, save and share workflows
+efficiently. In addition, workflows and input/output data (called "histories")
+can be
+[referenced](https://galaxy.workflow4metabolomics.org/history/list_published),
+thus enabling fully reproducible research. More than 30 modules are currently
+available for LC-MS, GC-MS and NMR data preprocessing, statistical analysis, and
+annotation, including wrappers of `xcms`, `CAMERA`, `metaMS`, `ropls`, and
+`biosigner`, and is open to
+[new contributions](http://workflow4metabolomics.org/node/49).
+
+In order to facilitate data import from/to W4M, the `fromW4M` function
+(respectively the `toW4M` method) enables import from (respectively export to)
+the W4M 3 tabular file format (*dataMatrix.tsv*, *sampleMetadata.tsv*,
+*variableMetadata.tsv*) into (respectively from) an `ExpressionSet` object, as
+shown in the following example which uses the 3 .tsv files stored in the
+*extdata* repository of the package to create a *sacSet* ExpressionSet object:
+
+```{r fromW4M}
+sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+sacSet
+```
+
+The generated *sacSet* `ExpressionSet` object can be used with the `opls` method
+as described in the previous section.
+
+Conversely, an `ExpressionSet` (with filled *assayData*, *phenoData* and
+*featureData* slots) can be exported to the 3 table W4M format:
+
+```{r toW4M, eval = FALSE}
+toW4M(sacSet, paste0(getwd(), "/out_"))
+```
+
+Before moving to the next session whith another example dataset, we detach
+*sacurine* from the search path:
+
+```{r detach}
 detach(sacurine)
 ```
 

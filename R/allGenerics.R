@@ -397,3 +397,44 @@ setGeneric("getVipVn",
 setGeneric("getSubsetVi",
            function(object, ...) {standardGeneric("getSubsetVi")})
 
+
+#' Checking the consistency of an ExpressionSet instance with W4M format
+#'
+#' @param eset An S4 object of class ExpressionSet.
+#' @param ... Currently not used.
+#' @return Invisible TRUE logical in case of success (otherwise generates an
+#' error)
+#' @author Etienne Thevenot, \email{etienne.thevenot@@cea.fr}
+#' @examples
+#' sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+#' print(checkW4M(sacSet))
+#' @rdname checkW4M
+#' @export
+setGeneric("checkW4M", function(eset, ...) {standardGeneric("checkW4M")})
+
+
+#' Exporting ExpressionSet instance into 3 tabulated files.
+#'
+#' The 3 .tsv files are written with the indicated \code{file} prefix, and
+#' '_dataMatrix.tsv', '_sampleMetadata.tsv', and '_variableMetadata.tsv'
+#' suffices, respectively. Note that the \code{dataMatrix} is transposed before
+#' export (e.g., the samples are written column wise in the 'dataMatrix.tsv'
+#' exported file).
+#'
+#' @param eset An S4 object of class \code{ExpressionSet}
+#' function.
+#' @param filePrefixC Character: common prefix (including repository full path)
+#' of the three file names: for example, the 'c:/mydata/setname' value will
+#' result in writting the 'c:/mydata/setname_dataMatrix.tsv',
+#' 'c:/mydata/setname_sampleMetadata.tsv', and
+#' 'c:/mydata/setname_variableMetadata.tsv' files.
+#' @param verboseL Logical: should comments be printed?
+#' @param ... Currently not used.
+#' @return No object returned.
+#' @author Etienne Thevenot, \email{etienne.thevenot@@cea.fr}
+#' @examples
+#'  sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+#'  toW4M(sacSet)
+#' @rdname toW4M
+#' @export
+setGeneric("toW4M", function(eset, ...) standardGeneric("toW4M"))
