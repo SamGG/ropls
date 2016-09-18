@@ -148,13 +148,13 @@ sacSet
 ## ----detach--------------------------------------------------------------
 detach(sacurine)
 
-## ----faahko_load---------------------------------------------------------
+## ----faahko_load, message = FALSE, warning = FALSE-----------------------
 library(faahKO)
 cdfpath <- system.file("cdf", package = "faahKO")
 cdffiles <- list.files(cdfpath, recursive = TRUE, full.names = TRUE)
 basename(cdffiles)
 
-## ----xcms_require--------------------------------------------------------
+## ----xcms_require, message = FALSE, warning = FALSE----------------------
 library(xcms)
 
 ## ----faahko_xcmsset, results = 'hide', warning = FALSE-------------------
@@ -176,7 +176,7 @@ xset2 <- group(xset2, bw = 10)
 ## ----faahko_fillpeaks, results = 'hide', warning = FALSE-----------------
 xset3 <- fillPeaks(xset2)
 
-## ----faahko_camera-------------------------------------------------------
+## ----faahko_camera, message = FALSE, warning = FALSE---------------------
 library(CAMERA)
 diffreport <- annotateDiffreport(xset3, quick=TRUE)
 diffreport[1:4, ]

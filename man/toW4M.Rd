@@ -8,7 +8,7 @@
 \usage{
 toW4M(eset, ...)
 
-\S4method{toW4M}{ExpressionSet}(eset, filePrefixC = getwd(),
+\S4method{toW4M}{ExpressionSet}(eset, filePrefixC = paste0(getwd(), "/out_"),
   verboseL = TRUE, ...)
 }
 \arguments{
