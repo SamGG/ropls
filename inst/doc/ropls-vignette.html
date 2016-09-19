@@ -50,9 +50,9 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title"><em>ropls</em>: PCA, PLS(-DA) and OPLS(-DA) for multivariate analysis and feature selection of omics data</h1>
 <h4 class="author"><em>Etienne A. Thevenot</em></h4>
-<h4 class="date"><em>18 septembre 2016</em></h4>
+<h4 class="date"><em>19 septembre 2016</em></h4>
 </div>
-<h4 class="package">Package version: <span style="font-weight: normal">ropls 1.5.14</span></h4>
+<h4 class="package">Package version: <span style="font-weight: normal">ropls 1.5.16</span></h4>
 
 <h1>Contents</h1>
 <div id="TOC">
@@ -190,7 +190,7 @@ names(sacurine)</code></pre>
 <p>Note:</p>
 <ol style="list-style-type: decimal">
 <li><p>Since <strong>dataMatrix</strong> does not contain missing value, the singular value decomposition was used by default; NIPALS can be selected with the <code>algoC</code> argument specifying the <em>algo</em>rithm (<em>C</em>haracter),</p></li>
-<li><p>The <code>predI = NA</code> default number of <em>pred</em>ictive components (<em>I</em>nteger) means that only components with a variance superior to the mean variance of all components are kept (note that this rule requires all components to be computed and can be quite time-consuming for large datasets with the NIPALS algorithm; in such cases, one may specify a limited number of components with the <code>predI</code> parameter).</p></li>
+<li><p>The <code>predI = NA</code> default number of <em>pred</em>ictive components (<em>I</em>nteger) for PCA means that components (up to 10) will be computed until the cumulative variance exceeds 50%. If the 50% have not been reached at the 10th component, a warning message will be issued (you can still compute the following components by specifying the <code>predI</code> value).</p></li>
 </ol>
 <p>Let us see if we notice any partition according to gender, by labeling/coloring the samples according to <em>gender</em> (<code>parAsColFcVn</code>) and drawing the Mahalanobis ellipses for the male and female subgroups (<code>parEllipseL</code>).</p>
 <pre class="r"><code>genderFc &lt;- sampleMetadata[, &quot;gender&quot;]
@@ -488,7 +488,7 @@ opls(dataMatrix)</code></pre>
 ##  [1] multtest_2.28.0     CAMERA_1.28.0       faahKO_1.12.0      
 ##  [4] xcms_1.48.0         ProtGenerics_1.4.0  mzR_2.6.3          
 ##  [7] Rcpp_0.12.6         Biobase_2.32.0      BiocGenerics_0.18.0
-## [10] ropls_1.5.14        BiocStyle_2.0.3     devtools_1.12.0    
+## [10] ropls_1.5.16        BiocStyle_2.0.3     devtools_1.12.0    
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] plyr_1.8.4           BiocInstaller_1.22.3 formatR_1.4         

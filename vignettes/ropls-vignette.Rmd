@@ -170,12 +170,11 @@ Note:
    decomposition was used by default; NIPALS can be selected with the
    `algoC` argument specifying the *algo*rithm (*C*haracter),
    
-2. The `predI = NA` default number of *pred*ictive components (*I*nteger) means
-   that only components with a variance superior to the mean variance of all
-   components are kept (note that this rule requires all components to be
-   computed and can be quite time-consuming for large datasets with the NIPALS
-   algorithm; in such cases, one may specify a limited number of components with
-   the `predI` parameter).
+2. The `predI = NA` default number of *pred*ictive components (*I*nteger) for
+   PCA means that components (up to 10) will be computed until the cumulative
+   variance exceeds 50%. If the 50% have not been reached at the 10th component,
+   a warning message will be issued (you can still compute the following
+   components by specifying the `predI` value).
 
 Let us see if we notice any partition according to gender, by labeling/coloring
 the samples according to *gender* (`parAsColFcVn`) and drawing the Mahalanobis
