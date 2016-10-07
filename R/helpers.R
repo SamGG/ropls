@@ -187,7 +187,6 @@
 
         varVn <- numeric(predI)
         names(varVn) <- preNamVc
-        vSumVn <- sum(apply(xMN, 2, function(y) var(y, na.rm = TRUE))) ## xMN is centered
 
         modelDF <- as.data.frame(matrix(0,
                                       nrow = predI,
@@ -251,7 +250,6 @@
 
                        tMN[, hN] <- tNewVn
                        pMN[, hN] <- pNewVn
-                       ## varVn[hN] <- 1 / (min(nrow(xMN), ncol(xMN)) - 1) * drop(crossprod(tNewVn))
                        varVn[hN] <- 1 / (nrow(xMN) - 1) * drop(crossprod(tNewVn))
                        xOldMN <- xOldMN - tcrossprod(tNewVn, pNewVn)
 
