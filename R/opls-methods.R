@@ -701,7 +701,6 @@ setMethod("opls", signature(x = "matrix"),
 
         varVn <- numeric(predI)
         names(varVn) <- preNamVc
-        vSumVn <- sum(apply(xMN, 2, function(y) var(y, na.rm = TRUE))) ## xMN is centered
 
         modelDF <- as.data.frame(matrix(0,
                                       nrow = predI,
@@ -765,7 +764,7 @@ setMethod("opls", signature(x = "matrix"),
 
                        tMN[, hN] <- tNewVn
                        pMN[, hN] <- pNewVn
-                       varVn[hN] <- 1 / (min(nrow(xMN), ncol(xMN)) - 1) * drop(crossprod(tNewVn))
+                       varVn[hN] <- 1 / (nrow(xMN) - 1) * drop(crossprod(tNewVn))
                        xOldMN <- xOldMN - tcrossprod(tNewVn, pNewVn)
 
                        modelDF[hN, "R2X"] <- sum(tcrossprod(tMN[, hN], pMN[, hN])^2) / ssxTotN
@@ -793,8 +792,6 @@ setMethod("opls", signature(x = "matrix"),
                    ##  249.014 202.008 ... 14.658 0
                    ## Names:  t1 t2 ... t49 t50
 
-                   rm(pcaSvdLs)
-
                    tMN <- tMN[, 1:predI, drop = FALSE]
                    pMN <- pMN[, 1:predI, drop = FALSE]
                    varVn <- varVn[1:predI]
@@ -802,19 +799,24 @@ setMethod("opls", signature(x = "matrix"),
                    rownames(pMN) <- xvaNamVc
                    names(varVn) <- colnames(pMN) <- colnames(tMN) <- preNamVc
 
-                   modelDF[, "R2X"] <- round(varVn / vSumVn, 3)
+                   modelDF[, "R2X"] <- round(pcaSvdLs[["d"]][1:predI] / ssxTotN, 3)
+
+                   rm(pcaSvdLs)
 
                }) ## svd
 
         modelDF[, "R2X(cum)"] <- cumsum(modelDF[, "R2X"])
 
         if(autNcpL) {
-            vSelVl <- cumsum(varVn) / vSumVn > 0.5
+
+            vSelVl <- modelDF[, "R2X(cum)"] > 0.5
+
             vSelVi <- which(vSelVl)
-            if(sum(vSelVl) == 0) {
+
+            if(length(vSelVi) == 0) {
                 warning("The maximum number of components for the automated mode (", autMaxN, ") has been reached whereas the cumulative variance ", round(tail(modelDF[, "R2X(cum)"], 1) * 100), "% is still less than 50%.", call. = FALSE)
             } else
-                predI <- max(which(vSelVl)[1])
+                predI <- vSelVi[1]
 
             tMN <- tMN[, 1:predI, drop = FALSE]
             pMN <- pMN[, 1:predI, drop = FALSE]

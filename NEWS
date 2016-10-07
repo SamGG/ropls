@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.4.6
+------------------------------
+
+BUG CORRECTION
+
+    o PCA: correction in the computation of variance and R2X (svd), and the determination of the optimal number of components
+    
 CHANGES IN VERSION 1.4.4
 ------------------------------
 
