@@ -94,9 +94,33 @@ test_PCA_sacurine <- function() {
     checkEqualsNumeric(getSummaryDF(sac.pca)["Total", "R2X(cum)"],
                        0.501,
                        tolerance = 1e-3)
+    checkEqualsNumeric(sac.pca@modelDF["p3", "R2X"],
+                       0.067,
+                       tolerance = 1e-3)
+    checkEqualsNumeric(sac.pca@modelDF["p2", "R2X(cum)"],
+                       0.252,
+                       tolerance = 1e-3)
+
+    sac.pcaCenter <- opls(sacurine[["dataMatrix"]],
+                          scaleC = "center",
+                          printL = FALSE, plotL = FALSE)
+    checkEqualsNumeric(sac.pcaCenter@modelDF["p2", "R2X(cum)"],
+                       0.223,
+                       tolerance = 1e-3)
+
+    sac.pcaPareto <- opls(sacurine[["dataMatrix"]],
+                          scaleC = "pareto",
+                          printL = FALSE, plotL = FALSE)
+    checkEqualsNumeric(sac.pcaPareto@modelDF["p3", "R2X"],
+                       0.063,
+                       tolerance = 1e-3)
+
     sac.pcaSvd <- opls(sacurine[["dataMatrix"]],
                        algoC = "svd",
                        printL = FALSE, plotL = FALSE)
+    checkEqualsNumeric(sac.pcaSvd@modelDF["p3", "R2X"],
+                       0.067,
+                       tolerance = 1e-3)
     checkEqualsNumeric(getScoreMN(sac.pcaSvd)[1, 1],
                        -8.744009,
                        tolerance = 1e-5)
