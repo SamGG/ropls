@@ -157,7 +157,7 @@ basename(cdffiles)
 ## ----xcms_require, message = FALSE, warning = FALSE----------------------
 library(xcms)
 
-## ----faahko_xcmsset, results = 'hide', warning = FALSE-------------------
+## ----faahko_xcmsset, results = 'hide', message = FALSE, warning = FALSE----
 xset <- xcmsSet(cdffiles)
 
 ## ----faahko_group--------------------------------------------------------
@@ -173,7 +173,7 @@ xset2 <- retcor(xset, family = "symmetric", plottype = "none")
 ## ----faahko_group2-------------------------------------------------------
 xset2 <- group(xset2, bw = 10)
 
-## ----faahko_fillpeaks, results = 'hide', warning = FALSE-----------------
+## ----faahko_fillpeaks, results = 'hide', message = FALSE, warning = FALSE----
 xset3 <- fillPeaks(xset2)
 
 ## ----faahko_camera, message = FALSE, warning = FALSE---------------------
