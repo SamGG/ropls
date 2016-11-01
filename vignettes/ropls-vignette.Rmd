@@ -11,7 +11,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 bibliography: "ropls-vignette.bib"
 output:
-  BiocStyle::html_document
+  BiocStyle::pdf_document
 ---
 
 ```{r global_options, include=FALSE}
@@ -105,7 +105,7 @@ We then load the **sacurine** dataset which contains:
 
 1. The **dataMatrix** matrix of numeric type containing the intensity profiles
    (log10 transformed),
-   
+
 2. The **sampleMetadata** data frame containg sample metadata,
 
 3. The **variableMetadata** data frame containg variable metadata
@@ -169,7 +169,7 @@ Note:
 1. Since **dataMatrix** does not contain missing value, the singular value
    decomposition was used by default; NIPALS can be selected with the
    `algoC` argument specifying the *algo*rithm (*C*haracter),
-   
+
 2. The `predI = NA` default number of *pred*ictive components (*I*nteger) for
    PCA means that components (up to 10) will be computed until the cumulative
    variance exceeds 50%. If the 50% have not been reached at the 10th component,
@@ -238,17 +238,17 @@ Note:
 1. When set to NA (as in the default), **the number of components** `predI` is
    determined automatically as follows [@Eriksson2001]: A new component *h* is
    added to the model if:
-   
+
   + $R2Y_h \geq 0.01$, i.e., the percentage of **Y** dispersion (i.e., sum of
     squares) explained by component *h* is more than 1 percent, and
-	
+
   + $Q2Y_h=1-PRESS_h/RSS_{h-1} \geq 0$ for PLS (or 5% when the number of
     samples is less than 100) or 1% for OPLS: $Q2Y_h \geq 0$ means that the
     predicted residual sum of squares ($PRESS_h$) of the model including the new
     component *h* estimated by 7-fold cross-validation is less than the residual
     sum of squares ($RSS_{h-1}$) of the model with the previous components only
     (with $RSS_0$ being the sum of squared **Y** values).
-	
+
 2. The **predictive performance** of the full model is assessed by the
 cumulative **Q2Y** metric: $Q2Y=1-\prod\limits_{h=1}^r (1-Q2Y_h)$. We have $Q2Y
 \in [0,1]$, and the higher the **Q2Y**, the better the performance. Models
@@ -261,7 +261,7 @@ are computed. The *p*-value is equal to the proportion of $Q2Y_{perm}$ above
 $Q2Y$ (the **default number of permutations is 20** as a compromise between quality
 control and computation speed; it can be increased with the `permI` parameter,
 e.g. to 1,000, to assess if the model is significant at the 0.05 level),
-   
+
 3. The **NIPALS** algorithm is used for PLS (and OPLS); *dataMatrix* matrices
 with (a moderate amount of) missing values can thus be analysed.
 
@@ -441,13 +441,13 @@ The **VIP** properties above result from:
    for VIPs can be simplified to $VIP_j = \sqrt{m} \times |w_j|$ for each
    feature $j$, were $m$ is the total number of features and **w** is the vector
    of loading weights,
-   
+
 3. in OPLS, **w** remains identical whatever the number of extracted orthogonal
    components,
-   
+
 4. for a single-response model, **w** is proportional to **X'y** (where **'**
 denotes the matrix transposition),
-   
+
 5. if **X** and **y** are standardized, **X'y** is the vector of the
    correlations between the features and the response.
 
@@ -615,7 +615,7 @@ used to pre-process the individual raw files, as described in the vignette.
 ```{r xcms_require, message = FALSE, warning = FALSE}
 library(xcms)
 ```
-```{r faahko_xcmsset, results = 'hide', warning = FALSE}
+```{r faahko_xcmsset, results = 'hide', message = FALSE, warning = FALSE}
 xset <- xcmsSet(cdffiles)
 ```
 ```{r faahko_group}
@@ -631,7 +631,7 @@ xset2 <- retcor(xset, family = "symmetric", plottype = "none")
 ```{r faahko_group2}
 xset2 <- group(xset2, bw = 10)
 ```
-```{r faahko_fillpeaks, results = 'hide', warning = FALSE}
+```{r faahko_fillpeaks, results = 'hide', message = FALSE, warning = FALSE}
 xset3 <- fillPeaks(xset2)
 ```
 
@@ -732,4 +732,4 @@ compiled:
 sessionInfo()
 ```
 
-# Reference
+# References
