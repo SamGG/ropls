@@ -4,6 +4,7 @@
 \name{getScoreMN}
 \alias{getScoreMN}
 \alias{getScoreMN,opls-method}
+\alias{getScoreMN,opls-method}
 \title{getScoreMN method for PCA/(O)PLS(-DA) models}
 \usage{
 getScoreMN(object, ...)
@@ -42,4 +43,3 @@ detach(sacurine)
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

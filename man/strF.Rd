@@ -26,10 +26,9 @@ strF(sacurine[['dataMatrix']])
 strF(sacurine[['sampleMetadata']])
 
 }
-\author{
-Etienne Thevenot (CEA)
-}
 \seealso{
 \code{\link{str}}
 }
-
+\author{
+Etienne Thevenot (CEA)
+}

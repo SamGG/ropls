@@ -31,4 +31,3 @@ Baccini (2010). Statistique Descriptive Multidimensionnelle
 (pour les nuls).
 }
 \keyword{datasets}
-

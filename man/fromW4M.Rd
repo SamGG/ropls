@@ -34,4 +34,3 @@ sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

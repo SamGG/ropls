@@ -4,6 +4,7 @@
 \name{tested}
 \alias{tested}
 \alias{tested,opls-method}
+\alias{tested,opls-method}
 \title{Tested method for (O)PLS models}
 \usage{
 tested(object, ...)
@@ -46,4 +47,3 @@ detach(sacurine)
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

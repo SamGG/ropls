@@ -41,4 +41,3 @@ Eriksson et al. (2006). Multi- and Megarvariate Data Analysis.
 Umetrics Academy. pp.10, 33, 48.
 }
 \keyword{datasets}
-

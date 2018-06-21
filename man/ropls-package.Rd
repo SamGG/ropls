@@ -2,8 +2,8 @@
 % Please edit documentation in R/ropls-package.R
 \docType{package}
 \name{ropls-package}
-\alias{ropls}
 \alias{ropls-package}
+\alias{ropls}
 \title{PCA, PLS(-DA) and OPLS(-DA) for multivariate analysis and feature selection
 of omics data}
 \description{
@@ -53,4 +53,3 @@ E. Thevenot (CEA, LIST, MetaboHub)
 Maintainer: Etienne Thevenot <etienne.thevenot@cea.fr>
 }
 \keyword{package}
-

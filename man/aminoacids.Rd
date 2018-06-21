@@ -40,4 +40,3 @@ Wold et al. (2001). PLS-regression: a basic tool of
 chemometrics. Chemometrics and Intelligent Laboratory Systems. 58:109-130.
 }
 \keyword{datasets}
-

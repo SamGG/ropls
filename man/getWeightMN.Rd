@@ -4,6 +4,7 @@
 \name{getWeightMN}
 \alias{getWeightMN}
 \alias{getWeightMN,opls-method}
+\alias{getWeightMN,opls-method}
 \title{getWeightMN method for (O)PLS(-DA) models}
 \usage{
 getWeightMN(object, ...)
@@ -42,4 +43,3 @@ detach(sacurine)
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

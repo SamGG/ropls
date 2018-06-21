@@ -6,6 +6,9 @@
 \alias{opls,ExpressionSet-method}
 \alias{opls,data.frame-method}
 \alias{opls,matrix-method}
+\alias{opls,ExpressionSet-method}
+\alias{opls,data.frame-method}
+\alias{opls,matrix-method}
 \title{PCA, PLS(-DA), and OPLS(-DA)}
 \usage{
 opls(x, ...)
@@ -165,9 +168,6 @@ sacurine.oplsda <- opls(dataMatrix, sampleMetadata[, "gender"], predI = 1, ortho
 detach(sacurine)
 
 }
-\author{
-Etienne Thevenot, \email{etienne.thevenot@cea.fr}
-}
 \references{
 Eriksson et al. (2006). Multi- and Megarvariate Data Analysis.
 Umetrics Academy.  Rosipal and Kramer (2006). Overview and recent advances
@@ -175,4 +175,6 @@ in partial least squares Tenenhaus (1990). La regression PLS : theorie et
 pratique. Technip.  Wehrens (2011). Chemometrics with R. Springer.  Wold et
 al. (2001). PLS-regression: a basic tool of chemometrics
 }
-
+\author{
+Etienne Thevenot, \email{etienne.thevenot@cea.fr}
+}

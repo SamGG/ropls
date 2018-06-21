@@ -4,6 +4,7 @@
 \name{getSummaryDF}
 \alias{getSummaryDF}
 \alias{getSummaryDF,opls-method}
+\alias{getSummaryDF,opls-method}
 \title{getSummaryDF method for PCA/(O)PLS models}
 \usage{
 getSummaryDF(object, ...)
@@ -38,4 +39,3 @@ detach(sacurine)
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

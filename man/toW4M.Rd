@@ -42,4 +42,3 @@ exported file).
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

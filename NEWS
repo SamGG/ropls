@@ -1,3 +1,21 @@
+CHANGES IN VERSION 1.13.2
+------------------------------
+
+BUG CORRECTION
+
+    o predict method: naming of the predicted Y matrix output columns in case of PLS modeling of multiple responses
+    
+INTERNAL MODIFICATION
+
+    o ropls.Rproj file added for package management with RStudio
+
+CHANGES IN VERSION 1.7.2
+------------------------------
+
+INTERNAL MODIFICATION
+
+    o vignette now in pdf format
+
 CHANGES IN VERSION 1.7.2
 ------------------------------
 

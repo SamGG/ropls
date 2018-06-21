@@ -32,4 +32,3 @@ detach(sacurine)
 \author{
 Philippe Rinaudo and Etienne Thevenot (CEA)
 }
-

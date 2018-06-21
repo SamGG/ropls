@@ -33,4 +33,3 @@ Tenenhaus (1998). La regression PLS: theorie et pratique. Paris:
 Editions Technip.
 }
 \keyword{datasets}
-

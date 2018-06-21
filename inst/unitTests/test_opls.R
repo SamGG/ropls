@@ -414,13 +414,13 @@ test_OPLSDA_ns <- function() {
 
 test_fromW4M <- function() {
 
-    sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+    sacSet <- fromW4M(file.path(path.package("ropls"), "inst", "extdata"))
 
 }
 
 test_dataMatrix_get <- function() {
 
-    sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+    sacSet <- fromW4M(file.path(path.package("ropls"), "inst", "extdata"))
     library(Biobase)
     checkEqualsNumeric(exprs(sacSet)["Tryptophan", "HU_020"], 4.594285, tol = 1e-6)
 
@@ -428,7 +428,7 @@ test_dataMatrix_get <- function() {
 
 test_sampleMetadata_get <- function() {
 
-    sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+    sacSet <- fromW4M(file.path(path.package("ropls"), "inst", "extdata"))
     library(Biobase)
     checkEqualsNumeric(pData(sacSet)["HU_017", "bmi"], 23.03, tol = 1e-2)
 
@@ -436,7 +436,7 @@ test_sampleMetadata_get <- function() {
 
 test_variableMetadata_get <- function() {
 
-    sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+    sacSet <- fromW4M(file.path(path.package("ropls"), "inst", "extdata"))
     library(Biobase)
     checkEquals(fData(sacSet)["Taurine", "hmdb"], "HMDB00251")
 
@@ -444,7 +444,7 @@ test_variableMetadata_get <- function() {
 
 test_sampleNames_get <- function() {
 
-    sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+    sacSet <- fromW4M(file.path(path.package("ropls"), "inst", "extdata"))
     library(Biobase)
     checkEquals(sampleNames(sacSet)[3], "HU_015")
 
@@ -452,10 +452,23 @@ test_sampleNames_get <- function() {
 
 test_variableNames_get <- function() {
 
-    sacSet <- fromW4M(file.path(path.package("ropls"), "extdata"))
+    sacSet <- fromW4M(file.path(path.package("ropls"), "inst", "extdata"))
     library(Biobase)
     checkEquals(featureNames(sacSet)[5], "X1.3.Dimethyluric.acid")
 
+}
+
+test_multiresponse <- function() {
+  
+  data(sacurine)
+  
+  agebmiPls <- opls(sacurine[["dataMatrix"]],
+                    as.matrix(sacurine[["sampleMetadata"]][, c("age","bmi")]))
+  agebmiPreMN <- predict(agebmiPls)
+  checkEquals(colnames(agebmiPreMN),
+              c("age", "bmi"))
+  checkEqualsNumeric(agebmiPreMN[1, 2], 20.5831139196, tol = 1e-10)
+  
 }
 
 

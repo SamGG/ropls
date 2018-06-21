@@ -35,4 +35,3 @@ detach(sacurine)
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

@@ -4,6 +4,7 @@
 \name{getPcaVarVn}
 \alias{getPcaVarVn}
 \alias{getPcaVarVn,opls-method}
+\alias{getPcaVarVn,opls-method}
 \title{getPcaVarVn method for PCA models}
 \usage{
 getPcaVarVn(object, ...)
@@ -37,4 +38,3 @@ detach(sacurine)
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

@@ -30,4 +30,3 @@ Multivariate calibration using spectral data. Simca tutorial.
 Umetrics.
 }
 \keyword{datasets}
-

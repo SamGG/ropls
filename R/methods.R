@@ -1460,7 +1460,7 @@ setMethod("predict", "opls",
                   if(is.factor(fitted(object))) {
 
                       yTestMCN <- object@suppLs[[".char2numF"]](yTesMN,
-                                                                     c2nL = FALSE)
+                                                                c2nL = FALSE)
                       predMCNFcVcn <- as.character(yTestMCN)
                       names(predMCNFcVcn) <- rownames(newdata)
                       predMCNFcVcn <- factor(predMCNFcVcn, levels = levels(object@suppLs[["y"]]))
@@ -1470,7 +1470,7 @@ setMethod("predict", "opls",
                       if(is.character(fitted(object))) {
 
                           yTestMCN <- object@suppLs[[".char2numF"]](yTesMN,
-                                                                         c2nL = FALSE)
+                                                                    c2nL = FALSE)
                           predMCNFcVcn <- as.character(yTestMCN)
                           names(predMCNFcVcn) <- rownames(newdata)
 
@@ -1489,7 +1489,7 @@ setMethod("predict", "opls",
                       } else
                           predMCNFcVcn <- yTesMN
 
-                      dimnames(predMCNFcVcn) <- list(rownames(newdata), "pred")
+                      rownames(predMCNFcVcn) <- rownames(newdata)
 
                   }
 

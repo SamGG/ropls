@@ -4,6 +4,7 @@
 \name{getVipVn}
 \alias{getVipVn}
 \alias{getVipVn,opls-method}
+\alias{getVipVn,opls-method}
 \title{getVipVn method for (O)PLS(-DA) models}
 \usage{
 getVipVn(object, ...)
@@ -39,12 +40,11 @@ getVipVn(sacurine.plsda)
 detach(sacurine)
 
 }
-\author{
-Etienne Thevenot, \email{etienne.thevenot@cea.fr}
-}
 \references{
 Galindo-Prieto B., Eriksson L. and Trygg J. (2014). Variable
 influence on projection (VIP) for orthogonal projections to latent
 structures (OPLS). Journal of Chemometrics 28, 623-632.
 }
-
+\author{
+Etienne Thevenot, \email{etienne.thevenot@cea.fr}
+}

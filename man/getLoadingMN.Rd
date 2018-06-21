@@ -4,6 +4,7 @@
 \name{getLoadingMN}
 \alias{getLoadingMN}
 \alias{getLoadingMN,opls-method}
+\alias{getLoadingMN,opls-method}
 \title{getLoadingMN method for PCA/(O)PLS(-DA) models}
 \usage{
 getLoadingMN(object, ...)
@@ -42,4 +43,3 @@ detach(sacurine)
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-

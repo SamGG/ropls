@@ -61,10 +61,12 @@ An S4 class to store PCA and (O)PLS(-DA) models: Objects can be created by calls
 
 \item{\code{suppLs}}{List of additional objects to be used internally by the 'print', 'plot', and 'predict' methods}
 }}
+
 \section{Objects from the Class}{
  Objects can be created by calls of the form
 \code{new("opls", ...)} or by calling the \code{opls} function
 }
+
 \examples{
 
 #### PCA
@@ -108,12 +110,11 @@ sacurine.oplsda <- opls(dataMatrix, sampleMetadata[, "gender"], predI = 1, ortho
 detach(sacurine)
 
 }
+\seealso{
+\code{\link{opls}}
+}
 \author{
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 
 Etienne Thevenot, \email{etienne.thevenot@cea.fr}
 }
-\seealso{
-\code{\link{opls}}
-}
-
