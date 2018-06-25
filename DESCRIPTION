@@ -2,7 +2,7 @@ Package: ropls
 Type: Package
 Title: PCA, PLS(-DA) and OPLS(-DA) for multivariate analysis and
     feature selection of omics data
-Version: 1.13.4
+Version: 1.13.6
 Date: 2018-06-25
 Author: Etienne A. Thevenot <etienne.thevenot@cea.fr>
 Maintainer: Etienne A. Thevenot <etienne.thevenot@cea.fr>
@@ -32,13 +32,10 @@ Imports:
 Suggests:
     BiocGenerics,
     BiocStyle,
-    CAMERA,
-    faahKO,
     knitr,
     multtest,
     rmarkdown,
-    RUnit,
-    xcms
+    RUnit
 VignetteBuilder: knitr
 License: CeCILL
 Lazy data: yes
